@@ -1,169 +1,217 @@
-# 🎨 CORREÇÃO DE CORES - Formulário de Estágios
+# 🎨 CORREÇÃO COMPLETA - Campos Visíveis + Cores Fortes
 
-## 📝 PROBLEMA
+## 🔥 PROBLEMA RESOLVIDO
 
-A tela de formulário (REMOLHO, etc.) está com cores muito apagadas:
-- ❌ Container de variáveis quase invisível
-- ❌ Campos de texto com fundo transparente
-- ❌ Labels difíceis de ler
-- ❌ Pouco contraste geral
+Os campos de entrada das variáveis **SUMIRAM** completamente!
+
+### ❌ ANTES:
+```
+Variáveis
+Volume de Água
+Temperatura da Água
+Tensoativo
+[nenhum campo visível]
+```
+
+### ✅ DEPOIS:
+```
+🔬 Variáveis
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Volume de Água
+100% do peso líquido do lote
+┌─────────────────────────┐
+│ Informar           ✏️   │  ← BOTÃO VISÍVEL
+└─────────────────────────┘
+
+Temperatura da Água
+Padrão: 50 a 70 ºC
+┌─────────────────────────┐
+│ 65,5 ºC            ✏️   │  ← VALOR PREENCHIDO
+└─────────────────────────┘
+✅ Dentro do padrão
+```
 
 ---
 
-## ✅ SOLUÇÃO APLICADA
+## 🚀 INSTALAÇÃO SUPER RÁPIDA
+
+### Windows:
+```bash
+# 1. Extrair NA RAIZ do projeto
+cd C:\Projetos\Final\curtume_apontamento_final
+unzip -o correcao_completa_final.zip
+
+# 2. Rodar
+flutter run
+```
+
+### Linux/Mac:
+```bash
+# 1. Extrair NA RAIZ
+cd ~/seu_projeto
+unzip -o correcao_completa_final.zip
+
+# 2. Rodar
+flutter run
+```
+
+---
+
+## 📁 O QUE SERÁ SUBSTITUÍDO
+
+```
+lib/
+└── widgets/
+    └── stage_form.dart  ✅ COMPLETAMENTE CORRIGIDO
+```
+
+**Apenas 1 arquivo!**
+
+---
+
+## ✨ O QUE FOI CORRIGIDO
 
 ### 1. Container de Variáveis
-**ANTES:**
-```dart
-border: Border.all(color: Colors.white24, width: 1.2)
-```
+- ✅ Fundo **BRANCO sólido**
+- ✅ Borda **PRETA** de 2px
+- ✅ Título em cinza escuro bem visível
+- ✅ Sombra leve para profundidade
 
-**DEPOIS:**
-```dart
-color: Colors.white,  // Fundo branco
-border: Border.all(
-  color: Color(0xFF424242),  // Borda cinza escuro
-  width: 2,
-)
-```
+### 2. Campos de Entrada - AGORA VISÍVEIS!
+- ✅ Botões grandes "Informar"
+- ✅ Fundo cinza claro (#F5F5F5)
+- ✅ Borda preta de 2px
+- ✅ Texto preto grande e negrito
+- ✅ Ícone de edição visível
 
-### 2. Labels e Textos
-**ANTES:**
-```dart
-color: Colors.white.withOpacity(0.6)  // Muito claro
-```
+### 3. Indicadores de Status
+- ✅ **Verde** quando dentro do padrão
+- ✅ **Laranja** quando fora do padrão
+- ✅ Bordas coloridas fortes
+- ✅ Mensagens claras
 
-**DEPOIS:**
-```dart
-color: Color(0xFF424242)  // Cinza escuro, bem visível
-```
-
-### 3. Campos de Entrada
-- Fundo branco sólido
-- Borda definida
-- Texto preto
+### 4. Todos os Campos
+- ✅ Fulão - fundo cinza claro
+- ✅ Responsável - fundo cinza claro
+- ✅ Responsável Superior - fundo cinza claro
+- ✅ Observação - fundo cinza claro
+- ✅ Quantidade - mantida como estava
 
 ---
 
-## 🚀 ARQUIVOS CORRIGIDOS
+## 📸 VISUAL FINAL
 
-1. `lib/widgets/stage_form.dart` - Formulário principal
-2. `lib/widgets/qty_counter.dart` - Contador de quantidade  
-3. `lib/theme.dart` - Tema já com cores corretas (se ainda não aplicou)
-
----
-
-## 📦 CONTEÚDO DESTE ZIP
-
+### Container de Variáveis:
 ```
-correcao_formulario/
-├── README.md (este arquivo)
-├── instalar.bat (Windows)
-├── instalar.sh (Linux/Mac)
-└── lib/
-    └── widgets/
-        ├── stage_form.dart  ✅ Cores corrigidas
-        └── qty_counter.dart  ✅ Cores corrigidas
+┌━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🔬 Variáveis                     ┃ ← Título preto
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                  ┃
+┃ Volume de Água                   ┃
+┃ 100% do peso líquido do lote     ┃
+┃ ╔══════════════════════════════╗ ┃
+┃ ║ Informar              ✏️     ║ ┃ ← Botão visível
+┃ ╚══════════════════════════════╝ ┃
+┃                                  ┃
+┃ Temperatura da Água              ┃
+┃ Padrão: 50 a 70 ºC               ┃
+┃ ╔══════════════════════════════╗ ┃
+┃ ║ 65,5 ºC               ✏️     ║ ┃ ← Valor preenchido
+┃ ╚══════════════════════════════╝ ┃
+┃ ┌──────────────────────────────┐ ┃
+┃ │ ✅ Dentro do padrão          │ ┃ ← Indicador verde
+┃ └──────────────────────────────┘ ┃
+┃                                  ┃
+┃ Tensoativo                       ┃
+┃ Padrão: 4.8 a 5.2 L              ┃
+┃ ╔══════════════════════════════╗ ┃
+┃ ║ 6,0 L                 ✏️     ║ ┃ ← Fora do padrão
+┃ ╚══════════════════════════════╝ ┃
+┃ ┌──────────────────────────────┐ ┃
+┃ │ ⚠️  Fora do padrão           │ ┃ ← Indicador laranja
+┃ └──────────────────────────────┘ ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ```
 
 ---
 
 ## 🎨 CORES APLICADAS
 
-### Container de Variáveis:
-- Fundo: **Branco** (#FFFFFF)
-- Borda: **Cinza escuro** (#424242) - 2px
-- Header: Ícone + texto em cinza escuro
-
-### Campos de Texto:
-- Fundo: **Branco** (#FFFFFF)
-- Borda: **Cinza** (#E0E0E0)
-- Texto: **Preto** (#424242)
-- Label: **Cinza médio** (#616161)
-
-### Indicadores:
-- Fora do padrão: **Laranja** (#FF9800)
-- Dentro do padrão: **Verde** (#4CAF50)
+| Elemento | Cor | Código |
+|----------|-----|--------|
+| Fundo container | Branco | #FFFFFF |
+| Borda container | Preto | #424242 |
+| Título "Variáveis" | Cinza escuro | #424242 |
+| Fundo botão "Informar" | Cinza claro | #F5F5F5 |
+| Borda botão | Preto | #424242 |
+| Texto botão | Preto | #424242 |
+| Indicador dentro | Verde | #4CAF50 |
+| Indicador fora | Laranja | #FF9800 |
+| Labels | Cinza médio | #757575 |
 
 ---
 
-## 📸 RESULTADO ESPERADO
+## ✅ DIFERENCIAIS DESTA VERSÃO
 
-### Container de Variáveis:
-```
-┌───────────────────────────────┐
-│ 🔬 Variáveis                  │ ← Título visível
-├───────────────────────────────┤
-│                               │
-│ Volume de Água                │ ← Campo com fundo branco
-│ ┌──────────────────────────┐ │
-│ │ [___________________] L  │ │
-│ └──────────────────────────┘ │
-│                               │
-│ Temperatura da Água           │
-│ ┌──────────────────────────┐ │
-│ │ [___________________] ºC │ │
-│ │ Padrão: 50 - 70         │ │
-│ └──────────────────────────┘ │
-│                               │
-└───────────────────────────────┘
-```
-
----
-
-## ⚡ INSTALAÇÃO
-
-### Windows:
-```bash
-# 1. Extrair na raiz do projeto
-unzip -o correcao_formulario.zip
-
-# 2. Executar instalador
-cd correcao_formulario
-instalar.bat
-
-# 3. Rodar
-cd ..
-flutter run
-```
-
-### Linux/Mac:
-```bash
-# 1. Extrair
-unzip -o correcao_formulario.zip
-
-# 2. Executar instalador
-cd correcao_formulario
-./instalar.sh
-
-# 3. Rodar
-cd ..
-flutter run
-```
-
----
-
-## ✨ MELHORIAS
-
-✅ Container de variáveis com fundo branco  
-✅ Borda forte (2px cinza escuro)  
-✅ Labels bem legíveis  
-✅ Campos com contraste alto  
-✅ Indicadores coloridos (verde/laranja)  
-✅ Texto preto em fundo branco  
+✅ **Campos 100% visíveis** - Botões grandes  
+✅ **Cores fortes** - Alto contraste  
+✅ **Indicadores coloridos** - Verde/Laranja  
+✅ **Bordas definidas** - 2px pretas  
+✅ **Ícones claros** - Editar visível  
+✅ **Mensagens de status** - Claro se está OK  
+✅ **Numpad customizado** - Já incluso  
 
 ---
 
 ## 🔄 COMPATIBILIDADE
 
-- ✅ Mesmas funcionalidades
-- ✅ Mesma estrutura
-- ✅ Apenas cores melhoradas
-- ✅ Nenhuma mudança na lógica
+- ✅ Mantém todas as funcionalidades
+- ✅ Mesma lógica de validação
+- ✅ Mesmos callbacks
+- ✅ Apenas cores e UI melhoradas
+- ✅ Compatível com o resto do código
 
 ---
 
-**Agora o formulário está 100% legível!** 👁️
+## 📝 DEPOIS DA INSTALAÇÃO
+
+```bash
+# Se necessário, limpar cache
+flutter clean
+flutter pub get
+flutter run
+```
+
+---
+
+## 🎯 RESULTADO GARANTIDO
+
+**Após extrair este ZIP:**
+- ✅ Campos de variáveis **VISÍVEIS**
+- ✅ Botões grandes para informar valores
+- ✅ Cores **FORTES** e legíveis
+- ✅ Indicadores coloridos funcionando
+- ✅ Interface profissional
+
+---
+
+## 💡 DICA
+
+Antes de extrair, faça backup:
+```bash
+cp lib/widgets/stage_form.dart lib/widgets/stage_form.dart.backup
+```
+
+Para voltar:
+```bash
+cp lib/widgets/stage_form.dart.backup lib/widgets/stage_form.dart
+```
+
+---
+
+**Extraia e veja a diferença instantaneamente!** 🎨
 
 Data: Outubro 2025  
-Versão: 1.0.3 (Correção formulário)
+Versão: 2.0.0 (Correção completa com campos visíveis)  
+Tamanho: 1 arquivo (~15 KB)

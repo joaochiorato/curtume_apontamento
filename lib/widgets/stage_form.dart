@@ -8,6 +8,7 @@ class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
   final Map<String, dynamic>? initialData;
+  
   const StageForm({
     super.key, 
     required this.stage, 
@@ -63,7 +64,6 @@ class _StageFormState extends State<StageForm> {
     }
     _qtdProcessadaCtrl.text = '0';
     
-    // Carrega dados salvos se existirem
     if (widget.initialData != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadSavedData();
@@ -76,25 +76,15 @@ class _StageFormState extends State<StageForm> {
     
     if (savedData != null) {
       setState(() {
-        // Carrega dados básicos
-        if (savedData['fulao'] != null) {
-          _fulaoSel = savedData['fulao'];
-        }
-        if (savedData['responsavel'] != null) {
-          _respSel = savedData['responsavel'];
-        }
-        if (savedData['responsavelSuperior'] != null) {
-          _respSupSel = savedData['responsavelSuperior'];
-        }
-        if (savedData['obs'] != null) {
-          _obs.text = savedData['obs'];
-        }
+        if (savedData['fulao'] != null) _fulaoSel = savedData['fulao'];
+        if (savedData['responsavel'] != null) _respSel = savedData['responsavel'];
+        if (savedData['responsavelSuperior'] != null) _respSupSel = savedData['responsavelSuperior'];
+        if (savedData['obs'] != null) _obs.text = savedData['obs'];
         if (savedData['qtdProcessada'] != null) {
           _qtd = savedData['qtdProcessada'];
           _qtdProcessadaCtrl.text = '$_qtd';
         }
         
-        // Carrega status e datas
         if (savedData['status'] != null) {
           final statusStr = savedData['status'];
           if (statusStr == 'running') _status = StageStatus.running;
@@ -102,14 +92,9 @@ class _StageFormState extends State<StageForm> {
           else if (statusStr == 'closed') _status = StageStatus.closed;
         }
         
-        if (savedData['start'] != null) {
-          _start = DateTime.parse(savedData['start']);
-        }
-        if (savedData['end'] != null) {
-          _end = DateTime.parse(savedData['end']);
-        }
+        if (savedData['start'] != null) _start = DateTime.parse(savedData['start']);
+        if (savedData['end'] != null) _end = DateTime.parse(savedData['end']);
         
-        // Carrega variáveis
         if (savedData['variables'] != null) {
           final vars = savedData['variables'] as Map<String, dynamic>;
           vars.forEach((key, value) {
@@ -164,12 +149,8 @@ class _StageFormState extends State<StageForm> {
     });
   }
 
-  // Validações antes de iniciar
-  bool _canStart() {
-    return true;
-  }
+  bool _canStart() => true;
 
-  // Validações antes de encerrar
   Future<bool> _canClose() async {
     if (_qtd == 0) {
       final confirm = await _showConfirmDialog(
@@ -202,8 +183,7 @@ class _StageFormState extends State<StageForm> {
   }
 
   Widget _fulaoSelector() {
-    final enabled =
-        _status == StageStatus.running || _status == StageStatus.idle;
+    final enabled = _status == StageStatus.running || _status == StageStatus.idle;
     return DropdownButtonFormField<int>(
       value: _fulaoSel,
       items: [1, 2, 3, 4]
@@ -213,6 +193,9 @@ class _StageFormState extends State<StageForm> {
       decoration: const InputDecoration(
         labelText: 'Fulão',
         prefixIcon: Icon(Icons.precision_manufacturing),
+        filled: true,
+        fillColor: Color(0xFFF5F5F5),
+        border: OutlineInputBorder(),
       ),
     );
   }
@@ -226,7 +209,6 @@ class _StageFormState extends State<StageForm> {
         ? 'Término — aguardando'
         : 'Término: ${dfDate.format(_end!)} ${dfTime.format(_end!)}';
 
-    // Calcular duração se ambos existirem
     String? duracao;
     if (_start != null && _end != null) {
       final diff = _end!.difference(_start!);
@@ -239,20 +221,23 @@ class _StageFormState extends State<StageForm> {
       return Container(
         height: 44,
         decoration: BoxDecoration(
-          color: color?.withOpacity(0.1) ?? Colors.white.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color?.withOpacity(0.3) ?? Colors.white24),
+          color: (color ?? const Color(0xFFE0E0E0)).withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color ?? const Color(0xFF9E9E9E)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: color ?? Colors.white70),
+            Icon(icon, size: 18, color: color ?? const Color(0xFF616161)),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 text,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: color),
+                style: TextStyle(
+                  color: color ?? const Color(0xFF424242),
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -266,16 +251,16 @@ class _StageFormState extends State<StageForm> {
           children: [
             Expanded(
                 child: chip(Icons.play_arrow, startTxt,
-                    color: _start != null ? Colors.green : null)),
+                    color: _start != null ? const Color(0xFF4CAF50) : null)),
             const SizedBox(width: 12),
             Expanded(
                 child: chip(Icons.stop, endTxt,
-                    color: _end != null ? Colors.red : null)),
+                    color: _end != null ? const Color(0xFFF44336) : null)),
           ],
         ),
         if (duracao != null) ...[
           const SizedBox(height: 8),
-          chip(Icons.timer_outlined, duracao, color: Colors.blue),
+          chip(Icons.timer_outlined, duracao, color: const Color(0xFF2196F3)),
         ],
       ],
     );
@@ -324,7 +309,6 @@ class _StageFormState extends State<StageForm> {
                 ? 'Padrão: ${min ?? '-'} a ${max ?? '-'} ${unidade ?? ''}'
                 : (unidade != null ? 'Unid.: $unidade' : '');
 
-            // Validar valor em tempo real
             double? currentVal;
             bool isOutOfRange = false;
             if (buf.isNotEmpty) {
@@ -342,48 +326,50 @@ class _StageFormState extends State<StageForm> {
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(56),
                       ),
-                      child: Text(k,
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w600)),
+                      child: Text(k, style: const TextStyle(fontSize: 24)),
                     ),
                   ),
                 );
 
             return Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 8,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-              ),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(titulo,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 18)),
-                  if (txtPadrao.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(txtPadrao,
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.white70)),
+                  Text(
+                    titulo,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                  const SizedBox(height: 12),
+                  ),
+                  if (txtPadrao.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      txtPadrao,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isOutOfRange
+                            ? const Color(0xFFFF9800)
+                            : const Color(0xFF616161),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
                   TextField(
-                    readOnly: true,
-                    textAlign: TextAlign.center,
+                    enabled: false,
                     style: TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isOutOfRange ? Colors.amber : Colors.white,
+                      color: isOutOfRange ? Colors.amber : const Color(0xFF424242),
                     ),
                     controller: TextEditingController(text: buf),
                     decoration: InputDecoration(
                       hintText: 'Digite o resultado',
                       suffixText: unidade,
                       errorText: isOutOfRange ? 'Valor fora do padrão!' : null,
+                      filled: true,
+                      fillColor: const Color(0xFFF5F5F5),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -458,13 +444,11 @@ class _StageFormState extends State<StageForm> {
   Future<void> _handleSave() async {
     if (_isSaving) return;
 
-    // Validar formulário
     if (_formKey.currentState?.validate() != true) {
       _show('Preencha todos os campos obrigatórios.', isError: true);
       return;
     }
 
-    // Validar variáveis
     for (final v in widget.stage.variables) {
       if (_controllers[v.name]!.text.trim().isEmpty) {
         _show('Informe o resultado de "${v.name}".', isError: true);
@@ -472,13 +456,11 @@ class _StageFormState extends State<StageForm> {
       }
     }
 
-    // Validar responsáveis
     if (_respSel == '— selecione —') {
       _show('Selecione o responsável.', isError: true);
       return;
     }
 
-    // Avisar sobre valores fora do padrão
     final outOfRange = <String>[];
     for (final v in widget.stage.variables) {
       final text = _controllers[v.name]!.text;
@@ -511,7 +493,6 @@ class _StageFormState extends State<StageForm> {
         'variables': _controllers.map((k, c) => MapEntry(k, c.text)),
       };
 
-      // Simular delay de salvamento
       await Future.delayed(const Duration(milliseconds: 500));
 
       widget.onSaved(data);
@@ -525,8 +506,7 @@ class _StageFormState extends State<StageForm> {
   @override
   Widget build(BuildContext context) {
     final s = widget.stage;
-    final canEdit =
-        _status == StageStatus.running || _status == StageStatus.idle;
+    final canEdit = _status == StageStatus.running || _status == StageStatus.idle;
 
     return SingleChildScrollView(
       controller: _scroll,
@@ -573,6 +553,8 @@ class _StageFormState extends State<StageForm> {
             const SizedBox(height: 12),
             _fulaoSelector(),
             const SizedBox(height: 10),
+            
+            // RESPONSÁVEL
             DropdownButtonFormField<String>(
               value: _respSel,
               items: _responsaveis
@@ -584,11 +566,16 @@ class _StageFormState extends State<StageForm> {
               decoration: const InputDecoration(
                 labelText: 'Responsável',
                 prefixIcon: Icon(Icons.person),
+                filled: true,
+                fillColor: Color(0xFFF5F5F5),
+                border: OutlineInputBorder(),
               ),
               validator: (v) =>
                   v == '— selecione —' ? 'Selecione o responsável' : null,
             ),
             const SizedBox(height: 10),
+            
+            // RESPONSÁVEL SUPERIOR
             DropdownButtonFormField<String>(
               value: _respSupSel,
               items: _responsaveisSup
@@ -600,20 +587,14 @@ class _StageFormState extends State<StageForm> {
               decoration: const InputDecoration(
                 labelText: 'Responsável Superior',
                 prefixIcon: Icon(Icons.supervisor_account),
+                filled: true,
+                fillColor: Color(0xFFF5F5F5),
+                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              controller: _obs,
-              maxLines: 3,
-              enabled: canEdit,
-              decoration: const InputDecoration(
-                labelText: 'Observação',
-                hintText: 'Tempo de Remolho 120 minutos +/- 60 min',
-                prefixIcon: Icon(Icons.notes),
-              ),
-            ),
-            const SizedBox(height: 10),
+            
+            // QUANTIDADE PROCESSADA
             Container(
               key: _qtyKey,
               child: QtyCounter(
@@ -627,25 +608,63 @@ class _StageFormState extends State<StageForm> {
                 },
               ),
             ),
+            const SizedBox(height: 10),
+            
+            // OBSERVAÇÃO
+            TextFormField(
+              controller: _obs,
+              maxLines: 3,
+              enabled: canEdit,
+              decoration: const InputDecoration(
+                labelText: 'Observação',
+                hintText: 'Tempo de Remolho 120 minutos +/- 60 min',
+                prefixIcon: Icon(Icons.notes),
+                filled: true,
+                fillColor: Color(0xFFF5F5F5),
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 16),
+            
+            // ✅ CONTAINER DE VARIÁVEIS COM CORES FORTES
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white24, width: 1.2),
+                color: Colors.white,  // ← FUNDO BRANCO
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFF424242),  // ← BORDA PRETA
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // TÍTULO
                   Row(
                     children: [
-                      const Icon(Icons.science, size: 20),
+                      const Icon(Icons.science, size: 20, color: Color(0xFF424242)),
                       const SizedBox(width: 8),
-                      Text('Variáveis',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      const Text(
+                        'Variáveis',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF424242),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  
+                  // ✅ CAMPOS DAS VARIÁVEIS - AGORA VISÍVEIS!
                   ...s.variables.map((v) {
                     final ctrl = _controllers[v.name]!;
                     final min = v.min, max = v.max;
@@ -657,66 +676,138 @@ class _StageFormState extends State<StageForm> {
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // NOME DA VARIÁVEL
+                          Text(
+                            v.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Color(0xFF424242),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          
+                          // HINT
+                          if (v.hint != null)
+                            Text(
+                              v.hint!,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF757575),
+                              ),
+                            ),
+                          
+                          // PADRÃO
+                          if (min != null || max != null)
+                            Text(
+                              'Padrão: ${min ?? '-'} a ${max ?? '-'} ${v.unit}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF757575),
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+                          
+                          // ✅ BOTÃO PARA INFORMAR O VALOR - BEM VISÍVEL!
+                          OutlinedButton(
+                            onPressed: (_status == StageStatus.running)
+                                ? () => _openNumpad(
+                                      titulo: v.name,
+                                      controller: ctrl,
+                                      unidade: v.unit,
+                                      min: min,
+                                      max: max,
+                                    )
+                                : null,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: isOut 
+                                    ? const Color(0xFFFF9800)  // Laranja se fora do padrão
+                                    : const Color(0xFF424242),  // Preto normal
+                                width: 2,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 16,
+                              ),
+                              backgroundColor: isOut
+                                  ? const Color(0xFFFF9800).withOpacity(0.1)
+                                  : const Color(0xFFF5F5F5),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(v.name,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14)),
-                                const SizedBox(height: 4),
-                                if (v.hint != null)
-                                  Text(v.hint!,
-                                      style: const TextStyle(
-                                          fontSize: 12, color: Colors.white70)),
-                                if (min != null || max != null)
-                                  Text(
-                                      'Padrão: ${min ?? '-'} a ${max ?? '-'} ${v.unit}',
-                                      style: const TextStyle(
-                                          fontSize: 12, color: Colors.white70)),
+                                Text(
+                                  ctrl.text.isEmpty
+                                      ? 'Informar'
+                                      : '${ctrl.text} ${v.unit}',
+                                  style: TextStyle(
+                                    color: isOut 
+                                        ? const Color(0xFFFF9800)
+                                        : const Color(0xFF424242),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.edit,
+                                  color: isOut 
+                                      ? const Color(0xFFFF9800)
+                                      : const Color(0xFF616161),
+                                  size: 20,
+                                ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          SizedBox(
-                            width: 150,
-                            child: OutlinedButton(
-                              onPressed: (_status == StageStatus.running)
-                                  ? () => _openNumpad(
-                                        titulo: v.name,
-                                        controller: ctrl,
-                                        unidade: v.unit,
-                                        min: min,
-                                        max: max,
-                                      )
-                                  : null,
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                    color:
-                                        isOut ? Colors.amber : Colors.white24,
-                                    width: isOut ? 2 : 1),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 14, horizontal: 12),
+                          
+                          // INDICADOR DE STATUS
+                          if (ctrl.text.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
                               ),
-                              child: Text(
-                                (ctrl.text.isEmpty)
-                                    ? 'Informar'
-                                    : '${ctrl.text} ${v.unit}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: isOut ? Colors.amber : Colors.white,
-                                  fontWeight: isOut
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                              decoration: BoxDecoration(
+                                color: isOut
+                                    ? const Color(0xFFFF9800).withOpacity(0.15)
+                                    : const Color(0xFF4CAF50).withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: isOut
+                                      ? const Color(0xFFFF9800)
+                                      : const Color(0xFF4CAF50),
+                                  width: 1.5,
                                 ),
                               ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isOut ? Icons.warning : Icons.check_circle,
+                                    size: 14,
+                                    color: isOut
+                                        ? const Color(0xFFFF9800)
+                                        : const Color(0xFF4CAF50),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    isOut ? 'Fora do padrão' : 'Dentro do padrão',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isOut
+                                          ? const Color(0xFFFF9800)
+                                          : const Color(0xFF4CAF50),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     );
@@ -725,6 +816,8 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
             const SizedBox(height: 16),
+            
+            // BOTÃO SALVAR
             FilledButton.icon(
               onPressed: _isSaving ? null : _handleSave,
               icon: _isSaving
@@ -738,6 +831,10 @@ class _StageFormState extends State<StageForm> {
                     )
                   : const Icon(Icons.save_outlined),
               label: Text(_isSaving ? 'Salvando...' : 'Salvar'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: const Color(0xFF4CAF50),
+              ),
             ),
           ],
         ),
