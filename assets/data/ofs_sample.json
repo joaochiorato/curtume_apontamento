@@ -1,0 +1,26 @@
+{
+  "ordens": [
+    {
+      "of": "18283",
+      "artigos": [
+        {
+          "name": "QUARTZO",
+          "po": "7315CK08",
+          "cor": "E - BROWN",
+          "classe": "G119"
+        }
+      ]
+    },
+    {
+      "of": "19001",
+      "artigos": [
+        {
+          "name": "SAFIRA",
+          "po": "7000AA01",
+          "cor": "BLACK",
+          "classe": "G200"
+        }
+      ]
+    }
+  ]
+}
