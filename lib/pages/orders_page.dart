@@ -45,16 +45,9 @@ class _OrdersPageState extends State<OrdersPage> {
   void _aplicarFiltros() {
     setState(() {
       _ordensFiltradas = _ordens.where((ordem) {
-        // Filtro por número da OF
         final matchOF = _filtroOF.text.isEmpty ||
             ordem.of.toLowerCase().contains(_filtroOF.text.toLowerCase());
-
-        // Filtro por data (simulado - se tivesse data na ordem)
-        // Como não tem data no modelo, sempre retorna true
-        // Você pode adicionar campo de data no modelo depois
-        final matchData = true;
-
-        return matchOF && matchData;
+        return matchOF;
       }).toList();
     });
   }
@@ -88,119 +81,115 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ordens de Produção'),
+        title: const Text('ORDENS DE PRODUÇÃO'),
         actions: [
-          // Contador de ordens filtradas
+          // Contador de ordens
           if (!_loading)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Text(
-                  '${_ordensFiltradas.length} OF(s)',
-                  style: const TextStyle(fontSize: 14),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Chip(
+                avatar: const Icon(Icons.assignment, size: 18, color: Colors.white),
+                label: Text(
+                  '${_ordensFiltradas.length}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
+                backgroundColor: const Color(0xFF4CAF50),
+                padding: EdgeInsets.zero,
               ),
             ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Carregando ordens...'),
+                ],
+              ),
+            )
           : Column(
               children: [
-                // Área de filtros
+                // 🔍 ÁREA DE FILTROS
                 Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[900],
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.white.withOpacity(0.1),
-                        width: 1,
-                      ),
-                    ),
-                  ),
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.white,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Campo de busca
+                      TextField(
+                        controller: _filtroOF,
+                        decoration: InputDecoration(
+                          labelText: 'Buscar Ordem de Produção',
+                          hintText: 'Digite o número da OF...',
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: _filtroOF.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () => _filtroOF.clear(),
+                                )
+                              : null,
+                        ),
+                      ),
+                      
+                      // Botões de filtro
+                      const SizedBox(height: 12),
                       Row(
                         children: [
-                          // Filtro por número da OF
-                          Expanded(
-                            flex: 2,
-                            child: TextField(
-                              controller: _filtroOF,
-                              decoration: InputDecoration(
-                                labelText: 'Buscar OF',
-                                hintText: 'Ex: 18283',
-                                prefixIcon: const Icon(Icons.search),
-                                suffixIcon: _filtroOF.text.isNotEmpty
-                                    ? IconButton(
-                                        icon: const Icon(Icons.clear),
-                                        onPressed: () => _filtroOF.clear(),
-                                      )
-                                    : null,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          
                           // Filtro por data
                           Expanded(
-                            flex: 2,
                             child: OutlinedButton.icon(
                               onPressed: _selecionarData,
                               icon: const Icon(Icons.calendar_today, size: 18),
                               label: Text(
                                 _dataFiltro == null
-                                    ? 'Data'
+                                    ? 'Filtrar por Data'
                                     : dfDate.format(_dataFiltro!),
                                 style: const TextStyle(fontSize: 13),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 16,
-                                ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           
-                          // Botão limpar filtros
+                          // Botão limpar
                           if (_filtroOF.text.isNotEmpty || _dataFiltro != null)
                             IconButton(
                               onPressed: _limparFiltros,
                               icon: const Icon(Icons.filter_alt_off),
                               tooltip: 'Limpar filtros',
                               style: IconButton.styleFrom(
-                                backgroundColor: Colors.red.withOpacity(0.1),
+                                backgroundColor: const Color(0xFFE53935).withOpacity(0.1),
+                                foregroundColor: const Color(0xFFE53935),
                               ),
                             ),
                         ],
                       ),
                       
-                      // Indicador de filtros ativos
+                      // Chips de filtros ativos
                       if (_filtroOF.text.isNotEmpty || _dataFiltro != null) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Wrap(
                           spacing: 8,
                           runSpacing: 4,
                           children: [
                             if (_filtroOF.text.isNotEmpty)
                               Chip(
-                                avatar: const Icon(Icons.filter_list, size: 16),
+                                avatar: const Icon(Icons.assignment, size: 16),
                                 label: Text('OF: ${_filtroOF.text}'),
                                 onDeleted: () => _filtroOF.clear(),
                                 deleteIcon: const Icon(Icons.close, size: 16),
+                                backgroundColor: const Color(0xFF4CAF50).withOpacity(0.1),
                               ),
                             if (_dataFiltro != null)
                               Chip(
                                 avatar: const Icon(Icons.calendar_today, size: 16),
-                                label: Text('Data: ${dfDate.format(_dataFiltro!)}'),
+                                label: Text(dfDate.format(_dataFiltro!)),
                                 onDeleted: () {
                                   setState(() {
                                     _dataFiltro = null;
@@ -208,6 +197,7 @@ class _OrdersPageState extends State<OrdersPage> {
                                   });
                                 },
                                 deleteIcon: const Icon(Icons.close, size: 16),
+                                backgroundColor: const Color(0xFF4CAF50).withOpacity(0.1),
                               ),
                           ],
                         ),
@@ -216,7 +206,10 @@ class _OrdersPageState extends State<OrdersPage> {
                   ),
                 ),
                 
-                // Lista de ordens filtradas
+                // Divider
+                const Divider(height: 1),
+                
+                // 📋 LISTA DE ORDENS
                 Expanded(
                   child: _ordensFiltradas.isEmpty
                       ? Center(
@@ -226,7 +219,7 @@ class _OrdersPageState extends State<OrdersPage> {
                               Icon(
                                 Icons.search_off,
                                 size: 64,
-                                color: Colors.grey[600],
+                                color: Colors.grey[400],
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -237,47 +230,137 @@ class _OrdersPageState extends State<OrdersPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              TextButton.icon(
-                                onPressed: _limparFiltros,
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Limpar filtros'),
+                              Text(
+                                'Tente ajustar os filtros',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
                               ),
                             ],
                           ),
                         )
                       : ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
                           itemCount: _ordensFiltradas.length,
-                          separatorBuilder: (_, __) => const Divider(height: 0),
+                          separatorBuilder: (_, __) => const SizedBox(height: 8),
                           itemBuilder: (_, i) {
-                            final o = _ordensFiltradas[i];
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: const Color(0xFF546E7A),
-                                child: Text(
-                                  o.of,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              title: Text('OF ${o.of}'),
-                              subtitle: Text('${o.artigos.length} artigo(s)'),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ArticlesPage(of: o),
-                                  ),
-                                );
-                              },
-                            );
+                            final ordem = _ordensFiltradas[i];
+                            return _buildOrderCard(context, ordem);
                           },
                         ),
                 ),
               ],
             ),
+    );
+  }
+
+  // 🎨 Card de Ordem
+  Widget _buildOrderCard(BuildContext context, OrdemModel ordem) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ArticlesPage(of: ordem),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Ícone
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF424242).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.assignment,
+                  size: 28,
+                  color: Color(0xFF424242),
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Conteúdo
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          'OF ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          ordem.of,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF424242),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4CAF50).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.inventory_2,
+                                size: 14,
+                                color: Color(0xFF4CAF50),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${ordem.artigos.length} artigo(s)',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF4CAF50),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Seta
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
