@@ -41,7 +41,8 @@ class HomePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white.withOpacity(0.3)),
                     ),
@@ -58,13 +59,13 @@ class HomePage extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Onda decorativa (igual ao Frigosoft)
             CustomPaint(
               size: const Size(double.infinity, 50),
               painter: WavePainter(),
             ),
-            
+
             // 📋 CONTEÚDO PRINCIPAL
             Expanded(
               child: Container(
@@ -108,7 +109,7 @@ class HomePage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Título
                             const Text(
                               'APONTAMENTO',
@@ -120,10 +121,10 @@ class HomePage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            
+
                             // Subtítulo
                             Text(
-                              'Sistema de Produção',
+                              'Sistema de Apontamento de Couro',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[600],
@@ -134,9 +135,9 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Botão de acesso
                     SizedBox(
                       width: double.infinity,
@@ -172,7 +173,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // 📍 RODAPÉ COM VERSÃO
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12),

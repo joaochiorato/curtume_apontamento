@@ -16,7 +16,7 @@ class _OrdersPageState extends State<OrdersPage> {
   bool _loading = true;
   List<OrdemModel> _ordens = [];
   List<OrdemModel> _ordensFiltradas = [];
-  
+
   final _filtroOF = TextEditingController();
   DateTime? _dataFiltro;
   final dfDate = DateFormat('dd/MM/yyyy');
@@ -88,7 +88,8 @@ class _OrdersPageState extends State<OrdersPage> {
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Chip(
-                avatar: const Icon(Icons.assignment, size: 18, color: Colors.white),
+                avatar:
+                    const Icon(Icons.assignment, size: 18, color: Colors.white),
                 label: Text(
                   '${_ordensFiltradas.length}',
                   style: const TextStyle(
@@ -96,7 +97,7 @@ class _OrdersPageState extends State<OrdersPage> {
                     color: Colors.white,
                   ),
                 ),
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: const Color(0xFF424242),
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -137,7 +138,7 @@ class _OrdersPageState extends State<OrdersPage> {
                               : null,
                         ),
                       ),
-                      
+
                       // Botões de filtro
                       const SizedBox(height: 12),
                       Row(
@@ -156,7 +157,7 @@ class _OrdersPageState extends State<OrdersPage> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          
+
                           // Botão limpar
                           if (_filtroOF.text.isNotEmpty || _dataFiltro != null)
                             IconButton(
@@ -164,13 +165,14 @@ class _OrdersPageState extends State<OrdersPage> {
                               icon: const Icon(Icons.filter_alt_off),
                               tooltip: 'Limpar filtros',
                               style: IconButton.styleFrom(
-                                backgroundColor: const Color(0xFFE53935).withOpacity(0.1),
+                                backgroundColor:
+                                    const Color(0xFFE53935).withOpacity(0.1),
                                 foregroundColor: const Color(0xFFE53935),
                               ),
                             ),
                         ],
                       ),
-                      
+
                       // Chips de filtros ativos
                       if (_filtroOF.text.isNotEmpty || _dataFiltro != null) ...[
                         const SizedBox(height: 12),
@@ -184,11 +186,13 @@ class _OrdersPageState extends State<OrdersPage> {
                                 label: Text('OF: ${_filtroOF.text}'),
                                 onDeleted: () => _filtroOF.clear(),
                                 deleteIcon: const Icon(Icons.close, size: 16),
-                                backgroundColor: const Color(0xFF4CAF50).withOpacity(0.1),
+                                backgroundColor:
+                                    const Color(0xFF4CAF50).withOpacity(0.1),
                               ),
                             if (_dataFiltro != null)
                               Chip(
-                                avatar: const Icon(Icons.calendar_today, size: 16),
+                                avatar:
+                                    const Icon(Icons.calendar_today, size: 16),
                                 label: Text(dfDate.format(_dataFiltro!)),
                                 onDeleted: () {
                                   setState(() {
@@ -197,7 +201,8 @@ class _OrdersPageState extends State<OrdersPage> {
                                   });
                                 },
                                 deleteIcon: const Icon(Icons.close, size: 16),
-                                backgroundColor: const Color(0xFF4CAF50).withOpacity(0.1),
+                                backgroundColor:
+                                    const Color(0xFF4CAF50).withOpacity(0.1),
                               ),
                           ],
                         ),
@@ -205,10 +210,10 @@ class _OrdersPageState extends State<OrdersPage> {
                     ],
                   ),
                 ),
-                
+
                 // Divider
                 const Divider(height: 1),
-                
+
                 // 📋 LISTA DE ORDENS
                 Expanded(
                   child: _ordensFiltradas.isEmpty
@@ -243,7 +248,8 @@ class _OrdersPageState extends State<OrdersPage> {
                       : ListView.separated(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           itemCount: _ordensFiltradas.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 8),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
                           itemBuilder: (_, i) {
                             final ordem = _ordensFiltradas[i];
                             return _buildOrderCard(context, ordem);
@@ -287,7 +293,7 @@ class _OrdersPageState extends State<OrdersPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              
+
               // Conteúdo
               Expanded(
                 child: Column(
@@ -322,7 +328,7 @@ class _OrdersPageState extends State<OrdersPage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4CAF50).withOpacity(0.1),
+                            color: Color(0xFF424242).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(
@@ -331,14 +337,14 @@ class _OrdersPageState extends State<OrdersPage> {
                               const Icon(
                                 Icons.inventory_2,
                                 size: 14,
-                                color: Color(0xFF4CAF50),
+                                color: Color(0xFF424242),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${ordem.artigos.length} artigo(s)',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF4CAF50),
+                                  color: Color(0xFF424242),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -350,7 +356,7 @@ class _OrdersPageState extends State<OrdersPage> {
                   ],
                 ),
               ),
-              
+
               // Seta
               const Icon(
                 Icons.arrow_forward_ios,

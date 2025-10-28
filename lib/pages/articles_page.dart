@@ -55,7 +55,7 @@ class ArticlesPage extends StatelessWidget {
               child: Column(
                 children: [
                   OrderInfoCard(orderData: orderData),
-                  
+
                   // Título da seção de artigos
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 16, 12, 8),
@@ -74,28 +74,24 @@ class ArticlesPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Lista de artigos
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: of.artigos.length,
-                    separatorBuilder: (_, __) => const Divider(height: 0, indent: 16, endIndent: 16),
+                    separatorBuilder: (_, __) =>
+                        const Divider(height: 0, indent: 16, endIndent: 16),
                     itemBuilder: (_, i) {
                       final a = of.artigos[i];
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: const Color(0xFF546E7A),
-                          child: Text(
-                            a.name,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          backgroundColor:
+                              const Color.fromARGB(255, 83, 83, 83),
                         ),
                         title: Text('Artigo ${a.name}'),
-                        subtitle: Text('PO ${a.po} • Cor ${a.cor} • Classe ${a.classe}'),
+                        subtitle: Text(
+                            'PO ${a.po} • Cor ${a.cor} • Classe ${a.classe}'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
                           Navigator.push(

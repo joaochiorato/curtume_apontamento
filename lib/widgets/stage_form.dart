@@ -28,7 +28,6 @@ class _StageFormState extends State<StageForm> {
   final _scroll = ScrollController();
   final _qtyKey = GlobalKey();
 
-  // Listas de opções
   final List<String> _responsaveis = const [
     '— selecione —',
     'Ana',
@@ -43,7 +42,6 @@ class _StageFormState extends State<StageForm> {
     'Supervisor C'
   ];
 
-  // Estado do formulário
   int? _fulaoSel;
   String _respSel = '— selecione —';
   String _respSupSel = '— selecione —';
@@ -554,7 +552,6 @@ class _StageFormState extends State<StageForm> {
             _fulaoSelector(),
             const SizedBox(height: 10),
             
-            // RESPONSÁVEL
             DropdownButtonFormField<String>(
               value: _respSel,
               items: _responsaveis
@@ -575,7 +572,6 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 10),
             
-            // RESPONSÁVEL SUPERIOR
             DropdownButtonFormField<String>(
               value: _respSupSel,
               items: _responsaveisSup
@@ -594,7 +590,6 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 10),
             
-            // QUANTIDADE PROCESSADA
             Container(
               key: _qtyKey,
               child: QtyCounter(
@@ -610,7 +605,6 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 10),
             
-            // OBSERVAÇÃO
             TextFormField(
               controller: _obs,
               maxLines: 3,
@@ -626,14 +620,14 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 16),
             
-            // ✅ CONTAINER DE VARIÁVEIS COM CORES FORTES
+            // ✨ CONTAINER DE VARIÁVEIS COM INDICADORES MELHORADOS
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,  // ← FUNDO BRANCO
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: const Color(0xFF424242),  // ← BORDA PRETA
+                  color: const Color(0xFF424242),
                   width: 2,
                 ),
                 boxShadow: [
@@ -647,7 +641,6 @@ class _StageFormState extends State<StageForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TÍTULO
                   Row(
                     children: [
                       const Icon(Icons.science, size: 20, color: Color(0xFF424242)),
@@ -664,7 +657,7 @@ class _StageFormState extends State<StageForm> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // ✅ CAMPOS DAS VARIÁVEIS - AGORA VISÍVEIS!
+                  // CAMPOS DAS VARIÁVEIS COM INDICADORES MELHORADOS
                   ...s.variables.map((v) {
                     final ctrl = _controllers[v.name]!;
                     final min = v.min, max = v.max;
@@ -673,45 +666,90 @@ class _StageFormState extends State<StageForm> {
                       val = double.tryParse(ctrl.text.replaceAll(',', '.'));
                     }
                     final isOut = _isOutOfRange(val, min, max);
+                    final hasValue = ctrl.text.isNotEmpty;
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.only(bottom: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // NOME DA VARIÁVEL
-                          Text(
-                            v.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Color(0xFF424242),
-                            ),
+                          // CABEÇALHO: Nome + Indicador
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  v.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Color(0xFF424242),
+                                  ),
+                                ),
+                              ),
+                              // ✨ INDICADOR COMPACTO À DIREITA
+                              if (hasValue)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isOut
+                                        ? const Color(0xFFFF9800)
+                                        : const Color(0xFF4CAF50),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isOut ? Icons.warning_rounded : Icons.check_circle_rounded,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        isOut ? 'Fora' : 'OK',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           
                           // HINT
                           if (v.hint != null)
-                            Text(
-                              v.hint!,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF757575),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                v.hint!,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF757575),
+                                ),
                               ),
                             ),
                           
                           // PADRÃO
                           if (min != null || max != null)
-                            Text(
-                              'Padrão: ${min ?? '-'} a ${max ?? '-'} ${v.unit}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF757575),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Padrão: ${min ?? '-'} a ${max ?? '-'} ${v.unit}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF757575),
+                                ),
                               ),
                             ),
-                          const SizedBox(height: 8),
                           
-                          // ✅ BOTÃO PARA INFORMAR O VALOR - BEM VISÍVEL!
+                          // BOTÃO DE ENTRADA - COM BORDA COLORIDA SE TIVER VALOR
                           OutlinedButton(
                             onPressed: (_status == StageStatus.running)
                                 ? () => _openNumpad(
@@ -724,90 +762,54 @@ class _StageFormState extends State<StageForm> {
                                 : null,
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
-                                color: isOut 
-                                    ? const Color(0xFFFF9800)  // Laranja se fora do padrão
-                                    : const Color(0xFF424242),  // Preto normal
+                                color: hasValue
+                                    ? (isOut 
+                                        ? const Color(0xFFFF9800)
+                                        : const Color(0xFF4CAF50))
+                                    : const Color(0xFF424242),
                                 width: 2,
                               ),
                               padding: const EdgeInsets.symmetric(
                                 vertical: 16,
                                 horizontal: 16,
                               ),
-                              backgroundColor: isOut
-                                  ? const Color(0xFFFF9800).withOpacity(0.1)
-                                  : const Color(0xFFF5F5F5),
+                              backgroundColor: hasValue && !isOut
+                                  ? const Color(0xFF4CAF50).withOpacity(0.05)
+                                  : (hasValue && isOut
+                                      ? const Color(0xFFFF9800).withOpacity(0.05)
+                                      : const Color(0xFFF5F5F5)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  ctrl.text.isEmpty
-                                      ? 'Informar'
-                                      : '${ctrl.text} ${v.unit}',
-                                  style: TextStyle(
-                                    color: isOut 
-                                        ? const Color(0xFFFF9800)
-                                        : const Color(0xFF424242),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
+                                Expanded(
+                                  child: Text(
+                                    ctrl.text.isEmpty
+                                        ? 'Informar'
+                                        : '${ctrl.text} ${v.unit}',
+                                    style: TextStyle(
+                                      color: hasValue
+                                          ? (isOut 
+                                              ? const Color(0xFFFF9800)
+                                              : const Color(0xFF4CAF50))
+                                          : const Color(0xFF424242),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
                                   ),
                                 ),
                                 Icon(
-                                  Icons.edit,
-                                  color: isOut 
-                                      ? const Color(0xFFFF9800)
+                                  Icons.edit_outlined,
+                                  color: hasValue
+                                      ? (isOut 
+                                          ? const Color(0xFFFF9800)
+                                          : const Color(0xFF4CAF50))
                                       : const Color(0xFF616161),
                                   size: 20,
                                 ),
                               ],
                             ),
                           ),
-                          
-                          // INDICADOR DE STATUS
-                          if (ctrl.text.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isOut
-                                    ? const Color(0xFFFF9800).withOpacity(0.15)
-                                    : const Color(0xFF4CAF50).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: isOut
-                                      ? const Color(0xFFFF9800)
-                                      : const Color(0xFF4CAF50),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isOut ? Icons.warning : Icons.check_circle,
-                                    size: 14,
-                                    color: isOut
-                                        ? const Color(0xFFFF9800)
-                                        : const Color(0xFF4CAF50),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    isOut ? 'Fora do padrão' : 'Dentro do padrão',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isOut
-                                          ? const Color(0xFFFF9800)
-                                          : const Color(0xFF4CAF50),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     );
@@ -817,7 +819,6 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 16),
             
-            // BOTÃO SALVAR
             FilledButton.icon(
               onPressed: _isSaving ? null : _handleSave,
               icon: _isSaving

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class OrderInfoCard extends StatelessWidget {
   final Map<String, String> orderData;
-  
+
   const OrderInfoCard({super.key, required this.orderData});
 
   Widget _buildInfoItem(String label, String value, {bool bold = false}) {
@@ -99,7 +99,8 @@ class OrderInfoCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: headerColor ?? const Color(0xFF424242), // Cinza escuro Frigosoft
+              color: headerColor ??
+                  const Color(0xFF424242), // Cinza escuro Frigosoft
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
@@ -201,29 +202,39 @@ class OrderInfoCard extends StatelessWidget {
               title: 'ARTIGO',
               headerColor: const Color(0xFF424242),
               children: [
-                _buildInfoItem('Artigo', orderData['artigo'] ?? '-', bold: true),
+                _buildInfoItem('Artigo', orderData['artigo'] ?? '-',
+                    bold: true),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: _buildGridItem('PVE', orderData['pve'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem('PVE', orderData['pve'] ?? '-')),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildGridItem('Classe', orderData['classe'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem(
+                            'Classe', orderData['classe'] ?? '-')),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: _buildGridItem('Cor', orderData['cor'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem('Cor', orderData['cor'] ?? '-')),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildGridItem('PO', orderData['po'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem('PO', orderData['po'] ?? '-')),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: _buildGridItem('Crust Item', orderData['crustItem'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem(
+                            'Crust Item', orderData['crustItem'] ?? '-')),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildGridItem('Esp. Final', orderData['espFinal'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem(
+                            'Esp. Final', orderData['espFinal'] ?? '-')),
                   ],
                 ),
               ],
@@ -232,13 +243,17 @@ class OrderInfoCard extends StatelessWidget {
             // 📊 SEÇÃO QUANTIDADES
             _buildSectionCard(
               title: 'QUANTIDADES',
-              headerColor: const Color(0xFF546E7A),
+              headerColor: const Color(0xFF424242),
               children: [
                 Row(
                   children: [
-                    Expanded(child: _buildGridItem('Nº Peças NF', orderData['nPcsNf'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem(
+                            'Nº Peças NF', orderData['nPcsNf'] ?? '-')),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildGridItem('Metragem NF', orderData['metragemNf'] ?? '-')),
+                    Expanded(
+                        child: _buildGridItem(
+                            'Metragem NF', orderData['metragemNf'] ?? '-')),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -247,9 +262,13 @@ class OrderInfoCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Expanded(child: _buildGridItem('Nº Peças ENX', orderData['nPcsEnx'] ?? '-')),
+                      Expanded(
+                          child: _buildGridItem(
+                              'Nº Peças ENX', orderData['nPcsEnx'] ?? '-')),
                       const SizedBox(width: 8),
-                      Expanded(child: _buildGridItem('Metragem ENX', orderData['metragemEnx'] ?? '-')),
+                      Expanded(
+                          child: _buildGridItem(
+                              'Metragem ENX', orderData['metragemEnx'] ?? '-')),
                     ],
                   ),
                 ],
@@ -259,16 +278,16 @@ class OrderInfoCard extends StatelessWidget {
             // ⚖️ SEÇÃO PESO
             _buildSectionCard(
               title: 'PESO',
-              headerColor: const Color(0xFF4CAF50), // Verde Frigosoft
+              headerColor: const Color(0xFF424242),
               children: [
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withOpacity(0.1),
+                    color: const Color(0xFF424242).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFF4CAF50),
+                      color: const Color(0xFF424242),
                       width: 2,
                     ),
                   ),
@@ -276,7 +295,7 @@ class OrderInfoCard extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.scale,
-                        color: Color(0xFF4CAF50),
+                        color: const Color(0xFF424242),
                         size: 32,
                       ),
                       const SizedBox(width: 16),
@@ -297,7 +316,7 @@ class OrderInfoCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF4CAF50),
+                              color: const Color(0xFF424242),
                             ),
                           ),
                         ],
