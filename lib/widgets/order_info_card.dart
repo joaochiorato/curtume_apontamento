@@ -14,9 +14,10 @@ class OrderInfoCard extends StatelessWidget {
             flex: 4,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
-                color: Colors.white.withOpacity(0.6),
+                color: Color(0xFF616161), // Cinza médio mais escuro
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -26,8 +27,8 @@ class OrderInfoCard extends StatelessWidget {
               value.isEmpty ? '-' : value,
               style: TextStyle(
                 fontSize: bold ? 15 : 14,
-                fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-                color: Colors.white,
+                fontWeight: bold ? FontWeight.bold : FontWeight.w600,
+                color: const Color(0xFF424242), // Cinza escuro
               ),
             ),
           ),
@@ -40,10 +41,11 @@ class OrderInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: const Color(0xFFF5F5F5), // Fundo cinza claro
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: const Color(0xFFE0E0E0), // Borda cinza
+          width: 1,
         ),
       ),
       child: Column(
@@ -51,9 +53,10 @@ class OrderInfoCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11,
-              color: Colors.white.withOpacity(0.6),
+              color: Color(0xFF757575), // Cinza médio
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 4),
@@ -62,7 +65,7 @@ class OrderInfoCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Color(0xFF424242), // Cinza escuro
             ),
           ),
         ],
@@ -78,35 +81,41 @@ class OrderInfoCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-        ),
+        color: Colors.white, // Fundo branco
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header da seção
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: (headerColor ?? const Color(0xFF546E7A)).withOpacity(0.15),
+              color: headerColor ?? const Color(0xFF424242), // Cinza escuro Frigosoft
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+                topLeft: Radius.circular(8),
+                topRight: Radius.circular(8),
               ),
             ),
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
+              style: const TextStyle(
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: headerColor ?? const Color(0xFF546E7A),
-                letterSpacing: 1,
+                color: Colors.white,
+                letterSpacing: 0.5,
               ),
             ),
           ),
+          // Conteúdo da seção
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -127,71 +136,70 @@ class OrderInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cabeçalho Principal
+            // 🏷️ CABEÇALHO PRINCIPAL
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF546E7A),
-                    Color(0xFF455A64),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF424242), // Cinza escuro Frigosoft
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
+                  // Ícone
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.assignment,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Informações
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'OF Nº ${orderData['of'] ?? '-'}',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.description,
-                          color: Colors.white,
-                          size: 24,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Lote WET BLUE: ${orderData['lote'] ?? '-'}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'OF Nº ${orderData['of'] ?? '-'}',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Lote WET BLUE: ${orderData['lote'] ?? '-'}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white.withOpacity(0.85),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-            // Seção Artigo em Grid
+            // 📦 SEÇÃO ARTIGO
             _buildSectionCard(
               title: 'ARTIGO',
-              headerColor: const Color(0xFF546E7A),
+              headerColor: const Color(0xFF424242),
               children: [
                 _buildInfoItem('Artigo', orderData['artigo'] ?? '-', bold: true),
                 const SizedBox(height: 8),
@@ -221,10 +229,10 @@ class OrderInfoCard extends StatelessWidget {
               ],
             ),
 
-            // Seção Quantidades
+            // 📊 SEÇÃO QUANTIDADES
             _buildSectionCard(
               title: 'QUANTIDADES',
-              headerColor: const Color(0xFF607D8B),
+              headerColor: const Color(0xFF546E7A),
               children: [
                 Row(
                   children: [
@@ -248,46 +256,48 @@ class OrderInfoCard extends StatelessWidget {
               ],
             ),
 
-            // Seção Peso
+            // ⚖️ SEÇÃO PESO
             _buildSectionCard(
               title: 'PESO',
-              headerColor: const Color(0xFF546E7A),
+              headerColor: const Color(0xFF4CAF50), // Verde Frigosoft
               children: [
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF66BB6A).withOpacity(0.15),
+                    color: const Color(0xFF4CAF50).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFF66BB6A).withOpacity(0.3),
+                      color: const Color(0xFF4CAF50),
+                      width: 2,
                     ),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.scale,
-                        color: Color(0xFF66BB6A),
-                        size: 24,
+                        color: Color(0xFF4CAF50),
+                        size: 32,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Peso Líquido',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 13,
+                              color: Color(0xFF616161),
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '${orderData['pesoLiquido'] ?? '-'} kg',
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Color(0xFF4CAF50),
                             ),
                           ),
                         ],
@@ -296,24 +306,24 @@ class OrderInfoCard extends StatelessWidget {
                   ),
                 ),
                 if (orderData['diferenca']?.isNotEmpty ?? false) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   _buildInfoItem('Diferença %', orderData['diferenca'] ?? '-'),
                 ],
               ],
             ),
 
-            // Observações (se houver)
+            // 📝 OBSERVAÇÕES (se houver)
             if (orderData['obs']?.isNotEmpty ?? false)
               _buildSectionCard(
                 title: 'OBSERVAÇÕES',
-                headerColor: const Color(0xFF78909C),
+                headerColor: const Color(0xFFFF9800), // Laranja Frigosoft
                 children: [
                   Text(
                     orderData['obs'] ?? '',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.9),
-                      height: 1.4,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF424242),
+                      height: 1.5,
                     ),
                   ),
                 ],

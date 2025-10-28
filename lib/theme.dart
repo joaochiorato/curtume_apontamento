@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-// 🎨 CORES DO FRIGOSOFT
+// ⚠️ CORES ANTIGAS - Mantidas para compatibilidade com widgets existentes
+const Color verde = Color(0xFF66BB6A); // Verde mais discreto
+const Color roxoClaro = Color(0xFF546E7A); // Azul acinzentado
+
+// 🎨 CORES DO FRIGOSOFT (Novas)
 const Color cinzaEscuroFrigo = Color(0xFF424242); // Header
 const Color cinzaMedioFrigo = Color(0xFF616161); // Secundário
 const Color verdeFrigo = Color(0xFF4CAF50); // Status positivo
@@ -42,8 +46,8 @@ ThemeData buildTheme() {
     // Scaffold
     scaffoldBackgroundColor: cinzaClaroFrigo,
     
-    // Cards
-    cardTheme: CardTheme(
+    // Cards - CORRIGIDO: usando CardThemeData
+    cardTheme: CardThemeData(
       color: brancoFrigo,
       elevation: 1,
       shape: RoundedRectangleBorder(

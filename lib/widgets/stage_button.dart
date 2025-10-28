@@ -64,9 +64,9 @@ class StageButton extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Icon(Icons.check_rounded, size: 14, color: verde),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           'finalizado',
                           style: TextStyle(

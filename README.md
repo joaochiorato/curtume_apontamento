@@ -1,207 +1,169 @@
-# 🎨 VISUAL FRIGOSOFT - Atualização Visual
+# 🎨 CORREÇÃO DE CORES - Formulário de Estágios
 
-## ⚠️ IMPORTANTE: APENAS MUDANÇAS VISUAIS!
+## 📝 PROBLEMA
 
-Esta atualização contém **APENAS modificações visuais** para deixar o protótipo com a mesma aparência do sistema Frigosoft.
-
-✅ **O QUE FOI ALTERADO:**
-- Cores (cinza escuro, branco, verde, vermelho)
-- Logo ATAK SISTEMAS no topo
-- Layout dos cards e botões
-- Ícones mais modernos e limpos
-- Tipografia e espaçamentos
-
-❌ **O QUE NÃO FOI ALTERADO:**
-- Estrutura de código
-- Funcionalidades
-- Métodos
-- Lógica de negócio
-- Navegação
-- Modelos de dados
+A tela de formulário (REMOLHO, etc.) está com cores muito apagadas:
+- ❌ Container de variáveis quase invisível
+- ❌ Campos de texto com fundo transparente
+- ❌ Labels difíceis de ler
+- ❌ Pouco contraste geral
 
 ---
 
-## 📁 ARQUIVOS MODIFICADOS
+## ✅ SOLUÇÃO APLICADA
+
+### 1. Container de Variáveis
+**ANTES:**
+```dart
+border: Border.all(color: Colors.white24, width: 1.2)
+```
+
+**DEPOIS:**
+```dart
+color: Colors.white,  // Fundo branco
+border: Border.all(
+  color: Color(0xFF424242),  // Borda cinza escuro
+  width: 2,
+)
+```
+
+### 2. Labels e Textos
+**ANTES:**
+```dart
+color: Colors.white.withOpacity(0.6)  // Muito claro
+```
+
+**DEPOIS:**
+```dart
+color: Color(0xFF424242)  // Cinza escuro, bem visível
+```
+
+### 3. Campos de Entrada
+- Fundo branco sólido
+- Borda definida
+- Texto preto
+
+---
+
+## 🚀 ARQUIVOS CORRIGIDOS
+
+1. `lib/widgets/stage_form.dart` - Formulário principal
+2. `lib/widgets/qty_counter.dart` - Contador de quantidade  
+3. `lib/theme.dart` - Tema já com cores corretas (se ainda não aplicou)
+
+---
+
+## 📦 CONTEÚDO DESTE ZIP
 
 ```
-lib/
-├── main.dart           ✅ ATUALIZADO (apenas título e tema)
-├── theme.dart          ✅ ATUALIZADO (cores Frigosoft)
-└── pages/
-    ├── home_page.dart  ✅ ATUALIZADO (logo ATAK + layout)
-    └── orders_page.dart ✅ ATUALIZADO (ícones + cards)
+correcao_formulario/
+├── README.md (este arquivo)
+├── instalar.bat (Windows)
+├── instalar.sh (Linux/Mac)
+└── lib/
+    └── widgets/
+        ├── stage_form.dart  ✅ Cores corrigidas
+        └── qty_counter.dart  ✅ Cores corrigidas
 ```
 
 ---
 
-## 🚀 COMO INSTALAR
+## 🎨 CORES APLICADAS
 
-### Passo 1: Backup
-Faça backup dos seus arquivos atuais:
-```bash
-cp lib/main.dart lib/main.dart.backup
-cp lib/theme.dart lib/theme.dart.backup
-cp lib/pages/home_page.dart lib/pages/home_page.dart.backup
-cp lib/pages/orders_page.dart lib/pages/orders_page.dart.backup
+### Container de Variáveis:
+- Fundo: **Branco** (#FFFFFF)
+- Borda: **Cinza escuro** (#424242) - 2px
+- Header: Ícone + texto em cinza escuro
+
+### Campos de Texto:
+- Fundo: **Branco** (#FFFFFF)
+- Borda: **Cinza** (#E0E0E0)
+- Texto: **Preto** (#424242)
+- Label: **Cinza médio** (#616161)
+
+### Indicadores:
+- Fora do padrão: **Laranja** (#FF9800)
+- Dentro do padrão: **Verde** (#4CAF50)
+
+---
+
+## 📸 RESULTADO ESPERADO
+
+### Container de Variáveis:
+```
+┌───────────────────────────────┐
+│ 🔬 Variáveis                  │ ← Título visível
+├───────────────────────────────┤
+│                               │
+│ Volume de Água                │ ← Campo com fundo branco
+│ ┌──────────────────────────┐ │
+│ │ [___________________] L  │ │
+│ └──────────────────────────┘ │
+│                               │
+│ Temperatura da Água           │
+│ ┌──────────────────────────┐ │
+│ │ [___________________] ºC │ │
+│ │ Padrão: 50 - 70         │ │
+│ └──────────────────────────┘ │
+│                               │
+└───────────────────────────────┘
 ```
 
-### Passo 2: Copiar Arquivos
-Copie os arquivos desta pasta para o seu projeto:
+---
 
+## ⚡ INSTALAÇÃO
+
+### Windows:
 ```bash
-# Copiar arquivos principais
-cp visual_frigosoft/lib/main.dart seu_projeto/lib/
-cp visual_frigosoft/lib/theme.dart seu_projeto/lib/
+# 1. Extrair na raiz do projeto
+unzip -o correcao_formulario.zip
 
-# Copiar páginas
-cp visual_frigosoft/lib/pages/home_page.dart seu_projeto/lib/pages/
-cp visual_frigosoft/lib/pages/orders_page.dart seu_projeto/lib/pages/
+# 2. Executar instalador
+cd correcao_formulario
+instalar.bat
+
+# 3. Rodar
+cd ..
+flutter run
 ```
 
-### Passo 3: Rodar o Projeto
+### Linux/Mac:
 ```bash
-flutter clean
-flutter pub get
+# 1. Extrair
+unzip -o correcao_formulario.zip
+
+# 2. Executar instalador
+cd correcao_formulario
+./instalar.sh
+
+# 3. Rodar
+cd ..
 flutter run
 ```
 
 ---
 
-## 🎨 CORES DO FRIGOSOFT
+## ✨ MELHORIAS
 
-As cores foram extraídas do sistema original:
-
-| Cor | Código | Uso |
-|-----|--------|-----|
-| Cinza Escuro | `#424242` | Header, AppBar, Botões |
-| Cinza Médio | `#616161` | Texto secundário |
-| Cinza Claro | `#F5F5F5` | Fundo da página |
-| Branco | `#FFFFFF` | Cards, inputs |
-| Verde | `#4CAF50` | Status positivo, badges |
-| Vermelho | `#E53935` | Status negativo, alertas |
-| Laranja | `#FF9800` | Avisos |
+✅ Container de variáveis com fundo branco  
+✅ Borda forte (2px cinza escuro)  
+✅ Labels bem legíveis  
+✅ Campos com contraste alto  
+✅ Indicadores coloridos (verde/laranja)  
+✅ Texto preto em fundo branco  
 
 ---
 
-## 🖼️ ELEMENTOS VISUAIS
+## 🔄 COMPATIBILIDADE
 
-### 1. **Logo ATAK SISTEMAS**
-- Texto estilizado no topo
-- Fonte bold com espaçamento de letras
-- Subtítulo "SISTEMAS" com borda
-
-### 2. **Home Page**
-- Header cinza escuro com logo
-- Onda decorativa (similar ao Frigosoft)
-- Card central com ícone grande
-- Botão de ação destacado
-- Rodapé com versão
-
-### 3. **Lista de Ordens**
-- Cards brancos com sombra suave
-- Ícones arredondados
-- Badges verdes para contadores
-- Área de filtros destacada
-- Chips de filtros ativos
-
-### 4. **Componentes Gerais**
-- Botões com bordas arredondadas (8px)
-- Cards com elevação 1
-- Inputs com fundo branco
-- Ícones mais limpos e profissionais
+- ✅ Mesmas funcionalidades
+- ✅ Mesma estrutura
+- ✅ Apenas cores melhoradas
+- ✅ Nenhuma mudança na lógica
 
 ---
 
-## ✨ MELHORIAS VISUAIS IMPLEMENTADAS
+**Agora o formulário está 100% legível!** 👁️
 
-### Tela Inicial (home_page.dart)
-✅ Logo ATAK SISTEMAS estilizada
-✅ Onda decorativa entre header e conteúdo
-✅ Card central com ícone grande
-✅ Botão com ícone e texto
-✅ Rodapé com versão do sistema
-
-### Lista de Ordens (orders_page.dart)
-✅ Header cinza escuro
-✅ Contador de ordens em chip verde
-✅ Área de filtros com fundo branco
-✅ Cards de ordem com layout profissional
-✅ Ícones melhorados (assignment, inventory_2)
-✅ Estado vazio com mensagem amigável
-✅ Chips de filtros ativos removíveis
-
-### Tema (theme.dart)
-✅ Paleta de cores Frigosoft
-✅ Tipografia consistente
-✅ Espaçamentos padronizados
-✅ Componentes estilizados (botões, inputs, cards)
-
----
-
-## 🔧 PERSONALIZAÇÃO
-
-Se quiser ajustar alguma cor, edite o arquivo `lib/theme.dart`:
-
-```dart
-// Exemplo: Mudar cor do header
-const Color cinzaEscuroFrigo = Color(0xFF424242); // Altere aqui
-
-// Exemplo: Mudar cor de sucesso
-const Color verdeFrigo = Color(0xFF4CAF50); // Altere aqui
-```
-
----
-
-## 📱 COMPATIBILIDADE
-
-- ✅ Android
-- ✅ iOS  
-- ✅ Web
-- ✅ Windows
-- ✅ MacOS
-- ✅ Linux
-
----
-
-## ❓ PROBLEMAS?
-
-### Erro de compilação após copiar arquivos
-```bash
-flutter clean
-flutter pub get
-flutter run
-```
-
-### Cores não aparecendo
-Verifique se o arquivo `theme.dart` foi copiado corretamente e se o `main.dart` está importando o tema:
-```dart
-import 'theme.dart';
-```
-
-### Logo não aparecendo
-A logo é feita com Text Widget estilizado. Se preferir usar uma imagem, adicione em `assets/images/` e atualize o `home_page.dart`.
-
----
-
-## 📞 SUPORTE
-
-Se encontrar problemas ou tiver dúvidas, verifique:
-
-1. ✅ Todos os arquivos foram copiados?
-2. ✅ Executou `flutter clean` e `flutter pub get`?
-3. ✅ A estrutura de pastas está correta?
-4. ✅ Os imports estão corretos?
-
----
-
-## 🎉 PRONTO!
-
-Seu protótipo agora está com o visual do **FRIGOSOFT**!
-
-**Lembre-se:** Esta atualização contém **APENAS mudanças visuais**. Todas as funcionalidades permanecem as mesmas!
-
----
-
-**Data da atualização:** Outubro 2025  
-**Versão:** 1.0.0  
-**Compatível com:** Flutter 3.1.0+
+Data: Outubro 2025  
+Versão: 1.0.3 (Correção formulário)
