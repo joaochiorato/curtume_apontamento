@@ -8,61 +8,81 @@ class QtyCounter extends StatelessWidget {
   const QtyCounter({
     super.key,
     required this.value,
+    required this.enabled,
     required this.onChanged,
-    this.enabled = true,
   });
-
-  void _add(int delta) {
-    final next = value + delta;
-    if (next < 0) return;
-    onChanged(next);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24, width: 1.2),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Quantidade Processada'),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                IconButton(
-                    onPressed: enabled ? () => _add(-1) : null,
-                    icon: const Icon(Icons.remove)),
-                Expanded(
-                    child: Center(
-                  child: Text('$value',
-                      style: const TextStyle(
-                          fontSize: 28, fontWeight: FontWeight.w700)),
-                )),
-                IconButton(
-                    onPressed: enabled ? () => _add(1) : null,
-                    icon: const Icon(Icons.add)),
-              ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Quantidade Processada',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF424242),
             ),
-            const SizedBox(height: 8),
-            Wrap(spacing: 8, children: [
-              ActionChip(
-                  label: const Text('+5'),
-                  onPressed: enabled ? () => _add(5) : null),
-              ActionChip(
-                  label: const Text('+10'),
-                  onPressed: enabled ? () => _add(10) : null),
-              ActionChip(
-                  label: const Text('+50'),
-                  onPressed: enabled ? () => _add(50) : null),
-            ]),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: enabled ? () => onChanged(value - 1 < 0 ? 0 : value - 1) : null,
+                icon: const Icon(Icons.remove),
+                style: IconButton.styleFrom(
+                  backgroundColor: enabled ? const Color(0xFFF44336) : Colors.grey[300],
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                '$value',
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 16),
+              IconButton(
+                onPressed: enabled ? () => onChanged(value + 1) : null,
+                icon: const Icon(Icons.add),
+                style: IconButton.styleFrom(
+                  backgroundColor: enabled ? const Color(0xFF4CAF50) : Colors.grey[300],
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildQuickButton('+5', () => onChanged(value + 5)),
+              const SizedBox(width: 8),
+              _buildQuickButton('+10', () => onChanged(value + 10)),
+              const SizedBox(width: 8),
+              _buildQuickButton('+50', () => onChanged(value + 50)),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildQuickButton(String label, VoidCallback onTap) {
+    return OutlinedButton(
+      onPressed: enabled ? onTap : null,
+      child: Text(label),
     );
   }
 }

@@ -3,7 +3,6 @@ import '../models/stage.dart';
 import '../widgets/stage_button.dart';
 import '../widgets/stage_form.dart';
 
-// Singleton para manter dados em memória durante toda a execução do app
 class StageMemoryStorage {
   static final StageMemoryStorage _instance = StageMemoryStorage._internal();
   factory StageMemoryStorage() => _instance;
@@ -17,23 +16,13 @@ class StageMemoryStorage {
     _finalized[stageCode] = finalizar;
   }
 
-  Map<String, dynamic>? getData(String stageCode) {
-    return _data[stageCode];
-  }
-
-  bool isFinalized(String stageCode) {
-    return _finalized[stageCode] ?? false;
-  }
-
-  int getFinishedCount() {
-    return _finalized.values.where((f) => f).length;
-  }
-
+  Map<String, dynamic>? getData(String stageCode) => _data[stageCode];
+  bool isFinalized(String stageCode) => _finalized[stageCode] ?? false;
+  int getFinishedCount() => _finalized.values.where((f) => f).length;
   void clear(String stageCode) {
     _data.remove(stageCode);
     _finalized.remove(stageCode);
   }
-
   void clearAll() {
     _data.clear();
     _finalized.clear();
@@ -55,26 +44,18 @@ class _StagePageState extends State<StagePage> {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => Scaffold(
         appBar: AppBar(title: Text(stage.title)),
-        body: Padding(
-          padding: const EdgeInsets.all(12),
-          child: SingleChildScrollView(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: StageForm(
-                  stage: stage,
-                  initialData: storage.getData(stage.code),
-                  onSaved: (data) {
-                    storage.saveData(stage.code, data, finalizar: true);
-                    setState(() {}); // Atualiza a tela
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${stage.title} salvo com sucesso!')),
-                    );
-                  },
-                ),
-              ),
-            ),
+        body: SingleChildScrollView(
+          child: StageForm(
+            stage: stage,
+            initialData: storage.getData(stage.code),
+            onSaved: (data) {
+              storage.saveData(stage.code, data, finalizar: true);
+              setState(() {});
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${stage.title} salvo!')),
+              );
+            },
           ),
         ),
       ),
@@ -86,7 +67,7 @@ class _StagePageState extends State<StagePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Limpar Dados'),
-        content: const Text('Deseja realmente limpar todos os dados dos estágios?'),
+        content: const Text('Deseja limpar todos os dados?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -97,9 +78,6 @@ class _StagePageState extends State<StagePage> {
               storage.clearAll();
               setState(() {});
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Dados limpos')),
-              );
             },
             child: const Text('Limpar'),
           ),
@@ -110,78 +88,64 @@ class _StagePageState extends State<StagePage> {
 
   @override
   Widget build(BuildContext context) {
-    final stages = getAllStages();
     final finishedCount = storage.getFinishedCount();
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Estágios de Produção'),
+        title: const Text('Estágios'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Limpar todos os dados',
             onPressed: _clearAllData,
+            icon: const Icon(Icons.delete_sweep),
+            tooltip: 'Limpar todos os dados',
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Card com informações do artigo
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Wrap(
-                  spacing: 12, 
-                  runSpacing: 8,
-                  children: [
-                    Text('OF: ${widget.articleHeader['of'] ?? '-'}'),
-                    Text('Artigo: ${widget.articleHeader['artigo'] ?? '-'}'),
-                    Text('Cor: ${widget.articleHeader['cor'] ?? '-'}'),
-                    Text('Classe: ${widget.articleHeader['classe'] ?? '-'}'),
-                  ],
-                ),
+      body: Column(
+        children: [
+          Card(
+            margin: const EdgeInsets.all(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('OF: ${widget.articleHeader['of'] ?? '-'}'),
+                  Text('Artigo: ${widget.articleHeader['artigo'] ?? '-'}'),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            
-            // Indicador de progresso
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline, size: 20),
-                    const SizedBox(width: 8),
-                    Text('Progresso: $finishedCount de ${stages.length} estágios finalizados'),
-                  ],
-                ),
+          ),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline),
+                  const SizedBox(width: 8),
+                  Text('Progresso: $finishedCount de ${availableStages.length}'),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            
-            // Lista de estágios
-            Expanded(
-              child: ListView.builder(
-                itemCount: stages.length,
-                itemBuilder: (context, index) {
-                  final stage = stages[index];
-                  final isFinalizado = storage.isFinalized(stage.code);
-                  
-                  return StageButton(
-                    label: 'APONTAR ${stage.title}',
-                    icon: stage.icon,
-                    cor: stage.color,
-                    finalizado: isFinalizado,
-                    onTap: () => _openStageForm(stage),
-                  );
-                },
-              ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: availableStages.length,
+              itemBuilder: (context, index) {
+                final stage = availableStages[index];
+                final isFinalizado = storage.isFinalized(stage.code);
+                return StageButton(
+                  label: stage.title,
+                  finalizado: isFinalizado,
+                  onTap: () => _openStageForm(stage),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

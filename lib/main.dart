@@ -14,7 +14,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'FRIGOSOFT • Apontamento',
+      title: 'Apontamento • Produção',
       theme: buildTheme(),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

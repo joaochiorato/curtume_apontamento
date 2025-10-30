@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-enum StageStatus { idle, running, paused, closed }
+import '../models/stage.dart';
 
 class StageActionBar extends StatelessWidget {
   final StageStatus status;
@@ -20,20 +19,50 @@ class StageActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canStart  = status == StageStatus.idle;
-    final canPause  = status == StageStatus.running;
-    final canClose  = status == StageStatus.running || status == StageStatus.paused;
-    final canReopen = status == StageStatus.closed || status == StageStatus.paused;
-
     return Row(
       children: [
-        Expanded(child: FilledButton(onPressed: canStart  ? onStart  : null, child: const Text('Iniciar'))),
+        Expanded(
+          child: FilledButton(
+            onPressed: status == StageStatus.idle ? onStart : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Iniciar'),
+          ),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: FilledButton.tonal(onPressed: canPause  ? onPause  : null, child: const Text('Pausar'))),
+        Expanded(
+          child: FilledButton(
+            onPressed: status == StageStatus.running ? onPause : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Pausar'),
+          ),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: FilledButton.tonal(onPressed: canClose  ? onClose  : null, child: const Text('Encerrar'))),
+        Expanded(
+          child: FilledButton(
+            onPressed: status == StageStatus.running || status == StageStatus.paused ? onClose : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Encerrar'),
+          ),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: OutlinedButton(onPressed: canReopen ? onReopen : null, child: const Text('Reabrir'))),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: status == StageStatus.closed ? onReopen : null,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Reabrir'),
+          ),
+        ),
       ],
     );
   }

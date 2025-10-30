@@ -1,97 +1,63 @@
-# 🔧 GUIA DE INSTALAÇÃO - Passo a Passo
+# 🚀 INSTALAÇÃO RÁPIDA
 
-## ⚠️ IMPORTANTE: Siga estes passos na ordem!
+## ⚡ 3 PASSOS SIMPLES
 
-### 1️⃣ Adicionar dependência Provider
-
-Abra o arquivo `pubspec.yaml` na raiz do seu projeto e adicione `provider`:
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  provider: ^6.1.1    # ← ADICIONE ESTA LINHA
-  intl: any
-```
-
-### 2️⃣ Instalar as dependências
-
-No terminal, execute:
-
+### 1️⃣ Instalar Dependências
 ```bash
 flutter pub get
 ```
 
-Aguarde a instalação terminar. Você deve ver algo como:
-```
-Resolving dependencies...
-Got dependencies!
+### 2️⃣ Rodar Projeto
+```bash
+flutter run
 ```
 
-### 3️⃣ Limpar build anterior
+### 3️⃣ PRONTO! ✅
+
+O app vai abrir com a tela inicial do logo ATAK!
+
+---
+
+## 🐛 SE DER ERRO DE BUILD:
 
 ```bash
-flutter clean
-```
+# Execute o script de correção:
+scripts\corrigir_build.bat
 
-### 4️⃣ Rodar o projeto
-
-```bash
+# Depois rode novamente:
 flutter run
 ```
 
 ---
 
-## 🐛 Se ainda der erro:
+## 📁 ESTRUTURA MÍNIMA NECESSÁRIA:
 
-### Erro de versão incompatível:
-
-Se der erro de incompatibilidade, tente versões diferentes:
-
-```yaml
-provider: ^6.0.0
 ```
-
-ou
-
-```yaml
-provider: ^5.0.0
-```
-
-### Erro de cache:
-
-```bash
-flutter pub cache repair
-flutter clean
-flutter pub get
-flutter run
-```
-
-### Verificar versão do Flutter:
-
-```bash
-flutter --version
-```
-
-Se estiver usando Flutter muito antigo (< 3.0), atualize:
-
-```bash
-flutter upgrade
+✅ lib/ - Código fonte
+✅ assets/ - Logo ATAK
+✅ pubspec.yaml - Dependências
+✅ scripts/ - Scripts de correção
 ```
 
 ---
 
-## ✅ Checklist de Instalação:
+## 💡 DICAS:
 
-- [ ] Adicionei `provider: ^6.1.1` no pubspec.yaml
-- [ ] Executei `flutter pub get`
-- [ ] Executei `flutter clean`
-- [ ] Tentei rodar com `flutter run`
+1. **Sempre use Ctrl+C** para parar o app
+2. **Use "r"** para Hot Reload (atualizar rápido)
+3. **Use "R"** para Hot Restart (reiniciar)
+4. **Não feche** apenas a janela!
 
 ---
 
-## 📝 pubspec.yaml completo (exemplo):
+## ✅ VERIFICAR INSTALAÇÃO:
 
-Veja o arquivo `pubspec_exemplo.yaml` incluído no ZIP para referência completa.
+```bash
+flutter doctor
+```
+
+Se tudo OK, pode rodar!
+
+---
+
+**É só isso!** 🎉
