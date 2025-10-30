@@ -1,116 +1,170 @@
-# ✨ MELHORIA - Indicadores Mais Elegantes
+# 🧪 BOTÃO QUÍMICOS - Lançamento de Produtos
 
-## 🎨 O QUE MUDOU
+## 🎯 NOVA FUNCIONALIDADE
 
-### ❌ ANTES (Sua imagem):
+Botão "Químicos" ao lado do campo Fulão para lançar as quantidades de produtos químicos utilizados no processo!
+
+---
+
+## 📸 VISUAL DO BOTÃO
+
+### Posição:
 ```
-Volume de Água
-100% do peso líquido do lote
-┌──────────────────────────┐
-│ 25 L              ✏️     │
-└──────────────────────────┘
-✅ Dentro do padrão          ← Badge separado abaixo
-
-Temperatura da Água
-Padrão: 50.0 a 70.0 ºC
-┌──────────────────────────┐
-│ 25 ºC             ✏️     │
-└──────────────────────────┘
-⚠️  Fora do padrão           ← Badge separado abaixo
+┌──────────────────────────────────────────────┐
+│ Fulão                    │  [🧪 Químicos]   │
+│ ▼ Fulão 1               │    0/6           │
+└──────────────────────────────────────────────┘
+       ↑ Dropdown              ↑ Botão novo
 ```
 
-### ✅ DEPOIS (Nova versão):
-```
-Volume de Água        ✅ OK     ← Indicador compacto à direita
-100% do peso líquido do lote
-┌══════════════════════════┐
-║ 25 L              ✏️     ║    ← Borda VERDE
-╚══════════════════════════╝
+### Estados do Botão:
 
-Temperatura da Água   ⚠️ Fora   ← Indicador compacto à direita
-Padrão: 50.0 a 70.0 ºC
-┌══════════════════════════┐
-║ 25 ºC             ✏️     ║    ← Borda LARANJA
-╚══════════════════════════╝
+**Sem químicos informados:**
+```
+┌─────────────┐
+│ 🧪 Químicos │  ← Cinza azulado
+└─────────────┘
+```
+
+**Com químicos informados:**
+```
+┌─────────────┐
+│ 🧪 Químicos │  ← VERDE
+│    3/6      │  ← Contador
+└─────────────┘
 ```
 
 ---
 
-## 🚀 MELHORIAS APLICADAS
+## 🧪 LISTA DE QUÍMICOS
 
-### 1️⃣ **Indicador Compacto no Topo**
-- ✅ Ícone + texto **"OK"** ou **"Fora"**
-- ✅ Posicionado ao lado do nome da variável
-- ✅ Mais compacto e elegante
-- ✅ Cores: Verde (#4CAF50) ou Laranja (#FF9800)
+Ao clicar no botão, abre um dialog com os seguintes produtos:
 
-### 2️⃣ **Borda do Campo Colorida**
-- ✅ Verde quando dentro do padrão
-- ✅ Laranja quando fora do padrão
-- ✅ Preta quando ainda não informado
-- ✅ Visual mais integrado
-
-### 3️⃣ **Fundo Levemente Colorido**
-- ✅ Verde muito claro quando OK
-- ✅ Laranja muito claro quando fora
-- ✅ Cinza quando não preenchido
-
-### 4️⃣ **Badge Removido**
-- ❌ Não tem mais badge separado abaixo
-- ✅ Tudo integrado no cabeçalho
+1. **Cal virgem (hidróxido de cálcio)** - kg
+2. **Sulfeto de sódio (Na₂S)** - kg
+3. **Hidrossulfeto de sódio (NaHS)** - kg
+4. **Desulfex, EcoLime, Biosafe** - kg
+5. **Tensoativo / umectante** - L
+6. **Agente sequestrante** - L
 
 ---
 
-## 📸 COMPARAÇÃO VISUAL
+## 📱 DIALOG DE QUÍMICOS
 
-### Layout Antigo:
+### Layout:
 ```
-┌─────────────────────────────┐
-│ Volume de Água              │
-│ 100% do peso líquido        │
-│ ┌───────────────────────┐   │
-│ │ 25 L            ✏️    │   │
-│ └───────────────────────┘   │
-│ ┌───────────────────────┐   │
-│ │ ✅ Dentro do padrão   │   │  ← Badge grande
-│ └───────────────────────┘   │
-└─────────────────────────────┘
-```
-
-### Layout Novo (Melhorado):
-```
-┌─────────────────────────────┐
-│ Volume de Água      ✅ OK   │  ← Indicador integrado
-│ 100% do peso líquido        │
-│ ╔═══════════════════════╗   │
-│ ║ 25 L            ✏️    ║   │  ← Borda verde
-│ ╚═══════════════════════╝   │
-└─────────────────────────────┘
-     ↑ Mais compacto e limpo!
+╔══════════════════════════════════════╗
+║  🧪 Químicos Utilizados          ✕  ║
+╠══════════════════════════════════════╣
+║                                      ║
+║  Cal virgem (hidróxido de cálcio)   ║
+║  ┌────────────────────────────────┐ ║
+║  │ Informar quantidade       ✏️   │ ║
+║  └────────────────────────────────┘ ║
+║                                      ║
+║  Sulfeto de sódio (Na₂S)            ║
+║  ┌────────────────────────────────┐ ║
+║  │ 25 kg                     ✏️   │ ║ ← Preenchido
+║  └────────────────────────────────┘ ║
+║                                      ║
+║  Hidrossulfeto de sódio (NaHS)      ║
+║  ┌────────────────────────────────┐ ║
+║  │ Informar quantidade       ✏️   │ ║
+║  └────────────────────────────────┘ ║
+║                                      ║
+║  ...                                 ║
+║                                      ║
+╠══════════════════════════════════════╣
+║  [ ✓ Concluir ]                     ║
+╚══════════════════════════════════════╝
 ```
 
 ---
 
-## 🎨 DETALHES DAS CORES
+## ⚙️ FUNCIONAMENTO
 
-### Indicador "OK" (Verde):
-- Badge: Verde sólido (#4CAF50)
-- Texto: Branco
-- Ícone: ✅ check_circle_rounded
-- Borda campo: Verde (#4CAF50)
-- Fundo campo: Verde 5% opacidade
+### 1️⃣ Clicar no Botão "Químicos"
+- Abre dialog com lista de produtos
+- Só funciona se o processo estiver iniciado
 
-### Indicador "Fora" (Laranja):
-- Badge: Laranja sólido (#FF9800)
-- Texto: Branco
-- Ícone: ⚠️ warning_rounded
-- Borda campo: Laranja (#FF9800)
-- Fundo campo: Laranja 5% opacidade
+### 2️⃣ Informar Quantidades
+- Clicar em cada produto
+- Abre numpad customizado
+- Digitar quantidade
+- Confirmar
 
-### Não Preenchido:
-- Sem badge
-- Borda: Preta (#424242)
-- Fundo: Cinza claro (#F5F5F5)
+### 3️⃣ Visualizar Progresso
+- Contador no botão (ex: 3/6)
+- Botão fica verde quando tem químicos
+- Campos preenchidos ficam verdes
+
+### 4️⃣ Salvar Dados
+- Ao salvar o formulário
+- Químicos são salvos junto
+- Recarrega automaticamente na próxima abertura
+
+---
+
+## 🎨 CORES E ESTADOS
+
+### Botão Químicos:
+
+| Estado | Cor | Texto |
+|--------|-----|-------|
+| Sem dados | Cinza (#546E7A) | Químicos |
+| Com dados | Verde (#4CAF50) | Químicos + 3/6 |
+
+### Campos no Dialog:
+
+| Estado | Borda | Fundo |
+|--------|-------|-------|
+| Vazio | Preta | Cinza claro |
+| Preenchido | Verde | Verde 5% |
+
+---
+
+## 📊 DADOS SALVOS
+
+Os dados dos químicos são salvos no formato:
+
+```json
+{
+  "status": "closed",
+  "fulao": 1,
+  "responsavel": "Ana",
+  "variables": { ... },
+  "quimicos": {
+    "Cal virgem (hidróxido de cálcio)": "25",
+    "Sulfeto de sódio (Na₂S)": "30",
+    "Tensoativo / umectante": "5"
+  }
+}
+```
+
+---
+
+## ✨ FUNCIONALIDADES
+
+### ✅ Botão Inteligente
+- Mostra contador de químicos informados
+- Muda de cor quando tem dados
+- Desabilitado se processo não iniciado
+
+### ✅ Dialog Completo
+- Lista todos os 6 químicos
+- Rolagem se necessário
+- Numpad customizado
+- Validação de valores
+
+### ✅ Persistência de Dados
+- Salva junto com o formulário
+- Recarrega automaticamente
+- Mantém os valores informados
+
+### ✅ Visual Integrado
+- Mesmo estilo das variáveis
+- Cores consistentes
+- UX intuitivo
 
 ---
 
@@ -120,7 +174,7 @@ Padrão: 50.0 a 70.0 ºC
 
 ```bash
 cd C:\Projetos\Final\curtume_apontamento_final
-unzip -o melhoria_indicadores.zip
+unzip -o botao_quimicos.zip
 ```
 
 ### 2️⃣ Rodar
@@ -136,56 +190,74 @@ flutter run
 ```
 lib/
 └── widgets/
-    └── stage_form.dart  ← Apenas este arquivo
+    └── stage_form.dart  ← Versão com botão Químicos
 ```
-
----
-
-## ✨ VANTAGENS DO NOVO LAYOUT
-
-✅ **Mais Limpo** - Menos elementos na tela  
-✅ **Mais Compacto** - Menos espaço vertical  
-✅ **Mais Integrado** - Badge no cabeçalho  
-✅ **Mais Visual** - Borda colorida do campo  
-✅ **Mais Profissional** - Layout moderno  
-✅ **Mais Rápido** - Identificação instantânea  
 
 ---
 
 ## 🔄 COMPATIBILIDADE
 
-- ✅ Mantém todas as funcionalidades
-- ✅ Mesma lógica de validação
-- ✅ Apenas layout melhorado
-- ✅ Compatível com todo o resto
+- ✅ Mantém todas as funcionalidades anteriores
+- ✅ Indicadores melhorados das variáveis
+- ✅ Botão Químicos integrado
+- ✅ Persistência de dados
+- ✅ Numpad customizado
 
 ---
 
-## 📊 COMPARAÇÃO
+## 💡 DICAS DE USO
 
-| Aspecto | Antes | Depois |
-|---------|-------|--------|
-| Badge | Separado abaixo | Integrado no topo |
-| Tamanho | Grande | Compacto |
-| Posição | Embaixo do campo | Ao lado do nome |
-| Borda | Sempre preta | Colorida conforme status |
-| Fundo | Sempre cinza | Levemente colorido |
-| Espaço | +40px por variável | Compacto |
+### Para Informar Químicos:
+1. Iniciar o processo
+2. Clicar no botão "Químicos"
+3. Informar as quantidades
+4. Clicar em "Concluir"
+5. Continuar preenchendo o resto
 
----
+### Para Editar:
+1. Clicar novamente no botão "Químicos"
+2. Alterar os valores desejados
+3. Clicar em "Concluir"
 
-## 💡 RESULTADO
-
-**Interface mais limpa, compacta e profissional!** ✨
-
-- Status visível instantaneamente
-- Menos rolagem necessária
-- Visual mais moderno
-- Cores indicam o status claramente
+### Para Ver Quantos Foram Informados:
+- Olhar o contador no botão (ex: 3/6)
+- Verde = tem dados
+- Cinza = sem dados
 
 ---
 
-**Extraia e veja a diferença!** 🎨
+## 📝 EXEMPLO COMPLETO
+
+### Fluxo de Trabalho:
+
+```
+1. [Iniciar] ← Clicar
+2. [Fulão] → Selecionar Fulão 1
+3. [Químicos] ← Clicar
+   ├─ Cal virgem: 25 kg
+   ├─ Sulfeto de sódio: 30 kg
+   └─ Tensoativo: 5 L
+4. [Concluir] ← Fechar dialog
+5. [Botão mostra: 3/6] ← Verde
+6. Preencher resto do formulário...
+7. [Salvar]
+```
+
+---
+
+## ✅ BENEFÍCIOS
+
+✅ **Organizado** - Tudo em um lugar  
+✅ **Rápido** - Numpad customizado  
+✅ **Visual** - Contador mostra progresso  
+✅ **Persistente** - Não perde dados  
+✅ **Integrado** - Mesma UX das variáveis  
+✅ **Profissional** - Interface moderna  
+
+---
+
+**Agora você pode controlar os químicos utilizados no processo!** 🧪
 
 Data: Outubro 2025  
-Versão: 2.1.0 (Indicadores melhorados)
+Versão: 2.2.0 (Botão Químicos)  
+Tamanho: 1 arquivo (~35 KB)

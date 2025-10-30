@@ -4,6 +4,24 @@ import '../models/stage.dart';
 import './stage_action_bar.dart';
 import './qty_counter.dart';
 
+// Modelo para os químicos
+class Quimico {
+  final String nome;
+  final String unidade;
+  
+  const Quimico({required this.nome, this.unidade = 'kg'});
+}
+
+// Lista de químicos
+const List<Quimico> quimicos = [
+  Quimico(nome: 'Cal virgem (hidróxido de cálcio)', unidade: 'kg'),
+  Quimico(nome: 'Sulfeto de sódio (Na₂S)', unidade: 'kg'),
+  Quimico(nome: 'Hidrossulfeto de sódio (NaHS)', unidade: 'kg'),
+  Quimico(nome: 'Desulfex, EcoLime, Biosafe', unidade: 'kg'),
+  Quimico(nome: 'Tensoativo / umectante', unidade: 'L'),
+  Quimico(nome: 'Agente sequestrante', unidade: 'L'),
+];
+
 class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
@@ -23,6 +41,7 @@ class StageForm extends StatefulWidget {
 class _StageFormState extends State<StageForm> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, TextEditingController> _quimicosControllers = {};
   final _obs = TextEditingController();
   final _qtdProcessadaCtrl = TextEditingController();
   final _scroll = ScrollController();
@@ -57,9 +76,17 @@ class _StageFormState extends State<StageForm> {
   @override
   void initState() {
     super.initState();
+    
+    // Inicializa controllers das variáveis
     for (final v in widget.stage.variables) {
       _controllers[v.name] = TextEditingController();
     }
+    
+    // Inicializa controllers dos químicos
+    for (final q in quimicos) {
+      _quimicosControllers[q.nome] = TextEditingController();
+    }
+    
     _qtdProcessadaCtrl.text = '0';
     
     if (widget.initialData != null) {
@@ -93,11 +120,22 @@ class _StageFormState extends State<StageForm> {
         if (savedData['start'] != null) _start = DateTime.parse(savedData['start']);
         if (savedData['end'] != null) _end = DateTime.parse(savedData['end']);
         
+        // Carrega variáveis
         if (savedData['variables'] != null) {
           final vars = savedData['variables'] as Map<String, dynamic>;
           vars.forEach((key, value) {
             if (_controllers.containsKey(key) && value != null) {
               _controllers[key]!.text = value.toString();
+            }
+          });
+        }
+        
+        // Carrega químicos
+        if (savedData['quimicos'] != null) {
+          final quims = savedData['quimicos'] as Map<String, dynamic>;
+          quims.forEach((key, value) {
+            if (_quimicosControllers.containsKey(key) && value != null) {
+              _quimicosControllers[key]!.text = value.toString();
             }
           });
         }
@@ -108,6 +146,9 @@ class _StageFormState extends State<StageForm> {
   @override
   void dispose() {
     for (final c in _controllers.values) {
+      c.dispose();
+    }
+    for (final c in _quimicosControllers.values) {
       c.dispose();
     }
     _obs.dispose();
@@ -180,21 +221,232 @@ class _StageFormState extends State<StageForm> {
     );
   }
 
+  // Conta quantos químicos foram informados
+  int _getQuimicosInformados() {
+    return _quimicosControllers.values
+        .where((ctrl) => ctrl.text.isNotEmpty)
+        .length;
+  }
+
+  // Abre o dialog de químicos
+  Future<void> _openQuimicosDialog() async {
+    final canEdit = _status == StageStatus.running || _status == StageStatus.idle;
+    
+    if (!canEdit) {
+      _show('Inicie o processo para informar os químicos.', isError: true);
+      return;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+                child: Column(
+                  children: [
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF546E7A),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.science, color: Colors.white),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Químicos Utilizados',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            icon: const Icon(Icons.close, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Lista de químicos
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: quimicos.map((q) {
+                          final ctrl = _quimicosControllers[q.nome]!;
+                          final hasValue = ctrl.text.isNotEmpty;
+                          
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Nome do químico
+                                Text(
+                                  q.nome,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Color(0xFF424242),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                
+                                // Botão para informar quantidade
+                                OutlinedButton(
+                                  onPressed: () async {
+                                    final result = await _openNumpad(
+                                      titulo: q.nome,
+                                      controller: ctrl,
+                                      unidade: q.unidade,
+                                    );
+                                    
+                                    if (result != null) {
+                                      setDialogState(() {
+                                        ctrl.text = result;
+                                      });
+                                      setState(() {}); // Atualiza contador no botão
+                                    }
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                      color: hasValue
+                                          ? const Color(0xFF4CAF50)
+                                          : const Color(0xFF424242),
+                                      width: 2,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
+                                    backgroundColor: hasValue
+                                        ? const Color(0xFF4CAF50).withOpacity(0.05)
+                                        : const Color(0xFFF5F5F5),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          ctrl.text.isEmpty
+                                              ? 'Informar quantidade'
+                                              : '${ctrl.text} ${q.unidade}',
+                                          style: TextStyle(
+                                            color: hasValue
+                                                ? const Color(0xFF4CAF50)
+                                                : const Color(0xFF424242),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.edit_outlined,
+                                        color: hasValue
+                                            ? const Color(0xFF4CAF50)
+                                            : const Color(0xFF616161),
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    
+                    // Botão fechar
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.pop(ctx),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Concluir'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          backgroundColor: const Color(0xFF4CAF50),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _fulaoSelector() {
     final enabled = _status == StageStatus.running || _status == StageStatus.idle;
-    return DropdownButtonFormField<int>(
-      value: _fulaoSel,
-      items: [1, 2, 3, 4]
-          .map((n) => DropdownMenuItem(value: n, child: Text('Fulão $n')))
-          .toList(),
-      onChanged: enabled ? (v) => setState(() => _fulaoSel = v) : null,
-      decoration: const InputDecoration(
-        labelText: 'Fulão',
-        prefixIcon: Icon(Icons.precision_manufacturing),
-        filled: true,
-        fillColor: Color(0xFFF5F5F5),
-        border: OutlineInputBorder(),
-      ),
+    final quimicosCount = _getQuimicosInformados();
+    
+    return Row(
+      children: [
+        // Dropdown Fulão
+        Expanded(
+          flex: 2,
+          child: DropdownButtonFormField<int>(
+            value: _fulaoSel,
+            items: [1, 2, 3, 4]
+                .map((n) => DropdownMenuItem(value: n, child: Text('Fulão $n')))
+                .toList(),
+            onChanged: enabled ? (v) => setState(() => _fulaoSel = v) : null,
+            decoration: const InputDecoration(
+              labelText: 'Fulão',
+              prefixIcon: Icon(Icons.precision_manufacturing),
+              filled: true,
+              fillColor: Color(0xFFF5F5F5),
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        
+        const SizedBox(width: 12),
+        
+        // Botão Químicos
+        Expanded(
+          flex: 1,
+          child: FilledButton.icon(
+            onPressed: _openQuimicosDialog,
+            icon: const Icon(Icons.science, size: 20),
+            label: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Químicos',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+                if (quimicosCount > 0)
+                  Text(
+                    '$quimicosCount/${quimicos.length}',
+                    style: const TextStyle(fontSize: 10),
+                  ),
+              ],
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: quimicosCount > 0
+                  ? const Color(0xFF4CAF50)
+                  : const Color(0xFF546E7A),
+              minimumSize: const Size.fromHeight(56),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -264,7 +516,7 @@ class _StageFormState extends State<StageForm> {
     );
   }
 
-  Future<void> _openNumpad({
+  Future<String?> _openNumpad({
     required String titulo,
     required TextEditingController controller,
     String? unidade,
@@ -340,6 +592,8 @@ class _StageFormState extends State<StageForm> {
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
                   ),
                   if (txtPadrao.isNotEmpty) ...[
                     const SizedBox(height: 4),
@@ -362,7 +616,7 @@ class _StageFormState extends State<StageForm> {
                     ),
                     controller: TextEditingController(text: buf),
                     decoration: InputDecoration(
-                      hintText: 'Digite o resultado',
+                      hintText: 'Digite a quantidade',
                       suffixText: unidade,
                       errorText: isOutOfRange ? 'Valor fora do padrão!' : null,
                       filled: true,
@@ -434,9 +688,7 @@ class _StageFormState extends State<StageForm> {
       },
     );
 
-    if (result != null) {
-      setState(() => controller.text = result);
-    }
+    return result;
   }
 
   Future<void> _handleSave() async {
@@ -489,6 +741,7 @@ class _StageFormState extends State<StageForm> {
         'obs': _obs.text,
         'qtdProcessada': _qtd,
         'variables': _controllers.map((k, c) => MapEntry(k, c.text)),
+        'quimicos': _quimicosControllers.map((k, c) => MapEntry(k, c.text)),
       };
 
       await Future.delayed(const Duration(milliseconds: 500));
@@ -620,7 +873,6 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 16),
             
-            // ✨ CONTAINER DE VARIÁVEIS COM INDICADORES MELHORADOS
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -657,7 +909,6 @@ class _StageFormState extends State<StageForm> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // CAMPOS DAS VARIÁVEIS COM INDICADORES MELHORADOS
                   ...s.variables.map((v) {
                     final ctrl = _controllers[v.name]!;
                     final min = v.min, max = v.max;
@@ -673,7 +924,6 @@ class _StageFormState extends State<StageForm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // CABEÇALHO: Nome + Indicador
                           Row(
                             children: [
                               Expanded(
@@ -686,7 +936,6 @@ class _StageFormState extends State<StageForm> {
                                   ),
                                 ),
                               ),
-                              // ✨ INDICADOR COMPACTO À DIREITA
                               if (hasValue)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -723,7 +972,6 @@ class _StageFormState extends State<StageForm> {
                           ),
                           const SizedBox(height: 6),
                           
-                          // HINT
                           if (v.hint != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),
@@ -736,7 +984,6 @@ class _StageFormState extends State<StageForm> {
                               ),
                             ),
                           
-                          // PADRÃO
                           if (min != null || max != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8),
@@ -749,16 +996,20 @@ class _StageFormState extends State<StageForm> {
                               ),
                             ),
                           
-                          // BOTÃO DE ENTRADA - COM BORDA COLORIDA SE TIVER VALOR
                           OutlinedButton(
                             onPressed: (_status == StageStatus.running)
-                                ? () => _openNumpad(
+                                ? () async {
+                                    final result = await _openNumpad(
                                       titulo: v.name,
                                       controller: ctrl,
                                       unidade: v.unit,
                                       min: min,
                                       max: max,
-                                    )
+                                    );
+                                    if (result != null) {
+                                      setState(() => ctrl.text = result);
+                                    }
+                                  }
                                 : null,
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
