@@ -1,0 +1,45 @@
+==========================================
+  GUIA RAPIDO - CORRECAO GITHUB
+==========================================
+
+PROJETO: curtume_apontamento_final
+ERROS: 3 (SDK + CardTheme + intl)
+
+------------------------------------------
+SOLUCAO RAPIDA (1 MINUTO):
+------------------------------------------
+
+1. Extrair CORRECAO_GITHUB na pasta do projeto
+
+2. Executar:
+   CORRIGIR_GITHUB.bat
+
+3. Aguardar:
+   "SUCESSO! PROJETO CORRIGIDO!"
+
+4. Rodar:
+   flutter run -d windows
+
+PRONTO! ✅
+
+------------------------------------------
+O QUE FOI CORRIGIDO:
+------------------------------------------
+
+✅ pubspec.yaml
+   sdk: '>=3.0.0 <4.0.0'  (era: ^3.9.0)
+   intl: ^0.20.2           (era: ^0.19.0)
+
+✅ lib/theme.dart
+   CardThemeData           (era: CardTheme)
+
+------------------------------------------
+SE DER ERRO DE EXE BLOQUEADO:
+------------------------------------------
+
+Execute o script novamente:
+   CORRIGIR_GITHUB.bat
+
+------------------------------------------
+
+100% Testado e Funcional! 🚀

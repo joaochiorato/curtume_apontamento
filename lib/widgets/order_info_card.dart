@@ -295,7 +295,7 @@ class OrderInfoCard extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.scale,
-                        color: const Color(0xFF424242),
+                        color: Color(0xFF424242),
                         size: 32,
                       ),
                       const SizedBox(width: 16),
@@ -316,7 +316,7 @@ class OrderInfoCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xFF424242),
+                              color: Color(0xFF424242),
                             ),
                           ),
                         ],

@@ -18,9 +18,9 @@ class NowPill extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: roxoClaro.withOpacity(.6)),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             Icon(Icons.schedule, size: 16, color: Colors.white),
             SizedBox(width: 6),
             Text('AGORA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: .2)),
