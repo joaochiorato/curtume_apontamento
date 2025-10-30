@@ -1,263 +1,292 @@
-# 🧪 BOTÃO QUÍMICOS - Lançamento de Produtos
+# 🎨 LOGO ATAK SISTEMAS - Tela Inicial
 
-## 🎯 NOVA FUNCIONALIDADE
+## ✨ NOVA TELA INICIAL
 
-Botão "Químicos" ao lado do campo Fulão para lançar as quantidades de produtos químicos utilizados no processo!
-
----
-
-## 📸 VISUAL DO BOTÃO
-
-### Posição:
-```
-┌──────────────────────────────────────────────┐
-│ Fulão                    │  [🧪 Químicos]   │
-│ ▼ Fulão 1               │    0/6           │
-└──────────────────────────────────────────────┘
-       ↑ Dropdown              ↑ Botão novo
-```
-
-### Estados do Botão:
-
-**Sem químicos informados:**
-```
-┌─────────────┐
-│ 🧪 Químicos │  ← Cinza azulado
-└─────────────┘
-```
-
-**Com químicos informados:**
-```
-┌─────────────┐
-│ 🧪 Químicos │  ← VERDE
-│    3/6      │  ← Contador
-└─────────────┘
-```
+Tela inicial personalizada com o logo **ATAK SISTEMAS** em destaque!
 
 ---
 
-## 🧪 LISTA DE QUÍMICOS
+## 📸 VISUAL
 
-Ao clicar no botão, abre um dialog com os seguintes produtos:
+### Nova Tela Inicial:
 
-1. **Cal virgem (hidróxido de cálcio)** - kg
-2. **Sulfeto de sódio (Na₂S)** - kg
-3. **Hidrossulfeto de sódio (NaHS)** - kg
-4. **Desulfex, EcoLime, Biosafe** - kg
-5. **Tensoativo / umectante** - L
-6. **Agente sequestrante** - L
-
----
-
-## 📱 DIALOG DE QUÍMICOS
-
-### Layout:
 ```
-╔══════════════════════════════════════╗
-║  🧪 Químicos Utilizados          ✕  ║
-╠══════════════════════════════════════╣
-║                                      ║
-║  Cal virgem (hidróxido de cálcio)   ║
-║  ┌────────────────────────────────┐ ║
-║  │ Informar quantidade       ✏️   │ ║
-║  └────────────────────────────────┘ ║
-║                                      ║
-║  Sulfeto de sódio (Na₂S)            ║
-║  ┌────────────────────────────────┐ ║
-║  │ 25 kg                     ✏️   │ ║ ← Preenchido
-║  └────────────────────────────────┘ ║
-║                                      ║
-║  Hidrossulfeto de sódio (NaHS)      ║
-║  ┌────────────────────────────────┐ ║
-║  │ Informar quantidade       ✏️   │ ║
-║  └────────────────────────────────┘ ║
-║                                      ║
-║  ...                                 ║
-║                                      ║
-╠══════════════════════════════════════╣
-║  [ ✓ Concluir ]                     ║
-╚══════════════════════════════════════╝
+╔════════════════════════════════╗
+║                                ║
+║    ┌────────────────────┐      ║
+║    │                    │      ║
+║    │   ████████  ██     │      ║
+║    │   ██     ██ ██     │      ║
+║    │   ████████  ██     │      ║
+║    │   ██  ██    ██     │      ║
+║    │   ██   ██   ██████ │      ║
+║    │    ATAK              │      ║
+║    │                    │      ║
+║    │   ┌──────────────┐ │      ║
+║    │   │ SISTEMAS     │ │      ║
+║    │   └──────────────┘ │      ║
+║    └────────────────────┘      ║
+║                                ║
+║      APONTAMENTO               ║
+║   Sistema de Apontamento       ║
+║         de Couro               ║
+║                                ║
+║   ┌──────────────────┐         ║
+║   │ ACESSAR ORDENS → │         ║
+║   └──────────────────┘         ║
+║                                ║
+║      Versão: 1.0.0             ║
+║                                ║
+╚════════════════════════════════╝
 ```
 
 ---
 
-## ⚙️ FUNCIONAMENTO
+## 🎯 CARACTERÍSTICAS
 
-### 1️⃣ Clicar no Botão "Químicos"
-- Abre dialog com lista de produtos
-- Só funciona se o processo estiver iniciado
+### Logo ATAK SISTEMAS:
+- ✅ **Fundo branco** com sombra
+- ✅ **Logo preto** ATAK
+- ✅ **Texto "SISTEMAS"** com borda
+- ✅ **280x180px** - tamanho adequado
+- ✅ **Bordas arredondadas**
+- ✅ **Clicável** para acessar ordens
 
-### 2️⃣ Informar Quantidades
-- Clicar em cada produto
-- Abre numpad customizado
-- Digitar quantidade
-- Confirmar
-
-### 3️⃣ Visualizar Progresso
-- Contador no botão (ex: 3/6)
-- Botão fica verde quando tem químicos
-- Campos preenchidos ficam verdes
-
-### 4️⃣ Salvar Dados
-- Ao salvar o formulário
-- Químicos são salvos junto
-- Recarrega automaticamente na próxima abertura
-
----
-
-## 🎨 CORES E ESTADOS
-
-### Botão Químicos:
-
-| Estado | Cor | Texto |
-|--------|-----|-------|
-| Sem dados | Cinza (#546E7A) | Químicos |
-| Com dados | Verde (#4CAF50) | Químicos + 3/6 |
-
-### Campos no Dialog:
-
-| Estado | Borda | Fundo |
-|--------|-------|-------|
-| Vazio | Preta | Cinza claro |
-| Preenchido | Verde | Verde 5% |
-
----
-
-## 📊 DADOS SALVOS
-
-Os dados dos químicos são salvos no formato:
-
-```json
-{
-  "status": "closed",
-  "fulao": 1,
-  "responsavel": "Ana",
-  "variables": { ... },
-  "quimicos": {
-    "Cal virgem (hidróxido de cálcio)": "25",
-    "Sulfeto de sódio (Na₂S)": "30",
-    "Tensoativo / umectante": "5"
-  }
-}
-```
-
----
-
-## ✨ FUNCIONALIDADES
-
-### ✅ Botão Inteligente
-- Mostra contador de químicos informados
-- Muda de cor quando tem dados
-- Desabilitado se processo não iniciado
-
-### ✅ Dialog Completo
-- Lista todos os 6 químicos
-- Rolagem se necessário
-- Numpad customizado
-- Validação de valores
-
-### ✅ Persistência de Dados
-- Salva junto com o formulário
-- Recarrega automaticamente
-- Mantém os valores informados
-
-### ✅ Visual Integrado
-- Mesmo estilo das variáveis
-- Cores consistentes
-- UX intuitivo
+### Elementos:
+- ✅ Logo ATAK em destaque
+- ✅ Texto "APONTAMENTO"
+- ✅ Subtítulo do sistema
+- ✅ Botão "ACESSAR ORDENS"
+- ✅ Versão do app
+- ✅ Gradiente cinza escuro no fundo
 
 ---
 
 ## 🚀 INSTALAÇÃO
 
-### 1️⃣ Extrair na Raiz
+### 1️⃣ **Adicionar a Imagem do Logo**
 
+#### Opção A - Se já tem pasta assets:
 ```bash
-cd C:\Projetos\Final\curtume_apontamento_final
-unzip -o botao_quimicos.zip
+# Copiar o logo
+cp assets/images/logo_atak.png SEU_PROJETO/assets/images/
 ```
 
-### 2️⃣ Rodar
+#### Opção B - Criar estrutura do zero:
+```bash
+# Criar pasta
+mkdir -p assets/images
+
+# Copiar o logo
+cp assets/images/logo_atak.png SEU_PROJETO/assets/images/
+```
+
+---
+
+### 2️⃣ **Atualizar pubspec.yaml**
+
+Abra o arquivo `pubspec.yaml` e adicione:
+
+```yaml
+flutter:
+  assets:
+    - assets/images/logo_atak.png
+    # OU se quiser incluir todas as imagens:
+    # - assets/images/
+```
+
+**Localização no arquivo:**
+```yaml
+name: seu_projeto
+description: ...
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  
+  # ADICIONE AQUI:
+  assets:
+    - assets/images/logo_atak.png
+```
+
+---
+
+### 3️⃣ **Copiar home_page.dart**
 
 ```bash
+cp lib/pages/home_page.dart SEU_PROJETO/lib/pages/
+```
+
+---
+
+### 4️⃣ **Executar**
+
+```bash
+# Limpar cache
+flutter clean
+
+# Baixar dependências
+flutter pub get
+
+# Rodar
 flutter run
 ```
 
 ---
 
-## 📁 ARQUIVO SUBSTITUÍDO
+## 📁 ESTRUTURA DE ARQUIVOS
 
 ```
-lib/
-└── widgets/
-    └── stage_form.dart  ← Versão com botão Químicos
-```
-
----
-
-## 🔄 COMPATIBILIDADE
-
-- ✅ Mantém todas as funcionalidades anteriores
-- ✅ Indicadores melhorados das variáveis
-- ✅ Botão Químicos integrado
-- ✅ Persistência de dados
-- ✅ Numpad customizado
-
----
-
-## 💡 DICAS DE USO
-
-### Para Informar Químicos:
-1. Iniciar o processo
-2. Clicar no botão "Químicos"
-3. Informar as quantidades
-4. Clicar em "Concluir"
-5. Continuar preenchendo o resto
-
-### Para Editar:
-1. Clicar novamente no botão "Químicos"
-2. Alterar os valores desejados
-3. Clicar em "Concluir"
-
-### Para Ver Quantos Foram Informados:
-- Olhar o contador no botão (ex: 3/6)
-- Verde = tem dados
-- Cinza = sem dados
-
----
-
-## 📝 EXEMPLO COMPLETO
-
-### Fluxo de Trabalho:
-
-```
-1. [Iniciar] ← Clicar
-2. [Fulão] → Selecionar Fulão 1
-3. [Químicos] ← Clicar
-   ├─ Cal virgem: 25 kg
-   ├─ Sulfeto de sódio: 30 kg
-   └─ Tensoativo: 5 L
-4. [Concluir] ← Fechar dialog
-5. [Botão mostra: 3/6] ← Verde
-6. Preencher resto do formulário...
-7. [Salvar]
+SEU_PROJETO/
+├── assets/
+│   └── images/
+│       └── logo_atak.png       ← Logo ATAK
+├── lib/
+│   └── pages/
+│       └── home_page.dart      ← Tela inicial atualizada
+└── pubspec.yaml                ← Adicionar referência ao logo
 ```
 
 ---
 
-## ✅ BENEFÍCIOS
+## 🎨 CORES E ESTILO
 
-✅ **Organizado** - Tudo em um lugar  
-✅ **Rápido** - Numpad customizado  
-✅ **Visual** - Contador mostra progresso  
-✅ **Persistente** - Não perde dados  
-✅ **Integrado** - Mesma UX das variáveis  
-✅ **Profissional** - Interface moderna  
+### Logo Container:
+- **Fundo:** Branco (#FFFFFF)
+- **Sombra:** Preta com opacidade
+- **Bordas:** Arredondadas (20px)
+- **Tamanho:** 280x180px
+
+### Texto "SISTEMAS":
+- **Borda:** Preta (1.5px)
+- **Cor:** Preto
+- **Espaçamento:** 3px entre letras
+- **Estilo:** Médio
+
+### Fundo:
+- **Gradiente:** Cinza escuro
+- **Início:** #212121 (grey[900])
+- **Fim:** #303030 (grey[850])
 
 ---
 
-**Agora você pode controlar os químicos utilizados no processo!** 🧪
+## ✨ FUNCIONALIDADES
+
+### Áreas Clicáveis:
+1. **Logo ATAK** ← Clique para acessar
+2. **Texto "APONTAMENTO"** ← Clique para acessar
+3. **Botão "ACESSAR ORDENS"** ← Clique para acessar
+
+**Toda a área central é interativa!**
+
+---
+
+## 🔧 CUSTOMIZAÇÕES POSSÍVEIS
+
+### Mudar Tamanho do Logo:
+```dart
+Container(
+  width: 320,  // ← Aumente aqui
+  height: 200, // ← Aumente aqui
+  ...
+)
+```
+
+### Mudar Cor do Fundo:
+```dart
+colors: [
+  Colors.blue[900]!,  // ← Troque aqui
+  Colors.blue[850]!,  // ← Troque aqui
+],
+```
+
+### Adicionar Mais Informações:
+```dart
+Text(
+  'Desenvolvido por ATAK Sistemas',
+  style: TextStyle(
+    fontSize: 12,
+    color: Colors.white.withOpacity(0.5),
+  ),
+),
+```
+
+---
+
+## 🐛 TROUBLESHOOTING
+
+### Erro: "Unable to load asset"
+**Solução:**
+1. Verificar se o logo está em `assets/images/logo_atak.png`
+2. Verificar se adicionou no `pubspec.yaml`
+3. Executar `flutter pub get`
+4. Executar `flutter clean`
+5. Rodar novamente
+
+### Logo não aparece:
+**Solução:**
+1. Verificar caminho no código: `'assets/images/logo_atak.png'`
+2. Verificar se o arquivo existe
+3. Verificar indentação no `pubspec.yaml`
+
+### Logo muito grande/pequeno:
+**Solução:**
+Ajustar no código:
+```dart
+Image.asset(
+  'assets/images/logo_atak.png',
+  height: 100,  // ← Ajuste aqui
+  fit: BoxFit.contain,
+),
+```
+
+---
+
+## 📊 COMPARAÇÃO
+
+| Aspecto | Antes | Depois |
+|---------|-------|--------|
+| Ícone | 🏭 Factory | Logo ATAK |
+| Tamanho | 180x180px | 280x180px |
+| Fundo | Transparente | Branco sólido |
+| Estilo | Material Icon | Logo empresarial |
+| Profissional | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+
+---
+
+## ✅ CHECKLIST DE INSTALAÇÃO
+
+- [ ] Logo copiado para `assets/images/`
+- [ ] `pubspec.yaml` atualizado
+- [ ] `home_page.dart` copiado
+- [ ] `flutter pub get` executado
+- [ ] `flutter clean` executado (se necessário)
+- [ ] App rodando
+- [ ] Logo aparecendo corretamente
+- [ ] Todas as áreas clicáveis funcionando
+
+---
+
+## 🎯 RESULTADO FINAL
+
+**Tela inicial profissional com:**
+- ✅ Logo ATAK SISTEMAS em destaque
+- ✅ Design limpo e moderno
+- ✅ Áreas clicáveis intuitivas
+- ✅ Versão do app visível
+- ✅ Gradiente elegante no fundo
+
+---
+
+**Aproveite sua nova tela inicial personalizada!** 🎨
 
 Data: Outubro 2025  
-Versão: 2.2.0 (Botão Químicos)  
-Tamanho: 1 arquivo (~35 KB)
+Versão: 2.4.0 (Logo ATAK Sistemas)  
+Arquivos: 2 (home_page.dart + logo_atak.png)

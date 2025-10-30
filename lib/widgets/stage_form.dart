@@ -247,7 +247,7 @@ class _StageFormState extends State<StageForm> {
                 constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
                 child: Column(
                   children: [
-                    // Header
+                    // Header - SEM ÍCONE
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -258,8 +258,6 @@ class _StageFormState extends State<StageForm> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.science, color: Colors.white),
-                          const SizedBox(width: 12),
                           const Expanded(
                             child: Text(
                               'Químicos Utilizados',
@@ -370,14 +368,13 @@ class _StageFormState extends State<StageForm> {
                     // Botão fechar
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: FilledButton.icon(
+                      child: FilledButton(
                         onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.check),
-                        label: const Text('Concluir'),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                           backgroundColor: const Color(0xFF4CAF50),
                         ),
+                        child: const Text('Concluir'),
                       ),
                     ),
                   ],
@@ -396,7 +393,7 @@ class _StageFormState extends State<StageForm> {
     
     return Row(
       children: [
-        // Dropdown Fulão
+        // Dropdown Fulão - SEM ÍCONE
         Expanded(
           flex: 2,
           child: DropdownButtonFormField<int>(
@@ -407,7 +404,6 @@ class _StageFormState extends State<StageForm> {
             onChanged: enabled ? (v) => setState(() => _fulaoSel = v) : null,
             decoration: const InputDecoration(
               labelText: 'Fulão',
-              prefixIcon: Icon(Icons.precision_manufacturing),
               filled: true,
               fillColor: Color(0xFFF5F5F5),
               border: OutlineInputBorder(),
@@ -417,13 +413,19 @@ class _StageFormState extends State<StageForm> {
         
         const SizedBox(width: 12),
         
-        // Botão Químicos
+        // Botão Químicos - SEM ÍCONE
         Expanded(
           flex: 1,
-          child: FilledButton.icon(
+          child: FilledButton(
             onPressed: _openQuimicosDialog,
-            icon: const Icon(Icons.science, size: 20),
-            label: Column(
+            style: FilledButton.styleFrom(
+              backgroundColor: quimicosCount > 0
+                  ? const Color(0xFF4CAF50)
+                  : const Color(0xFF546E7A),
+              minimumSize: const Size.fromHeight(56),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
@@ -436,13 +438,6 @@ class _StageFormState extends State<StageForm> {
                     style: const TextStyle(fontSize: 10),
                   ),
               ],
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: quimicosCount > 0
-                  ? const Color(0xFF4CAF50)
-                  : const Color(0xFF546E7A),
-              minimumSize: const Size.fromHeight(56),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
           ),
         ),
@@ -805,6 +800,7 @@ class _StageFormState extends State<StageForm> {
             _fulaoSelector(),
             const SizedBox(height: 10),
             
+            // RESPONSÁVEL - SEM ÍCONE
             DropdownButtonFormField<String>(
               value: _respSel,
               items: _responsaveis
@@ -815,7 +811,6 @@ class _StageFormState extends State<StageForm> {
                   : null,
               decoration: const InputDecoration(
                 labelText: 'Responsável',
-                prefixIcon: Icon(Icons.person),
                 filled: true,
                 fillColor: Color(0xFFF5F5F5),
                 border: OutlineInputBorder(),
@@ -825,6 +820,7 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 10),
             
+            // RESPONSÁVEL SUPERIOR - SEM ÍCONE
             DropdownButtonFormField<String>(
               value: _respSupSel,
               items: _responsaveisSup
@@ -835,7 +831,6 @@ class _StageFormState extends State<StageForm> {
                   : null,
               decoration: const InputDecoration(
                 labelText: 'Responsável Superior',
-                prefixIcon: Icon(Icons.supervisor_account),
                 filled: true,
                 fillColor: Color(0xFFF5F5F5),
                 border: OutlineInputBorder(),
@@ -858,6 +853,7 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 10),
             
+            // OBSERVAÇÃO - SEM ÍCONE
             TextFormField(
               controller: _obs,
               maxLines: 3,
@@ -865,7 +861,6 @@ class _StageFormState extends State<StageForm> {
               decoration: const InputDecoration(
                 labelText: 'Observação',
                 hintText: 'Tempo de Remolho 120 minutos +/- 60 min',
-                prefixIcon: Icon(Icons.notes),
                 filled: true,
                 fillColor: Color(0xFFF5F5F5),
                 border: OutlineInputBorder(),
@@ -873,6 +868,7 @@ class _StageFormState extends State<StageForm> {
             ),
             const SizedBox(height: 16),
             
+            // CONTAINER VARIÁVEIS - SEM ÍCONE
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -893,19 +889,14 @@ class _StageFormState extends State<StageForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.science, size: 20, color: Color(0xFF424242)),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Variáveis',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF424242),
-                        ),
-                      ),
-                    ],
+                  // TÍTULO SEM ÍCONE
+                  const Text(
+                    'Variáveis',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF424242),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   

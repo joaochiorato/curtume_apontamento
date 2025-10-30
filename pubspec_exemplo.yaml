@@ -1,25 +1,18 @@
-name: curtume_apontamento_remolho
-description: Sistema de apontamento para remolho
-publish_to: 'none'
-version: 1.0.0+1
-
-environment:
-  sdk: '>=3.0.0 <4.0.0'
-
-dependencies:
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  provider: ^6.1.1
-  intl: any
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^2.0.0
+# EXEMPLO - Como adicionar o logo no pubspec.yaml
+# 
+# Cole estas linhas no seu arquivo pubspec.yaml existente
 
 flutter:
   uses-material-design: true
+  
+  # ADICIONE ESTA SEÇÃO:
   assets:
-    - assets/data/
+    - assets/images/logo_atak.png
+    
+    # OU para incluir todas as imagens da pasta:
+    # - assets/images/
+
+# IMPORTANTE:
+# - Manter a indentação correta (2 espaços)
+# - "assets:" alinhado com "uses-material-design:"
+# - Os itens da lista com hífen (-) recuados 4 espaços
