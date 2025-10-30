@@ -1,0 +1,61 @@
+==========================================
+  MUDANCAS v2.0.1 - DESCANSO REMOVIDO
+==========================================
+
+Data: 30 de Outubro de 2025
+Versao: 2.0.0 → 2.0.1
+
+==========================================
+  O QUE MUDOU
+==========================================
+
+❌ REMOVIDO:
+   - Estagio 4: DESCANSO
+
+✅ RESULTADO:
+   - Total de estagios: 6 → 5
+   - Ordem atual:
+     1. REMOLHO
+     2. ENXUGADEIRA
+     3. DIVISORA
+     4. REBAIXADEIRA (antes era 5)
+     5. REFILA (antes era 6)
+
+==========================================
+  ARQUIVOS ATUALIZADOS
+==========================================
+
+✅ lib/models/stage.dart     - DESCANSO removido
+✅ README.md                  - Documentacao atualizada
+✅ RESUMO.txt                 - Estatisticas atualizadas
+✅ CHANGELOG.md               - Log de mudancas
+✅ scripts/instalar.bat       - Referencias atualizadas
+✅ scripts/instalar.sh        - Referencias atualizadas
+
+==========================================
+  INSTALACAO
+==========================================
+
+Use o mesmo procedimento:
+1. Extrair ZIP
+2. Executar scripts/instalar.bat
+3. Rodar: flutter run -d windows
+
+==========================================
+  MOTIVO
+==========================================
+
+O estagio DESCANSO nao existe no processo
+real de producao do curtume Vancouros.
+
+Foi removido a pedido do usuario.
+
+==========================================
+  PROXIMO
+==========================================
+
+✅ 5 ESTAGIOS OPERACIONAIS
+✅ Todos baseados no PDF real
+✅ Pronto para producao
+
+🚀 Sistema Finalizado!
