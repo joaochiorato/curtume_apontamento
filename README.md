@@ -1,291 +1,328 @@
-# 🎯 SISTEMA DE STATUS - ATAK APONTAMENTO
+# 🎯 SISTEMA COMPLETO FINAL - CURTUME APONTAMENTO
 
-## 📦 CONTEÚDO DESTE PACOTE
+## 📦 VERSÃO FINAL - TODAS AS CORREÇÕES APLICADAS
 
-Este ZIP contém todos os arquivos necessários para implementar o sistema de gerenciamento de status nas Ordens de Produção.
+Este ZIP contém o sistema completo e corrigido com:
+- ✅ Dados reais da OF 18283 (QUARTZO - Vancouros)
+- ✅ Sistema de gerenciamento de status automático
+- ✅ 5 estágios (sem Descanso)
+- ✅ Layout padronizado ATAK
+- ✅ **Fulão e Químicos APENAS no REMOLHO**
 
 ---
 
 ## 📁 ESTRUTURA DE ARQUIVOS
 
 ```
-sistema_status_atak/
+sistema_completo_final/
 ├── lib/
 │   ├── models/
-│   │   ├── status_ordem.dart       ← NOVO: Enum de status
-│   │   └── order.dart              ← SUBSTITUIR: Model atualizado
+│   │   ├── status_ordem.dart       ← Enum de status
+│   │   ├── order.dart              ← Dados da OF 18283
+│   │   └── stage.dart              ← 5 estágios (Fulão/Químicos só no REMOLHO)
 │   └── pages/
-│       └── orders_page.dart        ← SUBSTITUIR: Tela com novo sistema
+│       └── orders_page.dart        ← Tela de ordens
 ├── docs/
-│   └── DOCUMENTACAO_SISTEMA_STATUS.md
-└── README.md                       ← Este arquivo
+│   ├── ATUALIZACAO_OF18283.md
+│   ├── DOCUMENTACAO_SISTEMA_STATUS.md
+│   └── FULAO_QUIMICOS_APENAS_REMOLHO.md
+├── README.md                       ← Este arquivo
+├── instalar.bat                    ← Windows
+└── instalar.sh                     ← Linux/Mac
+```
+
+---
+
+## ⭐ CORREÇÃO PRINCIPAL DESTA VERSÃO
+
+### ✅ Fulão e Químicos APENAS no REMOLHO
+
+| Estágio | Fulão | Químicos |
+|---------|-------|----------|
+| **REMOLHO** | ✅ Sim (1-4) | ✅ Sim (dialog) |
+| **ENXUGADEIRA** | ❌ Não | ❌ Não |
+| **DIVISORA** | ❌ Não | ❌ Não |
+| **REBAIXADEIRA** | ❌ Não | ❌ Não |
+| **REFILA** | ❌ Não | ❌ Não |
+
+---
+
+## 🎯 OF 18283 - QUARTZO (Dados Reais)
+
+| Campo | Valor |
+|-------|-------|
+| **OF Nº** | 18283 |
+| **Cliente** | Vancouros |
+| **Data** | 14/10/2025 |
+| **Artigo** | QUARTZO |
+| **PVE** | 7315 |
+| **Cor** | E - BROWN |
+| **Classe** | G119 |
+| **Lote WET BLUE** | 32666 |
+| **Nº Pçs NF** | 350 |
+| **Peso Líquido** | 9.855 kg |
+
+---
+
+## 🔄 5 ESTÁGIOS IMPLEMENTADOS
+
+```
+1. REMOLHO
+   ✅ Fulão: 1, 2, 3, 4
+   ✅ Químicos (dialog)
+   └─ 3 variáveis de controle
+   
+2. ENXUGADEIRA
+   ❌ Sem Fulão
+   ❌ Sem Químicos
+   └─ Máquina: 1, 2
+   └─ 5 variáveis de controle
+   
+3. DIVISORA
+   ❌ Sem Fulão
+   ❌ Sem Químicos
+   └─ Máquina: 1, 2
+   └─ 7 variáveis de controle
+   
+❌ DESCANSO (REMOVIDO)
+   
+4. REBAIXADEIRA
+   ❌ Sem Fulão
+   ❌ Sem Químicos
+   └─ Máquina: 1-6
+   └─ 10 PLTs (Pallets)
+   
+5. REFILA
+   ❌ Sem Fulão
+   ❌ Sem Químicos
+   └─ Nome do Refilador
+   └─ 3 variáveis de peso
 ```
 
 ---
 
 ## 🚀 INSTALAÇÃO RÁPIDA
 
-### Opção 1: Instalação Automática (Recomendado)
-
+### Windows:
 ```bash
-# 1. Extrair o ZIP na raiz do projeto
-unzip sistema_status_atak.zip
+# 1. Extrair ZIP na raiz do projeto
+# 2. Executar:
+sistema_completo_final\instalar.bat
+```
 
-# 2. Fazer backup dos arquivos originais
+### Linux/Mac:
+```bash
+# 1. Extrair ZIP na raiz do projeto
+# 2. Executar:
+chmod +x sistema_completo_final/instalar.sh
+./sistema_completo_final/instalar.sh
+```
+
+### Manual:
+```bash
+# 1. Fazer backups
 cp lib/models/order.dart lib/models/order.dart.backup
+cp lib/models/stage.dart lib/models/stage.dart.backup
 cp lib/pages/orders_page.dart lib/pages/orders_page.dart.backup
 
-# 3. Copiar novos arquivos
-cp sistema_status_atak/lib/models/status_ordem.dart lib/models/
-cp sistema_status_atak/lib/models/order.dart lib/models/
-cp sistema_status_atak/lib/pages/orders_page.dart lib/pages/
+# 2. Copiar arquivos
+cp sistema_completo_final/lib/models/status_ordem.dart lib/models/
+cp sistema_completo_final/lib/models/order.dart lib/models/
+cp sistema_completo_final/lib/models/stage.dart lib/models/
+cp sistema_completo_final/lib/pages/orders_page.dart lib/pages/
 
-# 4. Limpar e executar
-flutter clean
-flutter pub get
-flutter run
+# 3. Executar
+flutter clean && flutter pub get && flutter run
 ```
 
 ---
 
-### Opção 2: Instalação Manual
+## ✅ TODAS AS FUNCIONALIDADES
 
-#### Passo 1: Backup dos Arquivos Originais
-```bash
-cp lib/models/order.dart lib/models/order.dart.backup
-cp lib/pages/orders_page.dart lib/pages/orders_page.dart.backup
-```
-
-#### Passo 2: Adicionar Novo Arquivo
-Copie o arquivo:
-- `sistema_status_atak/lib/models/status_ordem.dart` → `lib/models/status_ordem.dart`
-
-#### Passo 3: Substituir Arquivos Existentes
-Substitua os arquivos:
-- `sistema_status_atak/lib/models/order.dart` → `lib/models/order.dart`
-- `sistema_status_atak/lib/pages/orders_page.dart` → `lib/pages/orders_page.dart`
-
-#### Passo 4: Executar
-```bash
-flutter clean
-flutter pub get
-flutter run
-```
-
----
-
-## ✅ O QUE FOI IMPLEMENTADO
-
-### 1. Sistema de Status com 4 Estados
-
-| Estado | Descrição | Cor |
-|--------|-----------|-----|
-| **Aguardando** | Nenhum apontamento iniciado | Cinza |
-| **Em Produção** | Pelo menos 1 apontamento iniciado | Azul |
-| **Finalizado** | Todos os apontamentos concluídos | Verde |
-| **Cancelado** | Ordem cancelada | Vermelho |
-
-### 2. Transição Automática de Status
-
+### 1. Sistema de Status Automático
 ```
 AGUARDANDO
-    ↓ (ao iniciar primeiro apontamento)
+    ↓ (ao iniciar 1º apontamento)
 EM PRODUÇÃO
-    ↓ (ao finalizar todos os apontamentos)
+    ↓ (ao finalizar todos)
 FINALIZADO
 ```
 
-### 3. Recursos Visuais
-
-- ✅ Status em texto discreto (sem badges coloridos)
-- ✅ Barra de progresso para ordens em produção
-- ✅ Indicador de progresso ("1/2 artigos concluídos")
-- ✅ Cores sutis baseadas no status
-- ✅ Ícones informativos
-
-### 4. Controle de Apontamentos
-
-- ✅ Contador de apontamentos iniciados/finalizados
-- ✅ Timestamps de início e fim
-- ✅ Cálculo de percentual de conclusão
-- ✅ Validação de estados finais
-
----
-
-## 🔄 REGRAS DE NEGÓCIO IMPLEMENTADAS
-
-### Regra 1: Início do Apontamento
-```
-SE ordem.status == AGUARDANDO
-E usuário INICIAR primeiro apontamento
-ENTÃO ordem.status = EM PRODUÇÃO (automático)
-```
-
-### Regra 2: Finalização Total
-```
-SE ordem.status == EM PRODUÇÃO
-E TODOS os artigos forem finalizados
-ENTÃO ordem.status = FINALIZADO (automático)
-```
-
-### Regra 3: Sem Início
-```
-SE ordem.status == AGUARDANDO
-E NENHUM apontamento for iniciado
-ENTÃO ordem.status permanece AGUARDANDO
-```
-
-### Regra 4: Estados Finais Bloqueados
-```
-SE ordem.status == FINALIZADO ou CANCELADO
-ENTÃO não pode mais alterar status (bloqueado)
-```
-
----
-
-## 📊 ALTERAÇÕES NOS ARQUIVOS
-
-### `status_ordem.dart` (NOVO)
-- ✅ Enum `StatusOrdem` com 4 estados
-- ✅ Validação de transições
-- ✅ Conversão string ↔ enum
-- ✅ Documentação completa
-
-### `order.dart` (ATUALIZADO)
-- ✅ Propriedade `StatusOrdem status`
-- ✅ Contadores de apontamentos
-- ✅ Métodos `iniciarApontamento()` e `finalizarApontamento()`
-- ✅ Propriedade `percentualConclusao`
-- ✅ Propriedade `infoProgresso`
-- ✅ Timestamps de início/fim
-
-### `orders_page.dart` (ATUALIZADO)
-- ✅ Título "ATAK - Apontamento"
+### 2. Layout Padronizado ATAK
+- ✅ Título: "ATAK - Apontamento"
 - ✅ Sem ícones circulares com números
-- ✅ Sem badges coloridos de status
+- ✅ Sem badges coloridos
 - ✅ Barra de progresso visual
-- ✅ Info de progresso por ordem
-- ✅ Layout limpo e padronizado
+- ✅ Status discreto
+
+### 3. Dados Reais da OF 18283
+- ✅ Artigo: QUARTZO
+- ✅ Cliente: Vancouros
+- ✅ 350 peças
+- ✅ Todos os campos do PDF
+
+### 4. Fulão e Químicos APENAS no REMOLHO
+- ✅ REMOLHO: Dropdown Fulão + Botão Químicos
+- ❌ Outros estágios: Sem esses campos
+
+### 5. Estágios Específicos
+- ✅ REMOLHO: Fulão + Químicos
+- ✅ ENXUGADEIRA: 5 variáveis
+- ✅ DIVISORA: 7 variáveis
+- ✅ REBAIXADEIRA: 10 PLTs
+- ✅ REFILA: Nome do Refilador
 
 ---
 
-## 🎨 ANTES vs DEPOIS
+## 📊 MUDANÇAS DESTA VERSÃO
 
-### ANTES:
+### ANTES (versões anteriores):
+- ⚠️ Todos os estágios tinham Fulão e Químicos
+- ⚠️ 6 estágios (com Descanso)
+- ⚠️ Dados mockados genéricos
+
+### AGORA (versão final):
+- ✅ Fulão e Químicos APENAS no REMOLHO
+- ✅ 5 estágios (sem Descanso)
+- ✅ Dados reais da OF 18283
+- ✅ Sistema de status automático
+- ✅ Layout padronizado ATAK
+
+---
+
+## 🎨 INTERFACE VISUAL
+
+### Tela do REMOLHO (com Fulão e Químicos):
 ```
 ┌─────────────────────────────────────┐
-│ ⚫83  OF 18283      [Em Produção]🟢 │
-│      Cliente: Cliente A              │
-│      Data: 30/10/2025                │
-│      2 artigo(s)                     │
-└─────────────────────────────────────┘
-```
-
-### DEPOIS:
-```
-┌─────────────────────────────────────┐
-│ OF 18283                            │
+│ REMOLHO                             │
 ├─────────────────────────────────────┤
-│ 👤 Cliente: Cliente A               │
-│ 📅 Data: 30/10/2025                 │
-│ 📦 Artigos: 2 artigo(s)             │
+│ [Iniciar] [Pausar] [Encerrar]      │
 │                                     │
-│ ████████░░░░░░ 1/2 artigos concl.   │
+│ ┌──────────┐  ┌──────────┐        │
+│ │ Fulão: 2 │  │Químicos  │ ✅      │
+│ └──────────┘  │  3/6     │        │
+│               └──────────┘        │
+│                                     │
+│ Responsável: [______]               │
+│ Variáveis: [______]                 │
+└─────────────────────────────────────┘
+```
+
+### Tela da ENXUGADEIRA (sem Fulão e Químicos):
+```
+┌─────────────────────────────────────┐
+│ ENXUGADEIRA                         │
 ├─────────────────────────────────────┤
-│ Em Produção                      ▶  │
+│ [Iniciar] [Pausar] [Encerrar]      │
+│                                     │
+│ ❌ SEM Fulão                        │
+│ ❌ SEM Químicos                     │
+│                                     │
+│ Máquina: [1] [2]                    │
+│ Responsável: [______]               │
+│ Variáveis: [______]                 │
 └─────────────────────────────────────┘
 ```
 
 ---
 
-## 🔗 INTEGRAÇÃO COM APONTAMENTOS
+## 📋 REGRAS DE NEGÓCIO
 
-### No `StagePage` ou `StageForm`:
+### Status Automático:
+1. **Aguardando** → Nenhum apontamento iniciado
+2. **Em Produção** → Ao iniciar primeiro apontamento (automático)
+3. **Finalizado** → Ao finalizar todos (automático)
 
-```dart
-// Ao INICIAR um apontamento:
-void iniciarApontamento(OrdemModel ordem) {
-  ordem.iniciarApontamento();  // Status muda automaticamente!
-  setState(() {});
-}
+### Fulão e Químicos:
+1. **REMOLHO** → Tem campos Fulão e Químicos
+2. **Outros estágios** → NÃO têm esses campos
 
-// Ao FINALIZAR um apontamento:
-void finalizarApontamento(OrdemModel ordem) {
-  ordem.finalizarApontamento();  // Status muda se todos concluídos!
-  setState(() {});
-}
-```
+### Validações:
+- ✅ REMOLHO: Exige seleção de Fulão
+- ✅ Estados finais não podem ser alterados
+- ✅ Transições automáticas validadas
+
+---
+
+## 📚 DOCUMENTAÇÃO COMPLETA
+
+1. `docs/ATUALIZACAO_OF18283.md`
+   - Detalhes da OF 18283 QUARTZO
+   - Dados extraídos do PDF
+
+2. `docs/DOCUMENTACAO_SISTEMA_STATUS.md`
+   - Sistema de status automático
+   - Fluxo de transições
+
+3. `docs/FULAO_QUIMICOS_APENAS_REMOLHO.md`
+   - Explicação detalhada
+   - Configuração por estágio
 
 ---
 
 ## ✅ CHECKLIST PÓS-INSTALAÇÃO
 
-Após instalar, verifique se:
+Após instalar, verifique:
 
 - [ ] Projeto compila sem erros
-- [ ] Tela de ordens exibe título "ATAK - Apontamento"
-- [ ] Ícones circulares foram removidos
-- [ ] Badges coloridos foram removidos
-- [ ] Status aparece em texto discreto
-- [ ] Ordens "Em Produção" mostram barra de progresso
-- [ ] Info de progresso está visível
+- [ ] OF 18283 aparece com dados corretos
+- [ ] Título: "ATAK - Apontamento"
+- [ ] REMOLHO tem Fulão e Químicos
+- [ ] ENXUGADEIRA NÃO tem Fulão e Químicos
+- [ ] DIVISORA NÃO tem Fulão e Químicos
+- [ ] REBAIXADEIRA NÃO tem Fulão e Químicos (tem 10 PLTs)
+- [ ] REFILA NÃO tem Fulão e Químicos (tem Nome Refilador)
+- [ ] Status em texto discreto
+- [ ] Barra de progresso funcional
 
 ---
 
 ## 🐛 SOLUÇÃO DE PROBLEMAS
 
-### Erro: "StatusOrdem não encontrado"
+### Erro de compilação:
 ```bash
-# Certifique-se que status_ordem.dart está em lib/models/
-ls lib/models/status_ordem.dart
-
-# Se não estiver, copie novamente
-cp sistema_status_atak/lib/models/status_ordem.dart lib/models/
-```
-
-### Erro: "OrdemModel constructor changed"
-```bash
-# Limpe o build e recompile
 flutter clean
 flutter pub get
 flutter run
 ```
 
-### Erro: "Import não encontrado"
-Verifique se os imports estão corretos em `order.dart`:
-```dart
-import 'status_ordem.dart';
+### Fulão aparece em outros estágios:
+Verifique se o arquivo `stage.dart` foi substituído corretamente:
+```bash
+grep -n "hasFulao" lib/models/stage.dart
+```
+
+### Restaurar backups:
+```bash
+cp lib/models/order.dart.backup lib/models/order.dart
+cp lib/models/stage.dart.backup lib/models/stage.dart
+cp lib/pages/orders_page.dart.backup lib/pages/orders_page.dart
 ```
 
 ---
 
-## 📚 DOCUMENTAÇÃO ADICIONAL
+## 🎯 RECURSOS FINAIS
 
-Para mais detalhes, consulte:
-- `docs/DOCUMENTACAO_SISTEMA_STATUS.md` - Documentação completa do sistema
+### Dados:
+✅ OF 18283 real (QUARTZO - Vancouros)
+✅ 350 peças
+✅ Peso líquido: 9.855 kg
+✅ Lote WET BLUE: 32666
 
----
+### Estágios:
+✅ 5 estágios (sem Descanso)
+✅ REMOLHO com Fulão e Químicos
+✅ Outros estágios sem Fulão e Químicos
 
-## 🆘 SUPORTE
-
-Se encontrar problemas:
-
-1. Verifique os backups em `lib/models/order.dart.backup`
-2. Consulte a documentação completa
-3. Execute `flutter clean && flutter pub get`
-
----
-
-## 🎯 RESULTADO ESPERADO
-
-Após a instalação, você terá:
-
-✅ Sistema de status automático funcionando
-✅ Visual limpo e padronizado (estilo ATAK)
-✅ Transições de estado baseadas em regras de negócio
+### Sistema:
+✅ Status automático (Aguardando → Em Produção → Finalizado)
+✅ Layout padronizado ATAK
 ✅ Barra de progresso visual
-✅ Controle completo de apontamentos
+✅ Validações completas
 
 ---
 
-**Instalação concluída! Sistema pronto para uso! 🎉**
+**Sistema completo e pronto para uso! 🎉**
+**Fulão e Químicos APENAS no REMOLHO! ✅**
+**Baseado na OF 18283 real! 🎯**

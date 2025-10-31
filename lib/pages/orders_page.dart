@@ -34,25 +34,38 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Future<void> _load() async {
-    // Dados de exemplo (mockados) - COM NOVO SISTEMA DE STATUS
+    // ✅ DADOS REAIS DA OF 18283 - BASEADO NO PDF VANCOUROS
     await Future.delayed(const Duration(milliseconds: 500));
     
     _ordens = [
-      // OF 1: Aguardando (nenhum apontamento iniciado)
+      // OF 18283: QUARTZO - Aguardando (dados reais do PDF)
       OrdemModel(
         of: '18283',
-        cliente: 'Cliente A',
-        data: DateTime.now(),
+        cliente: 'Vancouros', // Cliente conforme PDF
+        data: DateTime(2025, 10, 14), // Data do PDF: 14/10/25
         status: StatusOrdem.aguardando,
         artigos: [
-          ArtigoModel(codigo: 'ART001', descricao: 'QUARTZO', quantidade: 350),
-          ArtigoModel(codigo: 'ART002', descricao: 'GRANITO', quantidade: 200),
+          ArtigoModel(
+            codigo: 'QUARTZO',
+            descricao: 'QUARTZO',
+            quantidade: 350, // Nº PÇS NF do PDF
+            pve: '7315',
+            cor: 'E - BROWN',
+            classe: 'G119',
+            po: '7315CK08',
+            crustItem: '1165',
+            espFinal: '1.1/1.5',
+            loteWetBlue: '32666',
+            metragemNF: 21295.25,
+            avg: 60.84,
+            pesoLiquido: 9855.00,
+          ),
         ],
         apontamentosIniciados: 0,
         apontamentosFinalizados: 0,
       ),
       
-      // OF 2: Em Produção (alguns apontamentos iniciados)
+      // OF 18284: Exemplo - Em Produção
       OrdemModel(
         of: '18284',
         cliente: 'Cliente B',
@@ -66,7 +79,7 @@ class _OrdersPageState extends State<OrdersPage> {
         dataInicio: DateTime.now().subtract(const Duration(hours: 2)),
       ),
       
-      // OF 3: Finalizado (todos os apontamentos concluídos)
+      // OF 18285: Exemplo - Finalizado
       OrdemModel(
         of: '18285',
         cliente: 'Cliente C',

@@ -158,12 +158,25 @@ class OrdemModel {
   }
 }
 
-// 📦 MODELO DE ARTIGO
+// 📦 MODELO DE ARTIGO - BASEADO NA OF 18283 QUARTZO
 
 class ArtigoModel {
   final String codigo;
   final String descricao;
   final int quantidade;
+  
+  // Dados específicos do artigo (do PDF)
+  final String? pve;
+  final String? cor;
+  final String? classe;
+  final String? po;
+  final String? crustItem;
+  final String? espFinal;
+  final String? loteWetBlue;
+  final double? metragemNF;
+  final double? avg;
+  final double? pesoLiquido;
+  
   bool apontamentoIniciado;
   bool apontamentoFinalizado;
   DateTime? dataInicioApontamento;
@@ -173,6 +186,16 @@ class ArtigoModel {
     required this.codigo,
     required this.descricao,
     required this.quantidade,
+    this.pve,
+    this.cor,
+    this.classe,
+    this.po,
+    this.crustItem,
+    this.espFinal,
+    this.loteWetBlue,
+    this.metragemNF,
+    this.avg,
+    this.pesoLiquido,
     this.apontamentoIniciado = false,
     this.apontamentoFinalizado = false,
     this.dataInicioApontamento,
@@ -196,6 +219,16 @@ class ArtigoModel {
       'codigo': codigo,
       'descricao': descricao,
       'quantidade': quantidade,
+      'pve': pve,
+      'cor': cor,
+      'classe': classe,
+      'po': po,
+      'crustItem': crustItem,
+      'espFinal': espFinal,
+      'loteWetBlue': loteWetBlue,
+      'metragemNF': metragemNF,
+      'avg': avg,
+      'pesoLiquido': pesoLiquido,
       'apontamentoIniciado': apontamentoIniciado,
       'apontamentoFinalizado': apontamentoFinalizado,
       'dataInicioApontamento': dataInicioApontamento?.toIso8601String(),
@@ -208,6 +241,16 @@ class ArtigoModel {
       codigo: map['codigo'],
       descricao: map['descricao'],
       quantidade: map['quantidade'],
+      pve: map['pve'],
+      cor: map['cor'],
+      classe: map['classe'],
+      po: map['po'],
+      crustItem: map['crustItem'],
+      espFinal: map['espFinal'],
+      loteWetBlue: map['loteWetBlue'],
+      metragemNF: map['metragemNF'],
+      avg: map['avg'],
+      pesoLiquido: map['pesoLiquido'],
       apontamentoIniciado: map['apontamentoIniciado'] ?? false,
       apontamentoFinalizado: map['apontamentoFinalizado'] ?? false,
       dataInicioApontamento: map['dataInicioApontamento'] != null
@@ -216,6 +259,25 @@ class ArtigoModel {
       dataFimApontamento: map['dataFimApontamento'] != null
           ? DateTime.parse(map['dataFimApontamento'])
           : null,
+    );
+  }
+
+  // 📝 Factory para criar artigo da OF 18283 QUARTZO (do PDF)
+  factory ArtigoModel.of18283Quartzo() {
+    return ArtigoModel(
+      codigo: 'QUARTZO',
+      descricao: 'QUARTZO',
+      quantidade: 350, // Nº PÇS NF
+      pve: '7315',
+      cor: 'E - BROWN',
+      classe: 'G119',
+      po: '7315CK08',
+      crustItem: '1165',
+      espFinal: '1.1/1.5',
+      loteWetBlue: '32666',
+      metragemNF: 21295.25,
+      avg: 60.84,
+      pesoLiquido: 9855.00,
     );
   }
 }
