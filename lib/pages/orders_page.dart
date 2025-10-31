@@ -118,8 +118,9 @@ class _OrdersPageState extends State<OrdersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ✅ TÍTULO PADRONIZADO - ATAK APONTAMENTO
       appBar: AppBar(
-        title: const Text('Ordens de Produção'),
+        title: const Text('ATAK - Apontamento'),
         actions: [
           // Contador de ordens filtradas
           if (!_loading)
@@ -172,27 +173,31 @@ class _OrdersPageState extends State<OrdersPage> {
                                         onPressed: () => _filtroOF.clear(),
                                       )
                                     : null,
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.1),
-                                border: OutlineInputBorder(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.white.withOpacity(0.3),
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
+                                filled: true,
+                                fillColor: Colors.black.withOpacity(0.2),
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           
-                          // Filtro por data
+                          // Botão de filtro por data
                           Expanded(
-                            flex: 2,
                             child: OutlinedButton.icon(
                               onPressed: _selecionarData,
-                              icon: const Icon(Icons.calendar_today, size: 18, color: Colors.white),
+                              icon: const Icon(Icons.calendar_today, color: Colors.white, size: 18),
                               label: Text(
                                 _dataFiltro == null
                                     ? 'Data'
@@ -249,63 +254,93 @@ class _OrdersPageState extends State<OrdersPage> {
                             final ordem = _ordensFiltradas[index];
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.all(16),
-                                leading: CircleAvatar(
-                                  backgroundColor: const Color(0xFF546E7A),
-                                  child: Text(
-                                    ordem.of.substring(ordem.of.length - 2),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                title: Text(
-                                  'OF ${ordem.of}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 4),
-                                    Text('Cliente: ${ordem.cliente}'),
-                                    Text('Data: ${dfDate.format(ordem.data)}'),
-                                    Text('${ordem.artigos.length} artigo(s)'),
-                                  ],
-                                ),
-                                trailing: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: ordem.status == 'Em Produção'
-                                        ? Colors.green.withOpacity(0.2)
-                                        : Colors.orange.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    ordem.status,
-                                    style: TextStyle(
-                                      color: ordem.status == 'Em Produção'
-                                          ? Colors.green[700]
-                                          : Colors.orange[700],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: InkWell(
                                 onTap: () {
-                                  Navigator.of(context).push(
+                                  Navigator.push(
+                                    context,
                                     MaterialPageRoute(
-                                      builder: (_) => ArticlesPage(of: ordem),
+                                      builder: (context) => ArticlesPage(of: ordem),
                                     ),
                                   );
                                 },
+                                borderRadius: BorderRadius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // ✅ REMOVIDO: CircleAvatar com números
+                                      // ✅ Título da OF em destaque
+                                      Text(
+                                        'OF ${ordem.of}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: Color(0xFF424242),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      
+                                      // Linha divisória sutil
+                                      Container(
+                                        height: 1,
+                                        color: Colors.grey.shade300,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      
+                                      // Informações da ordem
+                                      _buildInfoRow(
+                                        icon: Icons.person_outline,
+                                        label: 'Cliente',
+                                        value: ordem.cliente,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      _buildInfoRow(
+                                        icon: Icons.calendar_today,
+                                        label: 'Data',
+                                        value: dfDate.format(ordem.data),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      _buildInfoRow(
+                                        icon: Icons.inventory_2_outlined,
+                                        label: 'Artigos',
+                                        value: '${ordem.artigos.length} artigo(s)',
+                                      ),
+                                      
+                                      // ✅ REMOVIDO: Badge de status colorido
+                                      // Status agora é mostrado de forma discreta
+                                      const SizedBox(height: 12),
+                                      Container(
+                                        height: 1,
+                                        color: Colors.grey.shade300,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            ordem.status,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade600,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             );
                           },
@@ -313,6 +348,41 @@ class _OrdersPageState extends State<OrdersPage> {
                 ),
               ],
             ),
+    );
+  }
+
+  // ✅ Método auxiliar para exibir informações com ícones
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: Colors.grey.shade600,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF424242),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
