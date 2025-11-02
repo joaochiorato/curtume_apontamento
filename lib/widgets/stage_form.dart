@@ -8,7 +8,7 @@ import './qty_counter.dart';
 class Quimico {
   final String nome;
   final String unidade;
-  
+
   const Quimico({required this.nome, this.unidade = 'kg'});
 }
 
@@ -26,10 +26,10 @@ class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
   final Map<String, dynamic>? initialData;
-  
+
   const StageForm({
-    super.key, 
-    required this.stage, 
+    super.key,
+    required this.stage,
     required this.onSaved,
     this.initialData,
   });
@@ -76,19 +76,19 @@ class _StageFormState extends State<StageForm> {
   @override
   void initState() {
     super.initState();
-    
+
     // Inicializa controllers das variáveis
     for (final v in widget.stage.variables) {
       _controllers[v.name] = TextEditingController();
     }
-    
+
     // Inicializa controllers dos químicos
     for (final q in quimicos) {
       _quimicosControllers[q.nome] = TextEditingController();
     }
-    
+
     _qtdProcessadaCtrl.text = '0';
-    
+
     if (widget.initialData != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadSavedData();
@@ -98,28 +98,33 @@ class _StageFormState extends State<StageForm> {
 
   void _loadSavedData() {
     final savedData = widget.initialData;
-    
+
     if (savedData != null) {
       setState(() {
         if (savedData['fulao'] != null) _fulaoSel = savedData['fulao'];
-        if (savedData['responsavel'] != null) _respSel = savedData['responsavel'];
-        if (savedData['responsavelSuperior'] != null) _respSupSel = savedData['responsavelSuperior'];
+        if (savedData['responsavel'] != null)
+          _respSel = savedData['responsavel'];
+        if (savedData['responsavelSuperior'] != null)
+          _respSupSel = savedData['responsavelSuperior'];
         if (savedData['obs'] != null) _obs.text = savedData['obs'];
         if (savedData['qtdProcessada'] != null) {
           _qtd = savedData['qtdProcessada'];
           _qtdProcessadaCtrl.text = '$_qtd';
         }
-        
+
         if (savedData['status'] != null) {
           final statusStr = savedData['status'];
-          if (statusStr == 'running') _status = StageStatus.running;
-          else if (statusStr == 'paused') _status = StageStatus.paused;
+          if (statusStr == 'running')
+            _status = StageStatus.running;
+          else if (statusStr == 'paused')
+            _status = StageStatus.paused;
           else if (statusStr == 'closed') _status = StageStatus.closed;
         }
-        
-        if (savedData['start'] != null) _start = DateTime.parse(savedData['start']);
+
+        if (savedData['start'] != null)
+          _start = DateTime.parse(savedData['start']);
         if (savedData['end'] != null) _end = DateTime.parse(savedData['end']);
-        
+
         // Carrega variáveis
         if (savedData['variables'] != null) {
           final vars = savedData['variables'] as Map<String, dynamic>;
@@ -129,7 +134,7 @@ class _StageFormState extends State<StageForm> {
             }
           });
         }
-        
+
         // Carrega químicos
         if (savedData['quimicos'] != null) {
           final quims = savedData['quimicos'] as Map<String, dynamic>;
@@ -230,8 +235,9 @@ class _StageFormState extends State<StageForm> {
 
   // Abre o dialog de químicos
   Future<void> _openQuimicosDialog() async {
-    final canEdit = _status == StageStatus.running || _status == StageStatus.idle;
-    
+    final canEdit =
+        _status == StageStatus.running || _status == StageStatus.idle;
+
     if (!canEdit) {
       _show('Inicie o processo para informar os químicos.', isError: true);
       return;
@@ -244,7 +250,8 @@ class _StageFormState extends State<StageForm> {
           builder: (context, setDialogState) {
             return Dialog(
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+                constraints:
+                    const BoxConstraints(maxWidth: 600, maxHeight: 700),
                 child: Column(
                   children: [
                     // Header - SEM ÍCONE
@@ -275,7 +282,7 @@ class _StageFormState extends State<StageForm> {
                         ],
                       ),
                     ),
-                    
+
                     // Lista de químicos
                     Expanded(
                       child: ListView(
@@ -283,7 +290,7 @@ class _StageFormState extends State<StageForm> {
                         children: quimicos.map((q) {
                           final ctrl = _quimicosControllers[q.nome]!;
                           final hasValue = ctrl.text.isNotEmpty;
-                          
+
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Column(
@@ -299,7 +306,7 @@ class _StageFormState extends State<StageForm> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                
+
                                 // Botão para informar quantidade
                                 OutlinedButton(
                                   onPressed: () async {
@@ -308,12 +315,13 @@ class _StageFormState extends State<StageForm> {
                                       controller: ctrl,
                                       unidade: q.unidade,
                                     );
-                                    
+
                                     if (result != null) {
                                       setDialogState(() {
                                         ctrl.text = result;
                                       });
-                                      setState(() {}); // Atualiza contador no botão
+                                      setState(
+                                          () {}); // Atualiza contador no botão
                                     }
                                   },
                                   style: OutlinedButton.styleFrom(
@@ -328,11 +336,13 @@ class _StageFormState extends State<StageForm> {
                                       horizontal: 16,
                                     ),
                                     backgroundColor: hasValue
-                                        ? const Color(0xFF4CAF50).withOpacity(0.05)
+                                        ? const Color(0xFF4CAF50)
+                                            .withOpacity(0.05)
                                         : const Color(0xFFF5F5F5),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
@@ -364,7 +374,7 @@ class _StageFormState extends State<StageForm> {
                         }).toList(),
                       ),
                     ),
-                    
+
                     // Botão fechar
                     Padding(
                       padding: const EdgeInsets.all(16),
@@ -388,9 +398,10 @@ class _StageFormState extends State<StageForm> {
   }
 
   Widget _fulaoSelector() {
-    final enabled = _status == StageStatus.running || _status == StageStatus.idle;
+    final enabled =
+        _status == StageStatus.running || _status == StageStatus.idle;
     final quimicosCount = _getQuimicosInformados();
-    
+
     return Row(
       children: [
         // Dropdown Fulão - SEM ÍCONE
@@ -410,9 +421,9 @@ class _StageFormState extends State<StageForm> {
             ),
           ),
         ),
-        
+
         const SizedBox(width: 12),
-        
+
         // Botão Químicos - SEM ÍCONE
         Expanded(
           flex: 1,
@@ -607,7 +618,8 @@ class _StageFormState extends State<StageForm> {
                     enabled: false,
                     style: TextStyle(
                       fontSize: 24,
-                      color: isOutOfRange ? Colors.amber : const Color(0xFF424242),
+                      color:
+                          isOutOfRange ? Colors.amber : const Color(0xFF424242),
                     ),
                     controller: TextEditingController(text: buf),
                     decoration: InputDecoration(
@@ -752,7 +764,8 @@ class _StageFormState extends State<StageForm> {
   @override
   Widget build(BuildContext context) {
     final s = widget.stage;
-    final canEdit = _status == StageStatus.running || _status == StageStatus.idle;
+    final canEdit =
+        _status == StageStatus.running || _status == StageStatus.idle;
 
     return SingleChildScrollView(
       controller: _scroll,
@@ -797,9 +810,11 @@ class _StageFormState extends State<StageForm> {
             const SizedBox(height: 12),
             _timeRow(),
             const SizedBox(height: 12),
-            _fulaoSelector(),
-            const SizedBox(height: 10),
-            
+            if (widget.stage.hasFulao) ...[
+              _fulaoSelector(),
+              const SizedBox(height: 10),
+            ],
+
             // RESPONSÁVEL - SEM ÍCONE
             DropdownButtonFormField<String>(
               value: _respSel,
@@ -819,7 +834,7 @@ class _StageFormState extends State<StageForm> {
                   v == '— selecione —' ? 'Selecione o responsável' : null,
             ),
             const SizedBox(height: 10),
-            
+
             // RESPONSÁVEL SUPERIOR - SEM ÍCONE
             DropdownButtonFormField<String>(
               value: _respSupSel,
@@ -837,7 +852,7 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
             const SizedBox(height: 10),
-            
+
             Container(
               key: _qtyKey,
               child: QtyCounter(
@@ -852,7 +867,7 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
             const SizedBox(height: 10),
-            
+
             // OBSERVAÇÃO - SEM ÍCONE
             TextFormField(
               controller: _obs,
@@ -867,7 +882,7 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // CONTAINER VARIÁVEIS - SEM ÍCONE
             Container(
               padding: const EdgeInsets.all(16),
@@ -899,7 +914,7 @@ class _StageFormState extends State<StageForm> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   ...s.variables.map((v) {
                     final ctrl = _controllers[v.name]!;
                     final min = v.min, max = v.max;
@@ -943,7 +958,9 @@ class _StageFormState extends State<StageForm> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        isOut ? Icons.warning_rounded : Icons.check_circle_rounded,
+                                        isOut
+                                            ? Icons.warning_rounded
+                                            : Icons.check_circle_rounded,
                                         size: 16,
                                         color: Colors.white,
                                       ),
@@ -962,7 +979,6 @@ class _StageFormState extends State<StageForm> {
                             ],
                           ),
                           const SizedBox(height: 6),
-                          
                           if (v.hint != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),
@@ -974,7 +990,6 @@ class _StageFormState extends State<StageForm> {
                                 ),
                               ),
                             ),
-                          
                           if (min != null || max != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8),
@@ -986,7 +1001,6 @@ class _StageFormState extends State<StageForm> {
                                 ),
                               ),
                             ),
-                          
                           OutlinedButton(
                             onPressed: (_status == StageStatus.running)
                                 ? () async {
@@ -1005,7 +1019,7 @@ class _StageFormState extends State<StageForm> {
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
                                 color: hasValue
-                                    ? (isOut 
+                                    ? (isOut
                                         ? const Color(0xFFFF9800)
                                         : const Color(0xFF4CAF50))
                                     : const Color(0xFF424242),
@@ -1018,7 +1032,8 @@ class _StageFormState extends State<StageForm> {
                               backgroundColor: hasValue && !isOut
                                   ? const Color(0xFF4CAF50).withOpacity(0.05)
                                   : (hasValue && isOut
-                                      ? const Color(0xFFFF9800).withOpacity(0.05)
+                                      ? const Color(0xFFFF9800)
+                                          .withOpacity(0.05)
                                       : const Color(0xFFF5F5F5)),
                             ),
                             child: Row(
@@ -1031,7 +1046,7 @@ class _StageFormState extends State<StageForm> {
                                         : '${ctrl.text} ${v.unit}',
                                     style: TextStyle(
                                       color: hasValue
-                                          ? (isOut 
+                                          ? (isOut
                                               ? const Color(0xFFFF9800)
                                               : const Color(0xFF4CAF50))
                                           : const Color(0xFF424242),
@@ -1043,7 +1058,7 @@ class _StageFormState extends State<StageForm> {
                                 Icon(
                                   Icons.edit_outlined,
                                   color: hasValue
-                                      ? (isOut 
+                                      ? (isOut
                                           ? const Color(0xFFFF9800)
                                           : const Color(0xFF4CAF50))
                                       : const Color(0xFF616161),
@@ -1060,7 +1075,7 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             FilledButton.icon(
               onPressed: _isSaving ? null : _handleSave,
               icon: _isSaving

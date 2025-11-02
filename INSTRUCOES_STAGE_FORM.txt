@@ -1,0 +1,51 @@
+Este arquivo contém APENAS a seção que precisa ser modificada no stage_form.dart
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROCURE NO SEU ARQUIVO stage_form.dart pela seção do método build():
+
+Dentro do Column, após StageActionBar e _timeRow(), você verá:
+
+            const SizedBox(height: 12),
+            _timeRow(),
+            const SizedBox(height: 12),
+            _fulaoSelector(),
+            const SizedBox(height: 10),
+
+SUBSTITUA ESSAS 2 LINHAS:
+            _fulaoSelector(),
+            const SizedBox(height: 10),
+
+POR ESTAS 4 LINHAS:
+            // Fulão e Químicos APENAS no REMOLHO
+            if (widget.stage.hasFulao) ...[
+              _fulaoSelector(),
+              const SizedBox(height: 10),
+            ],
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RESULTADO FINAL DEVE FICAR:
+
+            const SizedBox(height: 12),
+            _timeRow(),
+            const SizedBox(height: 12),
+            
+            // Fulão e Químicos APENAS no REMOLHO
+            if (widget.stage.hasFulao) ...[
+              _fulaoSelector(),
+              const SizedBox(height: 10),
+            ],
+            
+            // RESPONSÁVEL - SEM ÍCONE
+            DropdownButtonFormField<String>(
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IMPORTANTE:
+1. Certifique-se que stage.dart tem a propriedade hasFulao
+2. Execute: flutter clean
+3. Execute: flutter pub get  
+4. Execute: flutter run -d windows
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
