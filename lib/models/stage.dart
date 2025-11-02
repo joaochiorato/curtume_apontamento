@@ -13,6 +13,7 @@ class StageModel {
   final bool needsResponsibleSuperior;
   final bool hasPallets;
   final bool hasRefilador;
+  final bool hasFulao; // ← NOVO: controla se tem Fulão e Químicos
 
   StageModel({
     required this.code,
@@ -22,6 +23,7 @@ class StageModel {
     this.needsResponsibleSuperior = true,
     this.hasPallets = false,
     this.hasRefilador = false,
+    this.hasFulao = false, // ← NOVO: padrão false
   });
 }
 
@@ -48,6 +50,7 @@ final List<StageModel> availableStages = [
     code: 'REMOLHO',
     title: 'REMOLHO',
     machines: ['1', '2', '3', '4'],
+    hasFulao: true, // ← ÚNICO estágio com Fulão e Químicos
     variables: [
       VariableModel(
         name: 'Volume de Água',
@@ -76,6 +79,7 @@ final List<StageModel> availableStages = [
     code: 'ENXUGADEIRA',
     title: 'ENXUGADEIRA',
     machines: ['1', '2'],
+    hasFulao: false, // ← SEM Fulão
     variables: [
       VariableModel(
         name: 'Pressão do Rolo (1º manômetro)',
@@ -117,6 +121,7 @@ final List<StageModel> availableStages = [
     code: 'DIVISORA',
     title: 'DIVISORA',
     machines: ['1', '2'],
+    hasFulao: false, // ← SEM Fulão
     variables: [
       VariableModel(
         name: 'Espessura de Divisão',
@@ -161,12 +166,13 @@ final List<StageModel> availableStages = [
     ],
   ),
 
-  // 4. REBAIXADEIRA - SEM PALLETS
+  // 4. REBAIXADEIRA
   StageModel(
     code: 'REBAIXADEIRA',
     title: 'REBAIXADEIRA',
     machines: ['1', '2', '3', '4', '5', '6'],
-    hasPallets: false, // ✅ ALTERADO: removido os pallets
+    hasPallets: false,
+    hasFulao: false, // ← SEM Fulão
     variables: [
       VariableModel(
         name: 'Velocidade do Rolo de Transporte',
@@ -188,6 +194,7 @@ final List<StageModel> availableStages = [
     machines: null,
     needsResponsibleSuperior: false,
     hasRefilador: true,
+    hasFulao: false, // ← SEM Fulão
     variables: [
       VariableModel(
         name: 'Peso Líquido',
