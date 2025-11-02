@@ -32,7 +32,6 @@ if exist build rmdir /S /Q build 2>nul
 if exist .dart_tool rmdir /S /Q .dart_tool 2>nul
 echo OK
 echo.
-pause
 
 echo [3/4] Instalando dependencias...
 echo.

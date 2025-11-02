@@ -40,7 +40,7 @@ class _OrdersPageState extends State<OrdersPage> {
         of: '18283',
         cliente: 'Cliente A',
         data: DateTime.now(),
-        status: 'Em Produção',
+        status: StatusOrdem.emProducao,
         artigos: [
           ArtigoModel(codigo: 'ART001', descricao: 'QUARTZO', quantidade: 350),
           ArtigoModel(codigo: 'ART002', descricao: 'GRANITO', quantidade: 200),
@@ -50,7 +50,7 @@ class _OrdersPageState extends State<OrdersPage> {
         of: '18284',
         cliente: 'Cliente B',
         data: DateTime.now().subtract(const Duration(days: 1)),
-        status: 'Aguardando',
+        status: StatusOrdem.aguardando,
         artigos: [
           ArtigoModel(codigo: 'ART003', descricao: 'MÁRMORE', quantidade: 150),
         ],
@@ -59,7 +59,7 @@ class _OrdersPageState extends State<OrdersPage> {
         of: '18285',
         cliente: 'Cliente C',
         data: DateTime.now().subtract(const Duration(days: 2)),
-        status: 'Em Produção',
+        status: StatusOrdem.emProducao,
         artigos: [
           ArtigoModel(codigo: 'ART004', descricao: 'BASALTO', quantidade: 400),
           ArtigoModel(codigo: 'ART005', descricao: 'ARDÓSIA', quantidade: 250),
@@ -260,7 +260,8 @@ class _OrdersPageState extends State<OrdersPage> {
                       color: Color(0xFF424242),
                     ),
                   ),
-                  _buildStatusBadge(ordem.status),
+                  if (ordem.status != null)
+                    _buildStatusBadge(ordem.status!),
                 ],
               ),
               
@@ -309,8 +310,8 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    final isProduction = status == 'Em Produção';
+  Widget _buildStatusBadge(StatusOrdem status) {
+    final isProduction = status == StatusOrdem.emProducao;
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -321,7 +322,7 @@ class _OrdersPageState extends State<OrdersPage> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        status,
+        status.displayName,
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
