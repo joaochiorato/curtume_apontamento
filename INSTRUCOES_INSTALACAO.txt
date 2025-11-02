@@ -1,0 +1,247 @@
+# 🚀 GUIA DE INSTALAÇÃO - ATUALIZAÇÃO v2.1.0
+
+## 📦 Conteúdo do Pacote
+
+Este ZIP contém as atualizações do projeto para o padrão visual Frigosoft:
+
+```
+projeto_atualizado/
+├── lib/
+│   ├── models/
+│   │   └── stage.dart          ✅ ATUALIZADO - Sem pallets na Rebaixadeira
+│   └── pages/
+│       ├── orders_page.dart    ✅ NOVO - Padrão Frigosoft
+│       └── articles_page.dart  ✅ NOVO - Padrão Frigosoft
+├── scripts/
+│   ├── instalar.bat           ✅ ATUALIZADO - Windows
+│   └── instalar.sh            ✅ ATUALIZADO - Linux/Mac
+├── previews/
+│   ├── preview_orders.html    📱 Visualização OrdersPage
+│   ├── preview_articles.html  📱 Visualização ArticlesPage
+│   └── comparacao_visual.html 📊 Comparação Antes/Depois
+├── README.md                   📄 Documentação completa
+├── CHANGELOG_FRIGOSOFT.md     📝 Lista de mudanças
+└── INSTRUCOES_INSTALACAO.txt  📋 Este arquivo
+```
+
+---
+
+## ⚡ INSTALAÇÃO RÁPIDA
+
+### Windows:
+```cmd
+1. Extraia o ZIP na raiz do seu projeto Flutter
+2. Confirme a substituição dos arquivos
+3. Abra o terminal na pasta do projeto
+4. Execute: scripts\instalar.bat
+5. Execute: flutter run -d windows
+```
+
+### Linux/Mac:
+```bash
+1. Extraia o ZIP na raiz do seu projeto Flutter
+2. Confirme a substituição dos arquivos
+3. Abra o terminal na pasta do projeto
+4. Execute: chmod +x scripts/instalar.sh
+5. Execute: ./scripts/instalar.sh
+6. Execute: flutter run
+```
+
+---
+
+## 📝 PASSO A PASSO DETALHADO
+
+### 1. Backup (Recomendado)
+Antes de aplicar as atualizações, faça backup dos arquivos:
+```bash
+# Criar pasta de backup
+mkdir backup_antes_atualizacao
+
+# Copiar arquivos que serão substituídos
+cp lib/models/stage.dart backup_antes_atualizacao/
+cp lib/pages/orders_page.dart backup_antes_atualizacao/
+cp lib/pages/articles_page.dart backup_antes_atualizacao/
+cp scripts/instalar.bat backup_antes_atualizacao/
+cp scripts/instalar.sh backup_antes_atualizacao/
+```
+
+### 2. Extrair Atualização
+- Extraia o conteúdo do ZIP na **raiz do projeto**
+- Quando perguntado sobre substituir arquivos, escolha **"Sim para todos"**
+
+### 3. Verificar Arquivos
+Confirme que os arquivos foram copiados:
+```bash
+# Verificar estrutura
+tree lib/models/
+tree lib/pages/
+tree scripts/
+```
+
+### 4. Limpar Cache
+```bash
+# Limpar cache do Flutter
+flutter clean
+
+# Remover arquivos de lock
+rm -f pubspec.lock
+
+# Remover diretórios de build
+rm -rf build .dart_tool
+```
+
+### 5. Instalar Dependências
+```bash
+# Baixar todas as dependências
+flutter pub get
+
+# Verificar instalação
+flutter doctor
+```
+
+### 6. Executar Aplicação
+```bash
+# Windows
+flutter run -d windows
+
+# Linux
+flutter run -d linux
+
+# macOS
+flutter run -d macos
+```
+
+---
+
+## 🎨 VISUALIZAR PREVIEWS
+
+Antes de executar o app, você pode visualizar as mudanças nos navegadores:
+
+1. Navegue até a pasta `previews/`
+2. Abra os arquivos HTML no navegador:
+   - `preview_orders.html` - Lista de Ordens
+   - `preview_articles.html` - Lista de Artigos
+   - `comparacao_visual.html` - Comparação visual
+
+---
+
+## ✅ CHECKLIST DE VERIFICAÇÃO
+
+Após a instalação, verifique:
+
+- [ ] ✅ OrdersPage exibe instrução "Click duas vezes..."
+- [ ] ✅ Cards têm layout estruturado com dividers
+- [ ] ✅ Badges de status aparecem coloridos (verde/laranja)
+- [ ] ✅ ArticlesPage tem números em quadrados cinza
+- [ ] ✅ Double-tap funciona nos cards
+- [ ] ✅ Rebaixadeira NÃO tem sistema de pallets
+- [ ] ✅ Cores seguem padrão Frigosoft (#424242, #F5F5F5)
+
+---
+
+## 🔧 RESOLUÇÃO DE PROBLEMAS
+
+### Erro: "File already exists"
+**Solução:** Confirme a substituição dos arquivos ao extrair o ZIP.
+
+### Erro: "No such file or directory"
+**Solução:** Certifique-se de extrair o ZIP na raiz do projeto, não em subpastas.
+
+### Erro ao executar: "Missing dependencies"
+**Solução:**
+```bash
+flutter clean
+flutter pub get
+```
+
+### Erro: "Building failed"
+**Solução:**
+```bash
+# Windows
+scripts\instalar.bat
+
+# Linux/Mac
+./scripts/instalar.sh
+```
+
+### Arquivo .exe bloqueado (Windows)
+**Solução:**
+```bash
+taskkill /F /IM curtume_apontamento_remolho.exe
+flutter clean
+flutter run
+```
+
+---
+
+## 📊 O QUE MUDOU
+
+### ✅ Removido:
+- ❌ Sistema de 10 pallets na Rebaixadeira
+- ❌ Referências a pallets nos scripts
+
+### ✅ Adicionado:
+- ✅ Instrução "Click duas vezes no item para selecionar"
+- ✅ Layout estruturado com dividers
+- ✅ Badges de status coloridos
+- ✅ Double-tap em vez de single tap
+- ✅ Cores padronizadas Frigosoft
+- ✅ Tipografia consistente
+- ✅ Contador de resultados
+
+### ✅ Melhorado:
+- ✅ UX mais intuitiva
+- ✅ Visual mais profissional
+- ✅ Consistência com coletor Frigosoft
+- ✅ Melhor organização visual
+
+---
+
+## 📞 SUPORTE
+
+### Problemas na instalação?
+1. Verifique se está na raiz do projeto
+2. Confirme que tem Flutter instalado: `flutter --version`
+3. Execute `flutter doctor` para diagnóstico
+4. Consulte o CHANGELOG_FRIGOSOFT.md
+
+### Dúvidas sobre as mudanças?
+- Leia o arquivo CHANGELOG_FRIGOSOFT.md
+- Veja os previews HTML na pasta `previews/`
+- Consulte o README.md atualizado
+
+---
+
+## 🎯 PRÓXIMOS PASSOS
+
+Após instalar e testar:
+
+1. ✅ Verifique todas as telas
+2. ✅ Teste a navegação com double-tap
+3. ✅ Confirme as cores e layout
+4. ✅ Teste em diferentes resoluções
+5. ✅ Reporte qualquer inconsistência
+
+---
+
+## 📄 VERSÃO
+
+- **Versão:** 2.1.0
+- **Data:** Novembro 2025
+- **Compatibilidade:** Flutter 3.0+
+- **Plataformas:** Windows, Linux, macOS
+
+---
+
+**Instalação bem-sucedida?** 🎉
+
+Execute o aplicativo e veja as melhorias em ação!
+
+```bash
+flutter run -d windows
+```
+
+---
+
+*Este guia foi gerado automaticamente com a atualização do projeto.*
+*Para mais informações, consulte README.md e CHANGELOG_FRIGOSOFT.md*

@@ -1,328 +1,159 @@
-# 🎯 SISTEMA COMPLETO FINAL - CURTUME APONTAMENTO
+# 🏭 SISTEMA DE APONTAMENTO DE PRODUÇÃO - CURTUME VANCOUROS
 
-## 📦 VERSÃO FINAL - TODAS AS CORREÇÕES APLICADAS
+## 📋 Versão 2.0.1 - ATUALIZADA
 
-Este ZIP contém o sistema completo e corrigido com:
-- ✅ Dados reais da OF 18283 (QUARTZO - Vancouros)
-- ✅ Sistema de gerenciamento de status automático
-- ✅ 5 estágios (sem Descanso)
-- ✅ Layout padronizado ATAK
-- ✅ **Fulão e Químicos APENAS no REMOLHO**
+Sistema de apontamento de produção para curtume desenvolvido em Flutter.
 
 ---
 
-## 📁 ESTRUTURA DE ARQUIVOS
+## ✨ RECURSOS DO SISTEMA
 
-```
-sistema_completo_final/
-├── lib/
-│   ├── models/
-│   │   ├── status_ordem.dart       ← Enum de status
-│   │   ├── order.dart              ← Dados da OF 18283
-│   │   └── stage.dart              ← 5 estágios (Fulão/Químicos só no REMOLHO)
-│   └── pages/
-│       └── orders_page.dart        ← Tela de ordens
-├── docs/
-│   ├── ATUALIZACAO_OF18283.md
-│   ├── DOCUMENTACAO_SISTEMA_STATUS.md
-│   └── FULAO_QUIMICOS_APENAS_REMOLHO.md
-├── README.md                       ← Este arquivo
-├── instalar.bat                    ← Windows
-└── instalar.sh                     ← Linux/Mac
-```
+### ✅ 5 Estágios Completos
+1. **REMOLHO** - 4 Fulões disponíveis
+2. **ENXUGADEIRA** - 2 Máquinas
+3. **DIVISORA** - 2 Máquinas  
+4. **REBAIXADEIRA** - 6 Máquinas
+5. **REFILA** - Identificação do Refilador
 
----
+### ✅ Funcionalidades Principais
+- ✅ Controle de Responsável
+- ✅ Responsável Superior (Remolho, Enxugadeira, Divisora e Rebaixadeira)
+- ✅ Seleção de Máquina/Fulão
+- ✅ Contador de Quantidade Processada (peças)
+- ✅ Campo de Observações
+- ✅ Registro de Variáveis com validação de padrões
+- ✅ Controle de status: Iniciar, Pausar, Reabrir, Fechar
+- ✅ Início e Término Automáticos
+- ✅ Interface inspirada no Frigosoft
 
-## ⭐ CORREÇÃO PRINCIPAL DESTA VERSÃO
-
-### ✅ Fulão e Químicos APENAS no REMOLHO
-
-| Estágio | Fulão | Químicos |
-|---------|-------|----------|
-| **REMOLHO** | ✅ Sim (1-4) | ✅ Sim (dialog) |
-| **ENXUGADEIRA** | ❌ Não | ❌ Não |
-| **DIVISORA** | ❌ Não | ❌ Não |
-| **REBAIXADEIRA** | ❌ Não | ❌ Não |
-| **REFILA** | ❌ Não | ❌ Não |
+### ✅ Rebaixadeira
+- 6 máquinas disponíveis
+- Variáveis: Velocidade do Rolo de Transporte e Espessura de Rebaixe
+- **SEM sistema de pallets**
 
 ---
 
-## 🎯 OF 18283 - QUARTZO (Dados Reais)
+## 🚀 INSTALAÇÃO
 
-| Campo | Valor |
-|-------|-------|
-| **OF Nº** | 18283 |
-| **Cliente** | Vancouros |
-| **Data** | 14/10/2025 |
-| **Artigo** | QUARTZO |
-| **PVE** | 7315 |
-| **Cor** | E - BROWN |
-| **Classe** | G119 |
-| **Lote WET BLUE** | 32666 |
-| **Nº Pçs NF** | 350 |
-| **Peso Líquido** | 9.855 kg |
-
----
-
-## 🔄 5 ESTÁGIOS IMPLEMENTADOS
-
-```
-1. REMOLHO
-   ✅ Fulão: 1, 2, 3, 4
-   ✅ Químicos (dialog)
-   └─ 3 variáveis de controle
-   
-2. ENXUGADEIRA
-   ❌ Sem Fulão
-   ❌ Sem Químicos
-   └─ Máquina: 1, 2
-   └─ 5 variáveis de controle
-   
-3. DIVISORA
-   ❌ Sem Fulão
-   ❌ Sem Químicos
-   └─ Máquina: 1, 2
-   └─ 7 variáveis de controle
-   
-❌ DESCANSO (REMOVIDO)
-   
-4. REBAIXADEIRA
-   ❌ Sem Fulão
-   ❌ Sem Químicos
-   └─ Máquina: 1-6
-   └─ 10 PLTs (Pallets)
-   
-5. REFILA
-   ❌ Sem Fulão
-   ❌ Sem Químicos
-   └─ Nome do Refilador
-   └─ 3 variáveis de peso
-```
-
----
-
-## 🚀 INSTALAÇÃO RÁPIDA
-
-### Windows:
+### Windows
 ```bash
-# 1. Extrair ZIP na raiz do projeto
-# 2. Executar:
-sistema_completo_final\instalar.bat
+# Execute o script de instalação
+scripts\instalar.bat
 ```
 
-### Linux/Mac:
+### Linux/Mac
 ```bash
-# 1. Extrair ZIP na raiz do projeto
-# 2. Executar:
-chmod +x sistema_completo_final/instalar.sh
-./sistema_completo_final/instalar.sh
+# Dê permissão de execução
+chmod +x scripts/instalar.sh
+
+# Execute o script
+./scripts/instalar.sh
 ```
 
-### Manual:
+### Manual
 ```bash
-# 1. Fazer backups
-cp lib/models/order.dart lib/models/order.dart.backup
-cp lib/models/stage.dart lib/models/stage.dart.backup
-cp lib/pages/orders_page.dart lib/pages/orders_page.dart.backup
-
-# 2. Copiar arquivos
-cp sistema_completo_final/lib/models/status_ordem.dart lib/models/
-cp sistema_completo_final/lib/models/order.dart lib/models/
-cp sistema_completo_final/lib/models/stage.dart lib/models/
-cp sistema_completo_final/lib/pages/orders_page.dart lib/pages/
-
-# 3. Executar
-flutter clean && flutter pub get && flutter run
-```
-
----
-
-## ✅ TODAS AS FUNCIONALIDADES
-
-### 1. Sistema de Status Automático
-```
-AGUARDANDO
-    ↓ (ao iniciar 1º apontamento)
-EM PRODUÇÃO
-    ↓ (ao finalizar todos)
-FINALIZADO
-```
-
-### 2. Layout Padronizado ATAK
-- ✅ Título: "ATAK - Apontamento"
-- ✅ Sem ícones circulares com números
-- ✅ Sem badges coloridos
-- ✅ Barra de progresso visual
-- ✅ Status discreto
-
-### 3. Dados Reais da OF 18283
-- ✅ Artigo: QUARTZO
-- ✅ Cliente: Vancouros
-- ✅ 350 peças
-- ✅ Todos os campos do PDF
-
-### 4. Fulão e Químicos APENAS no REMOLHO
-- ✅ REMOLHO: Dropdown Fulão + Botão Químicos
-- ❌ Outros estágios: Sem esses campos
-
-### 5. Estágios Específicos
-- ✅ REMOLHO: Fulão + Químicos
-- ✅ ENXUGADEIRA: 5 variáveis
-- ✅ DIVISORA: 7 variáveis
-- ✅ REBAIXADEIRA: 10 PLTs
-- ✅ REFILA: Nome do Refilador
-
----
-
-## 📊 MUDANÇAS DESTA VERSÃO
-
-### ANTES (versões anteriores):
-- ⚠️ Todos os estágios tinham Fulão e Químicos
-- ⚠️ 6 estágios (com Descanso)
-- ⚠️ Dados mockados genéricos
-
-### AGORA (versão final):
-- ✅ Fulão e Químicos APENAS no REMOLHO
-- ✅ 5 estágios (sem Descanso)
-- ✅ Dados reais da OF 18283
-- ✅ Sistema de status automático
-- ✅ Layout padronizado ATAK
-
----
-
-## 🎨 INTERFACE VISUAL
-
-### Tela do REMOLHO (com Fulão e Químicos):
-```
-┌─────────────────────────────────────┐
-│ REMOLHO                             │
-├─────────────────────────────────────┤
-│ [Iniciar] [Pausar] [Encerrar]      │
-│                                     │
-│ ┌──────────┐  ┌──────────┐        │
-│ │ Fulão: 2 │  │Químicos  │ ✅      │
-│ └──────────┘  │  3/6     │        │
-│               └──────────┘        │
-│                                     │
-│ Responsável: [______]               │
-│ Variáveis: [______]                 │
-└─────────────────────────────────────┘
-```
-
-### Tela da ENXUGADEIRA (sem Fulão e Químicos):
-```
-┌─────────────────────────────────────┐
-│ ENXUGADEIRA                         │
-├─────────────────────────────────────┤
-│ [Iniciar] [Pausar] [Encerrar]      │
-│                                     │
-│ ❌ SEM Fulão                        │
-│ ❌ SEM Químicos                     │
-│                                     │
-│ Máquina: [1] [2]                    │
-│ Responsável: [______]               │
-│ Variáveis: [______]                 │
-└─────────────────────────────────────┘
-```
-
----
-
-## 📋 REGRAS DE NEGÓCIO
-
-### Status Automático:
-1. **Aguardando** → Nenhum apontamento iniciado
-2. **Em Produção** → Ao iniciar primeiro apontamento (automático)
-3. **Finalizado** → Ao finalizar todos (automático)
-
-### Fulão e Químicos:
-1. **REMOLHO** → Tem campos Fulão e Químicos
-2. **Outros estágios** → NÃO têm esses campos
-
-### Validações:
-- ✅ REMOLHO: Exige seleção de Fulão
-- ✅ Estados finais não podem ser alterados
-- ✅ Transições automáticas validadas
-
----
-
-## 📚 DOCUMENTAÇÃO COMPLETA
-
-1. `docs/ATUALIZACAO_OF18283.md`
-   - Detalhes da OF 18283 QUARTZO
-   - Dados extraídos do PDF
-
-2. `docs/DOCUMENTACAO_SISTEMA_STATUS.md`
-   - Sistema de status automático
-   - Fluxo de transições
-
-3. `docs/FULAO_QUIMICOS_APENAS_REMOLHO.md`
-   - Explicação detalhada
-   - Configuração por estágio
-
----
-
-## ✅ CHECKLIST PÓS-INSTALAÇÃO
-
-Após instalar, verifique:
-
-- [ ] Projeto compila sem erros
-- [ ] OF 18283 aparece com dados corretos
-- [ ] Título: "ATAK - Apontamento"
-- [ ] REMOLHO tem Fulão e Químicos
-- [ ] ENXUGADEIRA NÃO tem Fulão e Químicos
-- [ ] DIVISORA NÃO tem Fulão e Químicos
-- [ ] REBAIXADEIRA NÃO tem Fulão e Químicos (tem 10 PLTs)
-- [ ] REFILA NÃO tem Fulão e Químicos (tem Nome Refilador)
-- [ ] Status em texto discreto
-- [ ] Barra de progresso funcional
-
----
-
-## 🐛 SOLUÇÃO DE PROBLEMAS
-
-### Erro de compilação:
-```bash
+# Limpar cache
 flutter clean
+
+# Instalar dependências
 flutter pub get
-flutter run
-```
 
-### Fulão aparece em outros estágios:
-Verifique se o arquivo `stage.dart` foi substituído corretamente:
-```bash
-grep -n "hasFulao" lib/models/stage.dart
-```
-
-### Restaurar backups:
-```bash
-cp lib/models/order.dart.backup lib/models/order.dart
-cp lib/models/stage.dart.backup lib/models/stage.dart
-cp lib/pages/orders_page.dart.backup lib/pages/orders_page.dart
+# Executar
+flutter run -d windows
 ```
 
 ---
 
-## 🎯 RECURSOS FINAIS
+## 📁 ESTRUTURA DO PROJETO
 
-### Dados:
-✅ OF 18283 real (QUARTZO - Vancouros)
-✅ 350 peças
-✅ Peso líquido: 9.855 kg
-✅ Lote WET BLUE: 32666
-
-### Estágios:
-✅ 5 estágios (sem Descanso)
-✅ REMOLHO com Fulão e Químicos
-✅ Outros estágios sem Fulão e Químicos
-
-### Sistema:
-✅ Status automático (Aguardando → Em Produção → Finalizado)
-✅ Layout padronizado ATAK
-✅ Barra de progresso visual
-✅ Validações completas
+```
+lib/
+├── main.dart                 # Ponto de entrada
+├── theme.dart               # Tema do app
+├── models/
+│   ├── order.dart           # Modelo de Ordem
+│   ├── article.dart         # Modelo de Artigo
+│   └── stage.dart           # Modelo de Estágio (ATUALIZADO)
+├── pages/
+│   ├── home_page.dart       # Tela inicial
+│   ├── orders_page.dart     # Lista de ordens
+│   ├── articles_page.dart   # Lista de artigos
+│   └── stage_page.dart      # Página dos estágios
+└── widgets/
+    ├── stage_button.dart    # Botão de estágio
+    ├── stage_form.dart      # Formulário do estágio
+    ├── stage_action_bar.dart # Barra de ações
+    └── qty_counter.dart     # Contador customizado
+```
 
 ---
 
-**Sistema completo e pronto para uso! 🎉**
-**Fulão e Químicos APENAS no REMOLHO! ✅**
-**Baseado na OF 18283 real! 🎯**
+## 🔄 CHANGELOG v2.0.1
+
+### Removido
+- ❌ Sistema de 10 pallets da Rebaixadeira
+- ❌ Referências a pallets nos scripts de instalação
+
+### Mantido
+- ✅ Todos os 5 estágios funcionais
+- ✅ Sistema de variáveis com validação
+- ✅ Contador de peças processadas
+- ✅ Interface visual do Frigosoft
+- ✅ Scripts de instalação e correção
+
+---
+
+## 🛠️ CORREÇÃO DE PROBLEMAS
+
+### Arquivo EXE bloqueado
+```bash
+# Windows
+scripts\corrigir_build.bat
+
+# PowerShell
+scripts\corrigir_build.ps1
+
+# Como Administrador
+scripts\corrigir_build_admin.bat
+```
+
+---
+
+## 📱 PLATAFORMAS SUPORTADAS
+
+- ✅ Windows Desktop
+- ✅ Linux
+- ✅ macOS
+- ⚠️ Android/iOS (necessita ajustes)
+
+---
+
+## 🎨 DESIGN
+
+Interface baseada no sistema **Frigosoft** da ATAK Sistemas:
+- Header cinza escuro (#424242)
+- Fundo cinza claro (#F5F5F5)
+- Cards brancos com sombra
+- Botões de ação no rodapé
+- Logo ATAK em destaque
+
+---
+
+## 📄 LICENÇA
+
+Uso interno - Curtume Vancouros
+
+---
+
+## 👥 SUPORTE
+
+Para dúvidas ou problemas:
+- Consulte a documentação
+- Verifique os scripts de correção
+- Execute `flutter doctor` para diagnóstico
+
+---
+
+**Sistema desenvolvido para controle de produção industrial de curtume.**
+
+*Última atualização: v2.0.1 - Outubro 2025*

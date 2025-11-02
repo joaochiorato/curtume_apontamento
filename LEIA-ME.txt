@@ -1,0 +1,167 @@
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║   ATUALIZAÇÃO PROJETO CURTUME - PADRÃO FRIGOSOFT v2.1.0     ║
+║                                                              ║
+║   Sistema de Apontamento de Produção                        ║
+║   Vancouros - Flutter Desktop                               ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+📦 CONTEÚDO DESTE PACOTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Este ZIP contém todas as atualizações necessárias para aplicar
+o padrão visual do coletor Frigosoft ao seu projeto.
+
+┌─────────────────────────────────────────────────────────────┐
+│  📁 lib/models/                                             │
+│     └── stage.dart .......................... ATUALIZADO    │
+│         • Removido sistema de 10 pallets da Rebaixadeira   │
+│                                                             │
+│  📁 lib/pages/                                              │
+│     ├── orders_page.dart .................... NOVO          │
+│     │   • Instrução "Click duas vezes..."                  │
+│     │   • Cards com layout estruturado                     │
+│     │   • Badges de status coloridos                       │
+│     │   • Double-tap para seleção                          │
+│     │                                                       │
+│     └── articles_page.dart .................. NOVO          │
+│         • Números em quadrados cinza                        │
+│         • Layout horizontal com seta                        │
+│         • Badge de contador no header                       │
+│                                                             │
+│  📁 scripts/                                                │
+│     ├── instalar.bat ........................ ATUALIZADO    │
+│     └── instalar.sh ......................... ATUALIZADO    │
+│                                                             │
+│  📁 previews/                                               │
+│     ├── preview_orders.html ................. NOVO          │
+│     ├── preview_articles.html ............... NOVO          │
+│     └── comparacao_visual.html .............. NOVO          │
+│                                                             │
+│  📄 README.md ............................... ATUALIZADO    │
+│  📄 CHANGELOG_FRIGOSOFT.md .................. NOVO          │
+│  📄 INSTRUCOES_INSTALACAO.txt ............... NOVO          │
+│  📄 LEIA-ME.txt ............................. Este arquivo  │
+└─────────────────────────────────────────────────────────────┘
+
+
+⚡ INSTALAÇÃO RÁPIDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Extraia TODO o conteúdo deste ZIP na RAIZ do seu projeto
+2. Confirme "Sim para todos" quando perguntado sobre substituir
+3. Abra o terminal na pasta do projeto
+4. Execute o script de instalação:
+   
+   Windows:  scripts\instalar.bat
+   Linux:    ./scripts/instalar.sh
+   
+5. Execute o aplicativo:
+   
+   flutter run -d windows
+
+
+📋 ANTES DE INSTALAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ RECOMENDADO: Faça backup dos arquivos atuais:
+   • lib/models/stage.dart
+   • lib/pages/orders_page.dart
+   • lib/pages/articles_page.dart
+
+
+🎨 VISUALIZAR ANTES DE INSTALAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Você pode visualizar as mudanças ANTES de instalar:
+
+1. Abra a pasta "previews/"
+2. Clique duas vezes nos arquivos HTML:
+   
+   • preview_orders.html ......... Lista de Ordens
+   • preview_articles.html ....... Lista de Artigos
+   • comparacao_visual.html ...... Antes × Depois
+
+Os arquivos abrem no navegador e são totalmente interativos!
+
+
+✨ PRINCIPAIS MUDANÇAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ REMOVIDO:
+   • Sistema de 10 pallets na Rebaixadeira
+
+✅ ADICIONADO:
+   • Instrução "Click duas vezes no item para selecionar"
+   • Layout estruturado inspirado no Frigosoft
+   • Badges de status coloridos (verde/laranja)
+   • Double-tap para navegação
+   • Cores padronizadas (#424242, #F5F5F5)
+   • Dividers entre seções
+   • Tipografia consistente
+
+✅ MELHORADO:
+   • Interface mais profissional
+   • UX mais intuitiva
+   • Visual 100% alinhado com Frigosoft
+   • Melhor organização das informações
+
+
+📖 DOCUMENTAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Após extrair, consulte:
+
+📄 INSTRUCOES_INSTALACAO.txt ... Guia completo passo a passo
+📄 CHANGELOG_FRIGOSOFT.md ....... Lista detalhada de mudanças
+📄 README.md .................... Documentação do projeto
+
+
+🔧 SUPORTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Problemas na instalação?
+
+1. Verifique se extraiu na RAIZ do projeto
+2. Execute: flutter doctor
+3. Execute: flutter clean && flutter pub get
+4. Consulte INSTRUCOES_INSTALACAO.txt
+
+
+📊 COMPATIBILIDADE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Flutter:      3.0 ou superior
+• Plataformas:  Windows, Linux, macOS
+• Dart SDK:     >=3.0.0 <4.0.0
+
+
+✅ CHECKLIST PÓS-INSTALAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Após instalar, verifique:
+
+□ Instrução "Click duas vezes..." aparece no topo
+□ Cards têm layout estruturado com dividers
+□ Badges de status coloridos funcionam
+□ Double-tap abre os detalhes
+□ Cores seguem padrão Frigosoft
+□ Rebaixadeira NÃO tem pallets
+
+
+🎯 VERSÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Versão:          2.1.0
+Data:            Novembro 2025
+Baseado em:      Screenshots Frigosoft
+Desenvolvido para: Curtume Vancouros
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        Pronto para começar? Extraia o ZIP e siga as
+             instruções em INSTRUCOES_INSTALACAO.txt
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

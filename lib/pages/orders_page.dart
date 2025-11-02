@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/order.dart';
-import '../models/status_ordem.dart';
 import 'articles_page.dart';
 
 class OrdersPage extends StatefulWidget {
@@ -34,65 +33,37 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Future<void> _load() async {
-    // ✅ DADOS REAIS DA OF 18283 - BASEADO NO PDF VANCOUROS
     await Future.delayed(const Duration(milliseconds: 500));
     
     _ordens = [
-      // OF 18283: QUARTZO - Aguardando (dados reais do PDF)
       OrdemModel(
         of: '18283',
-        cliente: 'Vancouros', // Cliente conforme PDF
-        data: DateTime(2025, 10, 14), // Data do PDF: 14/10/25
-        status: StatusOrdem.aguardando,
+        cliente: 'Cliente A',
+        data: DateTime.now(),
+        status: 'Em Produção',
         artigos: [
-          ArtigoModel(
-            codigo: 'QUARTZO',
-            descricao: 'QUARTZO',
-            quantidade: 350, // Nº PÇS NF do PDF
-            pve: '7315',
-            cor: 'E - BROWN',
-            classe: 'G119',
-            po: '7315CK08',
-            crustItem: '1165',
-            espFinal: '1.1/1.5',
-            loteWetBlue: '32666',
-            metragemNF: 21295.25,
-            avg: 60.84,
-            pesoLiquido: 9855.00,
-          ),
+          ArtigoModel(codigo: 'ART001', descricao: 'QUARTZO', quantidade: 350),
+          ArtigoModel(codigo: 'ART002', descricao: 'GRANITO', quantidade: 200),
         ],
-        apontamentosIniciados: 0,
-        apontamentosFinalizados: 0,
       ),
-      
-      // OF 18284: Exemplo - Em Produção
       OrdemModel(
         of: '18284',
         cliente: 'Cliente B',
         data: DateTime.now().subtract(const Duration(days: 1)),
-        status: StatusOrdem.emProducao,
+        status: 'Aguardando',
         artigos: [
           ArtigoModel(codigo: 'ART003', descricao: 'MÁRMORE', quantidade: 150),
         ],
-        apontamentosIniciados: 1,
-        apontamentosFinalizados: 0,
-        dataInicio: DateTime.now().subtract(const Duration(hours: 2)),
       ),
-      
-      // OF 18285: Exemplo - Finalizado
       OrdemModel(
         of: '18285',
         cliente: 'Cliente C',
         data: DateTime.now().subtract(const Duration(days: 2)),
-        status: StatusOrdem.finalizado,
+        status: 'Em Produção',
         artigos: [
           ArtigoModel(codigo: 'ART004', descricao: 'BASALTO', quantidade: 400),
           ArtigoModel(codigo: 'ART005', descricao: 'ARDÓSIA', quantidade: 250),
         ],
-        apontamentosIniciados: 2,
-        apontamentosFinalizados: 2,
-        dataInicio: DateTime.now().subtract(const Duration(days: 2)),
-        dataFinalizacao: DateTime.now().subtract(const Duration(hours: 4)),
       ),
     ];
     
@@ -103,11 +74,9 @@ class _OrdersPageState extends State<OrdersPage> {
   void _aplicarFiltros() {
     setState(() {
       _ordensFiltradas = _ordens.where((ordem) {
-        // Filtro por número da OF
         final matchOF = _filtroOF.text.isEmpty ||
             ordem.of.toLowerCase().contains(_filtroOF.text.toLowerCase());
 
-        // Filtro por data
         final matchData = _dataFiltro == null ||
             (ordem.data.year == _dataFiltro!.year &&
              ordem.data.month == _dataFiltro!.month &&
@@ -128,182 +97,107 @@ class _OrdersPageState extends State<OrdersPage> {
     );
 
     if (picked != null) {
-      setState(() {
-        _dataFiltro = picked;
-        _aplicarFiltros();
-      });
+      setState(() => _dataFiltro = picked);
+      _aplicarFiltros();
     }
   }
 
-  void _limparFiltros() {
-    setState(() {
-      _filtroOF.clear();
-      _dataFiltro = null;
-      _ordensFiltradas = _ordens;
-    });
-  }
-
-  // 🎨 Retorna a cor do status (uso discreto)
-  Color _getStatusColor(StatusOrdem status) {
-    switch (status) {
-      case StatusOrdem.aguardando:
-        return Colors.grey.shade600;
-      case StatusOrdem.emProducao:
-        return Colors.blue.shade700;
-      case StatusOrdem.finalizado:
-        return Colors.green.shade700;
-      case StatusOrdem.cancelado:
-        return Colors.red.shade700;
-    }
-  }
-
-  // 📊 Widget de indicador de progresso
-  Widget _buildProgressIndicator(OrdemModel ordem) {
-    if (ordem.status == StatusOrdem.aguardando) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: ordem.percentualConclusao,
-          backgroundColor: Colors.grey.shade300,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            ordem.status == StatusOrdem.finalizado
-                ? Colors.green
-                : Colors.blue,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          ordem.infoProgresso,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
-    );
+  void _limparFiltroData() {
+    setState(() => _dataFiltro = null);
+    _aplicarFiltros();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text('ATAK - Apontamento'),
-        actions: [
-          // Contador de ordens filtradas
-          if (!_loading)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Text(
-                  '${_ordensFiltradas.length} OF(s)',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-            ),
-        ],
+        title: const Text('SELECIONE A ORDEM'),
+        centerTitle: false,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Área de filtros
+                // Instrução no topo - estilo Frigosoft
                 Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF37474F),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.white.withOpacity(0.1),
-                        width: 1,
-                      ),
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.white,
+                  child: const Text(
+                    'Click duas vezes no item para selecionar',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF616161),
+                      fontWeight: FontWeight.w500,
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          // Filtro por número da OF
-                          Expanded(
-                            flex: 2,
-                            child: TextField(
-                              controller: _filtroOF,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                labelText: 'Buscar OF',
-                                labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                                hintText: 'Ex: 18283',
-                                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                                prefixIcon: const Icon(Icons.search, color: Colors.white),
-                                suffixIcon: _filtroOF.text.isNotEmpty
-                                    ? IconButton(
-                                        icon: const Icon(Icons.clear, color: Colors.white),
-                                        onPressed: () => _filtroOF.clear(),
-                                      )
-                                    : null,
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Colors.white.withOpacity(0.3),
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: Colors.white,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                filled: true,
-                                fillColor: Colors.black.withOpacity(0.2),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          
-                          // Botão de filtro por data
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _selecionarData,
-                              icon: const Icon(Icons.calendar_today, color: Colors.white, size: 18),
-                              label: Text(
-                                _dataFiltro == null
-                                    ? 'Data'
-                                    : dfDate.format(_dataFiltro!),
-                                style: const TextStyle(fontSize: 13, color: Colors.white),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          
-                          // Botão limpar filtros
-                          if (_filtroOF.text.isNotEmpty || _dataFiltro != null)
-                            IconButton(
-                              onPressed: _limparFiltros,
-                              icon: const Icon(Icons.filter_alt_off, color: Colors.white),
-                              tooltip: 'Limpar filtros',
-                              style: IconButton.styleFrom(
-                                backgroundColor: Colors.red.withOpacity(0.3),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
                 
-                // Lista de ordens filtradas
+                // Filtros
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _filtroOF,
+                          decoration: InputDecoration(
+                            labelText: 'Filtrar por OF',
+                            prefixIcon: const Icon(Icons.search),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F5F5),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: _selecionarData,
+                        icon: const Icon(Icons.calendar_today),
+                        style: IconButton.styleFrom(
+                          backgroundColor: _dataFiltro != null
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFF424242),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.all(12),
+                        ),
+                      ),
+                      if (_dataFiltro != null)
+                        IconButton(
+                          onPressed: _limparFiltroData,
+                          icon: const Icon(Icons.clear),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Contador de resultados
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: const Color(0xFFE0E0E0),
+                  child: Text(
+                    '${_ordensFiltradas.length} ordem(ns) encontrada(s)',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF424242),
+                    ),
+                  ),
+                ),
+
+                // Lista de ordens
                 Expanded(
                   child: _ordensFiltradas.isEmpty
                       ? const Center(
@@ -324,98 +218,7 @@ class _OrdersPageState extends State<OrdersPage> {
                           itemCount: _ordensFiltradas.length,
                           itemBuilder: (context, index) {
                             final ordem = _ordensFiltradas[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ArticlesPage(of: ordem),
-                                    ),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(8),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Título da OF em destaque
-                                      Text(
-                                        'OF ${ordem.of}',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          color: Color(0xFF424242),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      
-                                      // Linha divisória sutil
-                                      Container(
-                                        height: 1,
-                                        color: Colors.grey.shade300,
-                                      ),
-                                      const SizedBox(height: 12),
-                                      
-                                      // Informações da ordem
-                                      _buildInfoRow(
-                                        icon: Icons.person_outline,
-                                        label: 'Cliente',
-                                        value: ordem.cliente,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildInfoRow(
-                                        icon: Icons.calendar_today,
-                                        label: 'Data',
-                                        value: dfDate.format(ordem.data),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildInfoRow(
-                                        icon: Icons.inventory_2_outlined,
-                                        label: 'Artigos',
-                                        value: '${ordem.artigos.length} artigo(s)',
-                                      ),
-                                      
-                                      // Indicador de progresso (se aplicável)
-                                      _buildProgressIndicator(ordem),
-                                      
-                                      const SizedBox(height: 12),
-                                      Container(
-                                        height: 1,
-                                        color: Colors.grey.shade300,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      
-                                      // Status discreto
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            ordem.statusTexto,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: _getStatusColor(ordem.status),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.arrow_forward_ios,
-                                            size: 16,
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
+                            return _buildOrderCard(ordem);
                           },
                         ),
                 ),
@@ -424,25 +227,72 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  // Método auxiliar para exibir informações com ícones
-  Widget _buildInfoRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
+  Widget _buildOrderCard(OrdemModel ordem) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onDoubleTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ArticlesPage(of: ordem),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cabeçalho: OF + Status
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'OF: ${ordem.of}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF424242),
+                    ),
+                  ),
+                  _buildStatusBadge(ordem.status),
+                ],
+              ),
+              
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              
+              // Informações detalhadas
+              _buildInfoRow('Cliente', ordem.cliente),
+              const SizedBox(height: 6),
+              _buildInfoRow('Data', dfDate.format(ordem.data)),
+              const SizedBox(height: 6),
+              _buildInfoRow('Artigos', '${ordem.artigos.length} item(ns)'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Colors.grey.shade600,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade700,
+        SizedBox(
+          width: 80,
+          child: Text(
+            '$label:',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF757575),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         Expanded(
@@ -450,12 +300,34 @@ class _OrdersPageState extends State<OrdersPage> {
             value,
             style: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w500,
               color: Color(0xFF424242),
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    final isProduction = status == 'Em Produção';
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isProduction 
+            ? const Color(0xFF4CAF50) 
+            : const Color(0xFFFF9800),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }

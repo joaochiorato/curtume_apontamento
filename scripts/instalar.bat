@@ -1,11 +1,11 @@
 @echo off
 cls
 echo ==========================================
-echo  INSTALACAO PROJETO v2.0 - COMPLETO
+echo  INSTALACAO PROJETO v2.0 - ATUALIZADO
 echo ==========================================
 echo.
 echo Projeto: Curtume Apontamento Vancouros
-echo Versao: 2.0.0
+echo Versao: 2.0.1
 echo Estagios: 5 (Remolho ate Refila)
 echo.
 echo Este script vai:
@@ -32,6 +32,7 @@ if exist build rmdir /S /Q build 2>nul
 if exist .dart_tool rmdir /S /Q .dart_tool 2>nul
 echo OK
 echo.
+pause
 
 echo [3/4] Instalando dependencias...
 echo.
@@ -59,7 +60,6 @@ echo Recursos:
 echo [OK] 5 Estagios (Remolho ate Refila)
 echo [OK] Responsavel Superior
 echo [OK] Selecao de Maquina
-echo [OK] 10 PLTs (Rebaixadeira)
 echo [OK] Nome do Refilador (Refila)
 echo.
 echo Agora execute:
