@@ -102,10 +102,12 @@ class _StageFormState extends State<StageForm> {
     if (savedData != null) {
       setState(() {
         if (savedData['fulao'] != null) _fulaoSel = savedData['fulao'];
-        if (savedData['responsavel'] != null)
+        if (savedData['responsavel'] != null) {
           _respSel = savedData['responsavel'];
-        if (savedData['responsavelSuperior'] != null)
+        }
+        if (savedData['responsavelSuperior'] != null) {
           _respSupSel = savedData['responsavelSuperior'];
+        }
         if (savedData['obs'] != null) _obs.text = savedData['obs'];
         if (savedData['qtdProcessada'] != null) {
           _qtd = savedData['qtdProcessada'];
@@ -114,15 +116,16 @@ class _StageFormState extends State<StageForm> {
 
         if (savedData['status'] != null) {
           final statusStr = savedData['status'];
-          if (statusStr == 'running')
+          if (statusStr == 'running') {
             _status = StageStatus.running;
-          else if (statusStr == 'paused')
+          } else if (statusStr == 'paused')
             _status = StageStatus.paused;
           else if (statusStr == 'closed') _status = StageStatus.closed;
         }
 
-        if (savedData['start'] != null)
+        if (savedData['start'] != null) {
           _start = DateTime.parse(savedData['start']);
+        }
         if (savedData['end'] != null) _end = DateTime.parse(savedData['end']);
 
         // Carrega variáveis
@@ -257,9 +260,9 @@ class _StageFormState extends State<StageForm> {
                     // Header - SEM ÍCONE
                     Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF546E7A),
-                        borderRadius: const BorderRadius.vertical(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF546E7A),
+                        borderRadius: BorderRadius.vertical(
                           top: Radius.circular(4),
                         ),
                       ),
@@ -408,7 +411,7 @@ class _StageFormState extends State<StageForm> {
         Expanded(
           flex: 2,
           child: DropdownButtonFormField<int>(
-            value: _fulaoSel,
+            initialValue: _fulaoSel,
             items: [1, 2, 3, 4]
                 .map((n) => DropdownMenuItem(value: n, child: Text('Fulão $n')))
                 .toList(),
@@ -544,7 +547,7 @@ class _StageFormState extends State<StageForm> {
             void push(String ch) {
               if (ch == ',' || ch == '.') {
                 if (buf.contains(',') || buf.contains('.')) return;
-                buf = buf.isEmpty ? '0,' : (buf + ',');
+                buf = buf.isEmpty ? '0,' : ('$buf,');
               } else {
                 buf += ch;
               }
@@ -817,7 +820,7 @@ class _StageFormState extends State<StageForm> {
 
             // RESPONSÁVEL - SEM ÍCONE
             DropdownButtonFormField<String>(
-              value: _respSel,
+              initialValue: _respSel,
               items: _responsaveis
                   .map((n) => DropdownMenuItem(value: n, child: Text(n)))
                   .toList(),
@@ -837,7 +840,7 @@ class _StageFormState extends State<StageForm> {
 
             // RESPONSÁVEL SUPERIOR - SEM ÍCONE
             DropdownButtonFormField<String>(
-              value: _respSupSel,
+              initialValue: _respSupSel,
               items: _responsaveisSup
                   .map((n) => DropdownMenuItem(value: n, child: Text(n)))
                   .toList(),
@@ -1070,7 +1073,7 @@ class _StageFormState extends State<StageForm> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
