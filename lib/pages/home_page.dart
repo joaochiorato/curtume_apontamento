@@ -52,7 +52,7 @@ class HomePage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo ATAK
+                        // Logo ATAk
                         Image.asset(
                           'assets/images/logo_atak.png',
                           height: 80,
