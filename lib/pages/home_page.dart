@@ -59,7 +59,7 @@ class HomePage extends StatelessWidget {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 12),
-                        // Texto SISTEMAS
+                        // SISTEMAS
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -73,7 +73,7 @@ class HomePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
-                            'SISTEMAS',
+                            'Sistemas',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -128,9 +128,9 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Versão
                 Text(
                   'Versão: 1.0.0',

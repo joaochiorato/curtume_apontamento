@@ -14,7 +14,7 @@ class _OrdersPageState extends State<OrdersPage> {
   bool _loading = true;
   List<OrdemModel> _ordens = [];
   List<OrdemModel> _ordensFiltradas = [];
-  
+
   final _filtroOF = TextEditingController();
   DateTime? _dataFiltro;
   final dfDate = DateFormat('dd/MM/yyyy');
@@ -34,7 +34,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Future<void> _load() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     _ordens = [
       OrdemModel(
         of: '18283',
@@ -66,7 +66,7 @@ class _OrdersPageState extends State<OrdersPage> {
         ],
       ),
     ];
-    
+
     _ordensFiltradas = _ordens;
     setState(() => _loading = false);
   }
@@ -79,8 +79,8 @@ class _OrdersPageState extends State<OrdersPage> {
 
         final matchData = _dataFiltro == null ||
             (ordem.data.year == _dataFiltro!.year &&
-             ordem.data.month == _dataFiltro!.month &&
-             ordem.data.day == _dataFiltro!.day);
+                ordem.data.month == _dataFiltro!.month &&
+                ordem.data.day == _dataFiltro!.day);
 
         return matchOF && matchData;
       }).toList();
@@ -134,7 +134,7 @@ class _OrdersPageState extends State<OrdersPage> {
                     ),
                   ),
                 ),
-                
+
                 // Filtros
                 Container(
                   color: Colors.white,
@@ -152,7 +152,8 @@ class _OrdersPageState extends State<OrdersPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 12),
                           ),
                         ),
                       ),
@@ -185,7 +186,8 @@ class _OrdersPageState extends State<OrdersPage> {
                 // Contador de resultados
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: const Color(0xFFE0E0E0),
                   child: Text(
                     '${_ordensFiltradas.length} ordem(ns) encontrada(s)',
@@ -204,11 +206,13 @@ class _OrdersPageState extends State<OrdersPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.search_off, size: 64, color: Colors.grey),
+                              Icon(Icons.search_off,
+                                  size: 64, color: Colors.grey),
                               SizedBox(height: 16),
                               Text(
                                 'Nenhuma ordem encontrada',
-                                style: TextStyle(fontSize: 16, color: Colors.grey),
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -260,15 +264,14 @@ class _OrdersPageState extends State<OrdersPage> {
                       color: Color(0xFF424242),
                     ),
                   ),
-                  if (ordem.status != null)
-                    _buildStatusBadge(ordem.status!),
+                  if (ordem.status != null) _buildStatusBadge(ordem.status!),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
               const Divider(height: 1),
               const SizedBox(height: 12),
-              
+
               // Informações detalhadas
               _buildInfoRow('Cliente', ordem.cliente),
               const SizedBox(height: 6),
@@ -312,13 +315,11 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Widget _buildStatusBadge(StatusOrdem status) {
     final isProduction = status == StatusOrdem.emProducao;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isProduction 
-            ? const Color(0xFF4CAF50) 
-            : const Color(0xFFFF9800),
+        color: isProduction ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

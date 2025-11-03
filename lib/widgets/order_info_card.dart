@@ -16,7 +16,7 @@ class OrderInfoCard extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF616161), // Cinza médio mais escuro
+                color: Color(0xFF616161),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -28,7 +28,7 @@ class OrderInfoCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: bold ? 15 : 14,
                 fontWeight: bold ? FontWeight.bold : FontWeight.w600,
-                color: const Color(0xFF424242), // Cinza escuro
+                color: const Color(0xFF424242),
               ),
             ),
           ),
