@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/formulacoes_model.dart';
 
 // Importar o modelo (ajustar o path conforme necessário)
 // import '../models/formulacoes_model.dart';
@@ -31,7 +32,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
       (f) => f.codigo == formulacaoSelecionada,
       orElse: () => formulacoes.first,
     );
-    
+
     for (final q in formulacao.quimicos) {
       controllers[q.nome] = TextEditingController(
         text: dadosAtuais?.quantidades[q.nome] ?? '',
@@ -57,8 +58,8 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
             );
 
             // Remove controllers não usados
-            controllers.removeWhere((key, _) => 
-              !formulacao.quimicos.any((q) => q.nome == key));
+            controllers.removeWhere(
+                (key, _) => !formulacao.quimicos.any((q) => q.nome == key));
 
             // Adiciona novos controllers
             for (final q in formulacao.quimicos) {
@@ -157,8 +158,8 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: formulacaoSelecionada.isEmpty 
-                              ? null 
+                          value: formulacaoSelecionada.isEmpty
+                              ? null
                               : formulacaoSelecionada,
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
@@ -339,7 +340,8 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                           const SizedBox(height: 12),
 
                           ...formulacoes
-                              .firstWhere((f) => f.codigo == formulacaoSelecionada)
+                              .firstWhere(
+                                  (f) => f.codigo == formulacaoSelecionada)
                               .quimicos
                               .map((quimico) {
                             final ctrl = controllers[quimico.nome]!;
@@ -624,17 +626,20 @@ Future<String?> _showNumpad({
   );
 }
 
-Widget _numButton(String label, VoidCallback onPressed, {bool isBackspace = false}) {
+Widget _numButton(String label, VoidCallback onPressed,
+    {bool isBackspace = false}) {
   return ElevatedButton(
     onPressed: onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: isBackspace ? const Color(0xFFFFEBEE) : Colors.white,
-      foregroundColor: isBackspace ? const Color(0xFFD32F2F) : const Color(0xFF424242),
+      foregroundColor:
+          isBackspace ? const Color(0xFFD32F2F) : const Color(0xFF424242),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: isBackspace ? const Color(0xFFD32F2F) : const Color(0xFFE0E0E0),
+          color:
+              isBackspace ? const Color(0xFFD32F2F) : const Color(0xFFE0E0E0),
           width: 1,
         ),
       ),
