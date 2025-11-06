@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/formulacoes_model.dart';
 
-// Importar o modelo (ajustar o path conforme necessário)
-// import '../models/formulacoes_model.dart';
-
 /// Dialog para informar químicos com seleção de formulação
 /// e local de estoque único para todos os químicos
 Future<QuimicosFormulacaoData?> showQuimicosDialog(
@@ -108,46 +105,9 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                     child: ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        // Info box
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE3F2FD),
-                            borderRadius: BorderRadius.circular(4),
-                            border: const Border(
-                              left: BorderSide(
-                                color: Color(0xFF1976D2),
-                                width: 4,
-                              ),
-                            ),
-                          ),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '📋 Como Funciona',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1976D2),
-                                  fontSize: 14,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '1. Selecione a Formulação desejada\n'
-                                '2. Informe o Local de Estoque (único para todos)\n'
-                                '3. Preencha as quantidades dos químicos',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF424242),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        // ✅ REMOVIDO: Caixa "Como Funciona"
 
-                        // Seleção de Formulação
+                        // Dropdown Formulação
                         const Text(
                           'Formulação *',
                           style: TextStyle(
@@ -291,10 +251,6 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                               fillColor: localEstoque != '— selecione —'
                                   ? const Color(0xFFE8F5E9)
                                   : Colors.white,
-                              prefixIcon: const Icon(
-                                Icons.warehouse_outlined,
-                                color: Color(0xFF424242),
-                              ),
                             ),
                             items: locaisEstoque.map((local) {
                               return DropdownMenuItem(
@@ -303,7 +259,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                                   local,
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: local == '— selecione —'
+                                    color: local != '— selecione —'
                                         ? const Color(0xFF757575)
                                         : const Color(0xFF424242),
                                     fontWeight: local != '— selecione —'
@@ -345,169 +301,160 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                               .quimicos
                               .map((quimico) {
                             final ctrl = controllers[quimico.nome]!;
-                            final hasValue = ctrl.text.isNotEmpty;
 
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.only(bottom: 12),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     quimico.nome,
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
                                       fontSize: 13,
+                                      fontWeight: FontWeight.w500,
                                       color: Color(0xFF424242),
                                     ),
                                   ),
                                   const SizedBox(height: 6),
-                                  OutlinedButton(
-                                    onPressed: () async {
-                                      final result = await _showNumpad(
-                                        context: context,
-                                        titulo: quimico.nome,
-                                        controller: ctrl,
-                                        unidade: quimico.unidade,
-                                      );
-
-                                      if (result != null) {
-                                        setDialogState(() {
-                                          ctrl.text = result;
-                                        });
-                                      }
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(
-                                        color: hasValue
-                                            ? const Color(0xFF4CAF50)
-                                            : const Color(0xFF424242),
-                                        width: 2,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                        horizontal: 16,
-                                      ),
-                                      backgroundColor: hasValue
-                                          ? const Color(0xFFE8F5E9)
-                                          : Colors.white,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            hasValue
-                                                ? '${ctrl.text} ${quimico.unidade}'
-                                                : 'Informar ${quimico.unidade}',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: hasValue
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                              color: hasValue
-                                                  ? const Color(0xFF2E7D32)
-                                                  : const Color(0xFF757575),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: ctrl,
+                                          keyboardType: TextInputType.number,
+                                          decoration: InputDecoration(
+                                            hintText: 'Quantidade',
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 12,
                                             ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              borderSide: BorderSide(
+                                                color: ctrl.text.isNotEmpty
+                                                    ? const Color(0xFF4CAF50)
+                                                    : const Color(0xFFE0E0E0),
+                                              ),
+                                            ),
+                                            filled: true,
+                                            fillColor: ctrl.text.isNotEmpty
+                                                ? const Color(0xFFE8F5E9)
+                                                : Colors.white,
+                                          ),
+                                          onChanged: (_) =>
+                                              setDialogState(() {}),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF5F5F5),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                          border: Border.all(
+                                            color: const Color(0xFFE0E0E0),
                                           ),
                                         ),
-                                        Icon(
-                                          Icons.edit,
-                                          size: 18,
-                                          color: hasValue
-                                              ? const Color(0xFF2E7D32)
-                                              : const Color(0xFF757575),
+                                        child: Text(
+                                          quimico.unidade,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xFF757575),
+                                          ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             );
                           }).toList(),
                         ],
-
-                        // Mensagem se nenhuma formulação selecionada
-                        if (formulacaoSelecionada.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            child: const Column(
-                              children: [
-                                Icon(
-                                  Icons.science_outlined,
-                                  size: 64,
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                                SizedBox(height: 16),
-                                Text(
-                                  'Selecione uma formulação para começar',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF757575),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
                       ],
                     ),
                   ),
 
-                  // Footer
+                  // Footer com botões
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: Color(0xFFE0E0E0),
-                          width: 1,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -2),
                         ),
-                      ),
+                      ],
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancelar'),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                            ),
+                            child: const Text('Cancelar'),
+                          ),
                         ),
                         const SizedBox(width: 12),
-                        FilledButton(
-                          onPressed: formulacaoSelecionada.isEmpty
-                              ? null
-                              : () {
-                                  // Validar se local foi selecionado
-                                  if (localEstoque == '— selecione —') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Selecione o Local de Estoque',
-                                        ),
-                                        backgroundColor: Colors.orange,
-                                      ),
-                                    );
-                                    return;
-                                  }
+                        Expanded(
+                          flex: 2,
+                          child: FilledButton(
+                            onPressed: formulacaoSelecionada.isEmpty ||
+                                    localEstoque == '— selecione —'
+                                ? null
+                                : () {
+                                    // Valida se há pelo menos um químico preenchido
+                                    final quantidades = <String, String>{};
+                                    bool temAlgumPreenchido = false;
 
-                                  // Criar mapa com quantidades
-                                  final Map<String, String> quantidades = {};
-                                  controllers.forEach((nome, ctrl) {
-                                    if (ctrl.text.isNotEmpty) {
-                                      quantidades[nome] = ctrl.text;
+                                    for (final entry in controllers.entries) {
+                                      final valor = entry.value.text.trim();
+                                      quantidades[entry.key] = valor;
+                                      if (valor.isNotEmpty) {
+                                        temAlgumPreenchido = true;
+                                      }
                                     }
-                                  });
 
-                                  // Criar objeto de retorno
-                                  final resultado = QuimicosFormulacaoData(
-                                    formulacaoCodigo: formulacaoSelecionada,
-                                    localEstoque: localEstoque,
-                                    quantidades: quantidades,
-                                  );
+                                    if (!temAlgumPreenchido) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Informe pelo menos um químico'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      return;
+                                    }
 
-                                  Navigator.pop(ctx, resultado);
-                                },
-                          child: const Text('Confirmar'),
+                                    final resultado = QuimicosFormulacaoData(
+                                      formulacaoCodigo: formulacaoSelecionada,
+                                      localEstoque: localEstoque,
+                                      quantidades: quantidades,
+                                    );
+
+                                    Navigator.pop(ctx, resultado);
+                                  },
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                              backgroundColor: const Color(0xFF4CAF50),
+                            ),
+                            child: const Text('Confirmar'),
+                          ),
                         ),
                       ],
                     ),
@@ -519,138 +466,5 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
         },
       );
     },
-  );
-}
-
-/// Abre teclado numérico para inserir quantidade
-Future<String?> _showNumpad({
-  required BuildContext context,
-  required String titulo,
-  required TextEditingController controller,
-  required String unidade,
-}) async {
-  String valor = controller.text;
-
-  return await showDialog<String>(
-    context: context,
-    builder: (ctx) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(
-              titulo,
-              style: const TextStyle(fontSize: 16),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Display do valor
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE0E0E0)),
-                  ),
-                  child: Text(
-                    valor.isEmpty ? '0' : '$valor $unidade',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF424242),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Teclado numérico
-                GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 1.5,
-                  children: [
-                    // Números 1-9
-                    ...List.generate(9, (i) {
-                      final num = i + 1;
-                      return _numButton(num.toString(), () {
-                        setState(() {
-                          valor += num.toString();
-                        });
-                      });
-                    }),
-
-                    // Ponto decimal
-                    _numButton('.', () {
-                      if (!valor.contains('.')) {
-                        setState(() {
-                          valor += '.';
-                        });
-                      }
-                    }),
-
-                    // Zero
-                    _numButton('0', () {
-                      setState(() {
-                        valor += '0';
-                      });
-                    }),
-
-                    // Backspace
-                    _numButton('⌫', () {
-                      if (valor.isNotEmpty) {
-                        setState(() {
-                          valor = valor.substring(0, valor.length - 1);
-                        });
-                      }
-                    }, isBackspace: true),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, valor),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-Widget _numButton(String label, VoidCallback onPressed,
-    {bool isBackspace = false}) {
-  return ElevatedButton(
-    onPressed: onPressed,
-    style: ElevatedButton.styleFrom(
-      backgroundColor: isBackspace ? const Color(0xFFFFEBEE) : Colors.white,
-      foregroundColor:
-          isBackspace ? const Color(0xFFD32F2F) : const Color(0xFF424242),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color:
-              isBackspace ? const Color(0xFFD32F2F) : const Color(0xFFE0E0E0),
-          width: 1,
-        ),
-      ),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: isBackspace ? const Color(0xFFD32F2F) : const Color(0xFF424242),
-      ),
-    ),
   );
 }
