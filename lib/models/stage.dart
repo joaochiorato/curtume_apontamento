@@ -13,7 +13,7 @@ class StageModel {
   final bool needsResponsibleSuperior;
   final bool hasPallets;
   final bool hasRefilador;
-  final bool hasFulao; // ← NOVO: controla se tem Fulão e Químicos
+  final bool hasFulao;
 
   StageModel({
     required this.code,
@@ -23,7 +23,7 @@ class StageModel {
     this.needsResponsibleSuperior = true,
     this.hasPallets = false,
     this.hasRefilador = false,
-    this.hasFulao = false, // ← NOVO: padrão false
+    this.hasFulao = false,
   });
 }
 
@@ -43,14 +43,20 @@ class VariableModel {
   });
 }
 
-// 5 ESTÁGIOS COMPLETOS - Baseado no PDF Vancouros
+// ═══════════════════════════════════════════════════════════════
+// 5 ESTÁGIOS COMPLETOS - Sistema de Apontamento Curtume
+// ═══════════════════════════════════════════════════════════════
+
 final List<StageModel> availableStages = [
-  // 1. REMOLHO
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 1. REMOLHO - Único estágio com Fulão e Químicos
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'REMOLHO',
     title: 'REMOLHO',
     machines: ['1', '2', '3', '4'],
-    hasFulao: true, // ← ÚNICO estágio com Fulão e Químicos
+    hasFulao: true, // ← ÚNICO com Fulão e Químicos
+    needsResponsibleSuperior: true,
     variables: [
       VariableModel(
         name: 'Volume de Água',
@@ -74,12 +80,15 @@ final List<StageModel> availableStages = [
     ],
   ),
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 2. ENXUGADEIRA
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'ENXUGADEIRA',
     title: 'ENXUGADEIRA',
     machines: ['1', '2'],
-    hasFulao: false, // ← SEM Fulão
+    hasFulao: false,
+    needsResponsibleSuperior: true,
     variables: [
       VariableModel(
         name: 'Pressão do Rolo (1º manômetro)',
@@ -116,97 +125,109 @@ final List<StageModel> availableStages = [
     ],
   ),
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 3. DIVISORA
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'DIVISORA',
     title: 'DIVISORA',
     machines: ['1', '2'],
-    hasFulao: false, // ← SEM Fulão
+    hasFulao: false,
+    needsResponsibleSuperior: true,
     variables: [
       VariableModel(
-        name: 'Espessura de Divisão',
+        name: 'Espessura Final',
         unit: 'mm',
-        hint: '1.5/1.6',
-      ),
-      VariableModel(
-        name: 'Peso Bruto',
-        unit: 'kg',
-      ),
-      VariableModel(
-        name: 'Peso Líquido',
-        unit: 'kg',
+        min: 0.8,
+        max: 2.5,
+        hint: 'Conforme especificação do artigo',
       ),
       VariableModel(
         name: 'Velocidade da Máquina',
-        unit: 'metro/minuto',
-        min: 21,
-        max: 25,
-        hint: '23 +/- 2',
+        unit: 'mt/min',
+        min: 5,
+        max: 15,
+        hint: '10 +/- 5',
       ),
       VariableModel(
-        name: 'Distância da Navalha',
-        unit: 'mm',
-        min: 8.0,
-        max: 8.5,
-      ),
-      VariableModel(
-        name: 'Fio da Navalha Inferior',
-        unit: 'mm',
-        min: 4.5,
-        max: 5.5,
-        hint: '5.0 +/- 0.5',
-      ),
-      VariableModel(
-        name: 'Fio da Navalha Superior',
-        unit: 'mm',
-        min: 5.5,
-        max: 6.5,
-        hint: '6.0 +/- 0.5',
+        name: 'Pressão do Cilindro',
+        unit: 'Bar',
+        min: 80,
+        max: 150,
       ),
     ],
   ),
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 4. REBAIXADEIRA
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'REBAIXADEIRA',
     title: 'REBAIXADEIRA',
-    machines: ['1', '2', '3', '4', '5', '6'],
-    hasPallets: false,
-    hasFulao: false, // ← SEM Fulão
+    machines: ['1', '2'],
+    hasFulao: false,
+    hasPallets: false, // ← SEM sistema de pallets
+    needsResponsibleSuperior: true,
     variables: [
       VariableModel(
-        name: 'Velocidade do Rolo de Transporte',
-        unit: 'mt/min',
-        hint: '10/12',
+        name: 'Altura da Lixa',
+        unit: 'mm',
+        min: 0.5,
+        max: 3.0,
+        hint: 'Ajustar conforme necessidade',
       ),
       VariableModel(
-        name: 'Espessura de Rebaixe',
-        unit: 'mm',
-        hint: '1.2/1.3+1.2',
+        name: 'Velocidade da Esteira',
+        unit: 'mt/min',
+        min: 3,
+        max: 12,
+        hint: '7 +/- 4',
+      ),
+      VariableModel(
+        name: 'Granulometria da Lixa',
+        unit: 'mesh',
+        min: 40,
+        max: 180,
+      ),
+      VariableModel(
+        name: 'Pressão do Rolo',
+        unit: 'Bar',
+        min: 20,
+        max: 80,
       ),
     ],
   ),
 
-  // 5. REFILA
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 5. REFILADORA (REFILA)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'REFILA',
-    title: 'REFILA',
-    machines: null,
-    needsResponsibleSuperior: false,
+    title: 'REFILADORA',
+    machines: ['1', '2'],
+    hasFulao: false,
     hasRefilador: true,
-    hasFulao: false, // ← SEM Fulão
+    needsResponsibleSuperior: false, // ← Não precisa supervisor
     variables: [
       VariableModel(
-        name: 'Peso Líquido',
-        unit: 'kg',
+        name: 'Largura de Corte',
+        unit: 'cm',
+        min: 10,
+        max: 200,
+        hint: 'Conforme especificação',
       ),
       VariableModel(
-        name: 'Peso do Refile',
-        unit: 'kg',
+        name: 'Velocidade de Corte',
+        unit: 'mt/min',
+        min: 5,
+        max: 20,
+        hint: '12 +/- 7',
       ),
       VariableModel(
-        name: 'Peso do Cupim',
-        unit: 'kg',
+        name: 'Tensão da Lâmina',
+        unit: 'N',
+        min: 100,
+        max: 300,
       ),
     ],
   ),

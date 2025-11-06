@@ -44,19 +44,19 @@ class _StagePageState extends State<StagePage> {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => Scaffold(
         appBar: AppBar(title: Text(stage.title)),
-        body: SingleChildScrollView(
-          child: StageForm(
-            stage: stage,
-            initialData: storage.getData(stage.code),
-            onSaved: (data) {
-              storage.saveData(stage.code, data, finalizar: true);
-              setState(() {});
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${stage.title} salvo!')),
-              );
-            },
-          ),
+        // ✅ CORREÇÃO: Remover SingleChildScrollView
+        // O StageForm já tem seu próprio scroll interno
+        body: StageForm(
+          stage: stage,
+          initialData: storage.getData(stage.code),
+          onSaved: (data) {
+            storage.saveData(stage.code, data, finalizar: true);
+            setState(() {});
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${stage.title} salvo!')),
+            );
+          },
         ),
       ),
     ));

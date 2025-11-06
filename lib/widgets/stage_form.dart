@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import '../models/stage.dart';
 import '../models/formulacoes_model.dart';
 import './stage_action_bar.dart';
-import './qty_counter.dart';
 import './formulacoes_dialog.dart';
 
 class StageForm extends StatefulWidget {
@@ -29,7 +28,7 @@ class _StageFormState extends State<StageForm> {
   final _obs = TextEditingController();
   final _qtdProcessadaCtrl = TextEditingController();
   final _scroll = ScrollController();
-  final _qtyKey = GlobalKey();
+  // REMOVIDO: final _qtyKey = GlobalKey(); // ← Não estava sendo usado
 
   final List<String> _responsaveis = const [
     '— selecione —',
@@ -51,7 +50,6 @@ class _StageFormState extends State<StageForm> {
   DateTime? _start;
   DateTime? _end;
   StageStatus _status = StageStatus.idle;
-  int _qtd = 0;
   bool _isSaving = false;
 
   final dfDate = DateFormat('dd/MM/yyyy');
@@ -137,8 +135,8 @@ class _StageFormState extends State<StageForm> {
   }
 
   Future<void> _openQuimicosDialog() async {
-    final canEdit = _status == StageStatus.running || 
-                    _status == StageStatus.idle;
+    final canEdit =
+        _status == StageStatus.running || _status == StageStatus.idle;
 
     final resultado = await showQuimicosDialog(
       context,
@@ -160,7 +158,8 @@ class _StageFormState extends State<StageForm> {
       _show('Selecione o responsável', isError: true);
       return;
     }
-    if (widget.stage.needsResponsibleSuperior && _respSupSel == '— selecione —') {
+    if (widget.stage.needsResponsibleSuperior &&
+        _respSupSel == '— selecione —') {
       _show('Selecione o responsável superior', isError: true);
       return;
     }
@@ -244,12 +243,15 @@ class _StageFormState extends State<StageForm> {
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _fulaoSel,
-                              decoration: const InputDecoration(labelText: 'Fulão'),
+                              decoration:
+                                  const InputDecoration(labelText: 'Fulão'),
                               items: (widget.stage.machines ?? [])
                                   .map((m) => int.parse(m))
-                                  .map((i) => DropdownMenuItem(value: i, child: Text('Fulão $i')))
+                                  .map((i) => DropdownMenuItem(
+                                      value: i, child: Text('Fulão $i')))
                                   .toList(),
-                              onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
+                              onChanged: (_status == StageStatus.idle ||
+                                      _status == StageStatus.running)
                                   ? (v) => setState(() => _fulaoSel = v)
                                   : null,
                               validator: (_) =>
@@ -261,15 +263,19 @@ class _StageFormState extends State<StageForm> {
                             child: FilledButton.icon(
                               onPressed: _openQuimicosDialog,
                               icon: const Icon(Icons.science),
-                              label: Text('Químicos (${_getQuimicosInformados()})'),
+                              label: Text(
+                                  'Químicos (${_getQuimicosInformados()})'),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                     ],
-                    if (widget.stage.machines != null && !widget.stage.hasFulao) ...[
-                      const Text('Máquina', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    if (widget.stage.machines != null &&
+                        !widget.stage.hasFulao) ...[
+                      const Text('Máquina',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -282,12 +288,15 @@ class _StageFormState extends State<StageForm> {
                       ),
                       const SizedBox(height: 16),
                     ],
-                    const Text('Responsável', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    const Text('Responsável',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _respSel,
                       items: _responsaveis
-                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map(
+                              (r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
                       onChanged: (v) => setState(() => _respSel = v!),
                     ),
@@ -295,15 +304,19 @@ class _StageFormState extends State<StageForm> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         value: _respSupSel,
-                        decoration: const InputDecoration(labelText: 'Responsável Superior'),
+                        decoration: const InputDecoration(
+                            labelText: 'Responsável Superior'),
                         items: _responsaveisSup
-                            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                            .map((r) =>
+                                DropdownMenuItem(value: r, child: Text(r)))
                             .toList(),
                         onChanged: (v) => setState(() => _respSupSel = v!),
                       ),
                     ],
                     const SizedBox(height: 16),
-                    const Text('QTD Processada', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    const Text('QTD Processada',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _qtdProcessadaCtrl,
@@ -314,7 +327,9 @@ class _StageFormState extends State<StageForm> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Variáveis do Processo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    const Text('Variáveis do Processo',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     ...widget.stage.variables.map((v) {
                       return Padding(
@@ -328,7 +343,8 @@ class _StageFormState extends State<StageForm> {
                             hintText: v.hint,
                           ),
                           validator: (val) {
-                            if (val == null || val.isEmpty) return 'Obrigatório';
+                            if (val == null || val.isEmpty)
+                              return 'Obrigatório';
                             final num = double.tryParse(val);
                             if (num == null) return 'Número inválido';
                             if (v.min != null && num < v.min!) {
