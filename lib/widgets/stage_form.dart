@@ -289,7 +289,7 @@ class _StageFormState extends State<StageForm> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
-                              value: _fulaoSel,
+                              initialValue: _fulaoSel,
                               decoration:
                                   const InputDecoration(labelText: 'Fulão'),
                               items: (widget.stage.machines ?? [])
@@ -319,7 +319,7 @@ class _StageFormState extends State<StageForm> {
                     ],
 
                     DropdownButtonFormField<String>(
-                      value: _respSel,
+                      initialValue: _respSel,
                       decoration:
                           const InputDecoration(labelText: 'Responsável'),
                       items: _responsaveis
@@ -339,7 +339,7 @@ class _StageFormState extends State<StageForm> {
 
                     if (widget.stage.needsResponsibleSuperior)
                       DropdownButtonFormField<String>(
-                        value: _respSupSel,
+                        initialValue: _respSupSel,
                         decoration: const InputDecoration(
                             labelText: 'Responsável Superior'),
                         items: _responsaveisSup
@@ -368,7 +368,7 @@ class _StageFormState extends State<StageForm> {
                         fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
-                        labelText: 'QTD PROCESSADA NESTE APONTAMENTO *',
+                        labelText: 'Quantidade Processada*',
                         labelStyle:
                             const TextStyle(fontWeight: FontWeight.bold),
                         suffixText: 'peles',
@@ -401,8 +401,9 @@ class _StageFormState extends State<StageForm> {
                         ),
                       ),
                       validator: (txt) {
-                        if (txt == null || txt.isEmpty)
+                        if (txt == null || txt.isEmpty) {
                           return 'Informe a quantidade';
+                        }
                         final n = int.tryParse(txt);
                         if (n == null) return 'Valor inválido';
                         if (n <= 0) return 'Quantidade deve ser maior que 0';
@@ -458,7 +459,7 @@ class _StageFormState extends State<StageForm> {
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
 
                     const SizedBox(height: 16),
 

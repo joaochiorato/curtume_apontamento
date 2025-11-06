@@ -118,7 +118,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: formulacaoSelecionada.isEmpty ? null : formulacaoSelecionada,
+                          initialValue: formulacaoSelecionada.isEmpty ? null : formulacaoSelecionada,
                           isExpanded: true, // ✅ Evita overflow
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
@@ -203,7 +203,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                           ),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: localEstoque,
+                            initialValue: localEstoque,
                             isExpanded: true, // ✅ Evita overflow
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
@@ -370,7 +370,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                       ],
                     ),
