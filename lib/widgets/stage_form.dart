@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/stage.dart';
 import '../models/formulacoes_model.dart';
-import './stage_action_bar.dart';
-import './formulacoes_dialog.dart';
+import '../widgets/stage_action_bar.dart';
+import '../widgets/formulacoes_dialog.dart';
 
 class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
   final Map<String, dynamic>? initialData;
+  final int quantidadeTotal;
+  final int quantidadeProcessada;
+  final int quantidadeRestante;
 
   const StageForm({
     super.key,
     required this.stage,
     required this.onSaved,
     this.initialData,
+    required this.quantidadeTotal,
+    required this.quantidadeProcessada,
+    required this.quantidadeRestante,
   });
 
   @override
@@ -28,7 +35,6 @@ class _StageFormState extends State<StageForm> {
   final _obs = TextEditingController();
   final _qtdProcessadaCtrl = TextEditingController();
   final _scroll = ScrollController();
-  // REMOVIDO: final _qtyKey = GlobalKey(); // ← Não estava sendo usado
 
   final List<String> _responsaveis = const [
     '— selecione —',
@@ -63,7 +69,8 @@ class _StageFormState extends State<StageForm> {
       _controllers[v.name] = TextEditingController();
     }
 
-    _qtdProcessadaCtrl.text = '0';
+    // Sugere processar o restante
+    _qtdProcessadaCtrl.text = widget.quantidadeRestante.toString();
 
     if (widget.initialData != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -135,59 +142,57 @@ class _StageFormState extends State<StageForm> {
   }
 
   Future<void> _openQuimicosDialog() async {
-    final canEdit =
-        _status == StageStatus.running || _status == StageStatus.idle;
-
-    final resultado = await showQuimicosDialog(
+    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running);
+    
+    final result = await showQuimicosDialog(
       context,
       dadosAtuais: _quimicosData,
       canEdit: canEdit,
     );
 
-    if (resultado != null) {
+    if (result != null) {
       setState(() {
-        _quimicosData = resultado;
+        _quimicosData = result;
       });
     }
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_respSel == '— selecione —') {
-      _show('Selecione o responsável', isError: true);
+    // Validação adicional de quantidade
+    final qtdApontamento = int.tryParse(_qtdProcessadaCtrl.text) ?? 0;
+    if (qtdApontamento <= 0) {
+      _show('Informe uma quantidade válida!', isError: true);
       return;
     }
-    if (widget.stage.needsResponsibleSuperior &&
-        _respSupSel == '— selecione —') {
-      _show('Selecione o responsável superior', isError: true);
-      return;
-    }
-    if (_start == null || _end == null) {
-      _show('Inicie e encerre o apontamento', isError: true);
+
+    if (qtdApontamento > widget.quantidadeRestante) {
+      _show(
+        'Quantidade excede o saldo! Restam apenas ${widget.quantidadeRestante} peles.',
+        isError: true,
+      );
       return;
     }
 
     setState(() => _isSaving = true);
 
-    final variablesMap = <String, String>{};
-    for (final v in widget.stage.variables) {
-      variablesMap[v.name] = _controllers[v.name]!.text;
-    }
+    final variables = <String, dynamic>{};
+    _controllers.forEach((key, ctrl) {
+      variables[key] = ctrl.text;
+    });
 
-    final data = {
-      'stage': widget.stage.code,
+    final data = <String, dynamic>{
+      'fulao': _fulaoSel,
+      'responsavel': _respSel,
+      'responsavelSuperior': _respSupSel,
+      'qtdProcessada': qtdApontamento,
+      'observacao': _obs.text,
       'start': _start?.toIso8601String(),
       'end': _end?.toIso8601String(),
       'status': _status.name,
-      'variables': variablesMap,
-      'quimicos': _quimicosData?.toJson(),
-      'responsavel': _respSel,
-      if (widget.stage.needsResponsibleSuperior)
-        'responsavelSuperior': _respSupSel,
-      'observacao': _obs.text,
-      'fulao': _fulaoSel,
-      'qtdProcessada': int.tryParse(_qtdProcessadaCtrl.text) ?? 0,
+      'variables': variables,
+      if (_quimicosData != null) 'quimicos': _quimicosData!.toJson(),
     };
 
     widget.onSaved(data);
@@ -230,123 +235,238 @@ class _StageFormState extends State<StageForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Card com informações de quantidade
+                    Card(
+                      color: Colors.blue.shade50,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(color: Colors.blue.shade200),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Total da OF:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                Text(
+                                  '${widget.quantidadeTotal} peles',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Já processado:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                Text(
+                                  '${widget.quantidadeProcessada} peles',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'RESTANTE:',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade900,
+                                  ),
+                                ),
+                                Text(
+                                  '${widget.quantidadeRestante} peles',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
                     StageActionBar(
                       status: _status,
                       onStatusChange: _onStatusChange,
                       start: _start,
                       end: _end,
                     ),
+
                     const SizedBox(height: 20),
+
                     if (widget.stage.hasFulao) ...[
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _fulaoSel,
-                              decoration:
-                                  const InputDecoration(labelText: 'Fulão'),
+                              decoration: const InputDecoration(labelText: 'Fulão'),
                               items: (widget.stage.machines ?? [])
                                   .map((m) => int.parse(m))
-                                  .map((i) => DropdownMenuItem(
-                                      value: i, child: Text('Fulão $i')))
+                                  .map((i) => DropdownMenuItem(value: i, child: Text('Fulão $i')))
                                   .toList(),
-                              onChanged: (_status == StageStatus.idle ||
-                                      _status == StageStatus.running)
+                              onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
                                   ? (v) => setState(() => _fulaoSel = v)
                                   : null,
                               validator: (_) =>
-                                  _fulaoSel == null ? 'Obrigatório' : null,
+                                  _fulaoSel == null ? 'Selecione o fulão' : null,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: _openQuimicosDialog,
-                              icon: const Icon(Icons.science),
-                              label: Text(
-                                  'Químicos (${_getQuimicosInformados()})'),
-                            ),
+                          OutlinedButton.icon(
+                            onPressed: _openQuimicosDialog,
+                            icon: const Icon(Icons.science, size: 18),
+                            label: Text('Químicos (${_getQuimicosInformados()})'),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                     ],
-                    if (widget.stage.machines != null &&
-                        !widget.stage.hasFulao) ...[
-                      const Text('Máquina',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: widget.stage.machines!
-                            .map((m) => ChoiceChip(
-                                  label: Text(m),
-                                  selected: false,
-                                ))
-                            .toList(),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    const Text('Responsável',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+
                     DropdownButtonFormField<String>(
                       value: _respSel,
+                      decoration: const InputDecoration(labelText: 'Responsável'),
                       items: _responsaveis
-                          .map(
-                              (r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
-                      onChanged: (v) => setState(() => _respSel = v!),
+                      onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
+                          ? (v) => setState(() => _respSel = v!)
+                          : null,
+                      validator: (v) =>
+                          v == '— selecione —' ? 'Selecione o responsável' : null,
                     ),
-                    if (widget.stage.needsResponsibleSuperior) ...[
-                      const SizedBox(height: 12),
+
+                    const SizedBox(height: 16),
+
+                    if (widget.stage.needsResponsibleSuperior)
                       DropdownButtonFormField<String>(
                         value: _respSupSel,
-                        decoration: const InputDecoration(
-                            labelText: 'Responsável Superior'),
+                        decoration: const InputDecoration(labelText: 'Responsável Superior'),
                         items: _responsaveisSup
-                            .map((r) =>
-                                DropdownMenuItem(value: r, child: Text(r)))
+                            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                             .toList(),
-                        onChanged: (v) => setState(() => _respSupSel = v!),
+                        onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
+                            ? (v) => setState(() => _respSupSel = v!)
+                            : null,
+                        validator: (v) =>
+                            v == '— selecione —' ? 'Selecione o responsável superior' : null,
                       ),
-                    ],
-                    const SizedBox(height: 16),
-                    const Text('QTD Processada',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+
+                    if (widget.stage.needsResponsibleSuperior) const SizedBox(height: 16),
+
+                    // Campo de quantidade processada com destaque
                     TextFormField(
                       controller: _qtdProcessadaCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        hintText: '0',
-                        suffixText: 'pçs',
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'QTD PROCESSADA NESTE APONTAMENTO *',
+                        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        suffixText: 'peles',
+                        suffixStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        helperText: 'Máximo: ${widget.quantidadeRestante} peles',
+                        helperStyle: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        filled: true,
+                        fillColor: Colors.orange.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.orange.shade200, width: 2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.orange.shade300, width: 2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.orange.shade700, width: 2),
+                        ),
+                      ),
+                      validator: (txt) {
+                        if (txt == null || txt.isEmpty) return 'Informe a quantidade';
+                        final n = int.tryParse(txt);
+                        if (n == null) return 'Valor inválido';
+                        if (n <= 0) return 'Quantidade deve ser maior que 0';
+                        if (n > widget.quantidadeRestante) {
+                          return 'Máximo: ${widget.quantidadeRestante} peles';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+
+                    const Text(
+                      'Variáveis do Processo',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Text('Variáveis do Processo',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
+
                     ...widget.stage.variables.map((v) {
+                      final ctrl = _controllers[v.name]!;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: TextFormField(
-                          controller: _controllers[v.name],
-                          keyboardType: TextInputType.number,
+                          controller: ctrl,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: InputDecoration(
-                            labelText: v.name,
-                            suffixText: v.unit,
+                            labelText: '${v.name} (${v.unit})',
                             hintText: v.hint,
+                            helperText: v.min != null && v.max != null
+                                ? 'Faixa: ${v.min} - ${v.max}'
+                                : null,
                           ),
-                          validator: (val) {
-                            if (val == null || val.isEmpty)
-                              return 'Obrigatório';
-                            final num = double.tryParse(val);
-                            if (num == null) return 'Número inválido';
+                          validator: (txt) {
+                            if (txt == null || txt.isEmpty) {
+                              return 'Informe ${v.name}';
+                            }
+                            final num = double.tryParse(txt.replaceAll(',', '.'));
+                            if (num == null) return 'Valor inválido';
                             if (v.min != null && num < v.min!) {
                               return 'Mínimo: ${v.min}';
                             }
@@ -358,7 +478,9 @@ class _StageFormState extends State<StageForm> {
                         ),
                       );
                     }).toList(),
+
                     const SizedBox(height: 16),
+
                     TextFormField(
                       controller: _obs,
                       maxLines: 3,
@@ -372,6 +494,8 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
           ),
+
+          // Rodapé com botões
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -403,7 +527,7 @@ class _StageFormState extends State<StageForm> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Salvar'),
+                        : const Text('Salvar Apontamento'),
                   ),
                 ),
               ],

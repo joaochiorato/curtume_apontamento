@@ -84,6 +84,7 @@ class ArticlesPage extends StatelessWidget {
                   'of': of.of,
                   'artigo': artigo.descricao,
                   'codigo': artigo.codigo,
+                  'quantidade': artigo.quantidade.toString(), // ✅ ADICIONADO
                 },
               ),
             ),
