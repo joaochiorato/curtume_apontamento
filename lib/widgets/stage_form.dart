@@ -72,58 +72,8 @@ class _StageFormState extends State<StageForm> {
     // Sugere processar o restante
     _qtdProcessadaCtrl.text = widget.quantidadeRestante.toString();
 
-    if (widget.initialData != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadSavedData();
-      });
-    }
-  }
-
-  void _loadSavedData() {
-    final savedData = widget.initialData;
-
-    if (savedData != null) {
-      setState(() {
-        if (savedData['fulao'] != null) _fulaoSel = savedData['fulao'];
-        if (savedData['responsavel'] != null) {
-          _respSel = savedData['responsavel'];
-        }
-        if (savedData['responsavelSuperior'] != null) {
-          _respSupSel = savedData['responsavelSuperior'];
-        }
-        if (savedData['observacao'] != null) {
-          _obs.text = savedData['observacao'];
-        }
-        if (savedData['qtdProcessada'] != null) {
-          _qtdProcessadaCtrl.text = savedData['qtdProcessada'].toString();
-        }
-        if (savedData['start'] != null) {
-          _start = DateTime.parse(savedData['start']);
-        }
-        if (savedData['end'] != null) {
-          _end = DateTime.parse(savedData['end']);
-        }
-        if (savedData['status'] != null) {
-          _status = StageStatus.values.firstWhere(
-            (s) => s.name == savedData['status'],
-            orElse: () => StageStatus.idle,
-          );
-        }
-        if (savedData['variables'] != null) {
-          final vars = savedData['variables'] as Map<String, dynamic>;
-          vars.forEach((key, value) {
-            if (_controllers.containsKey(key)) {
-              _controllers[key]!.text = value.toString();
-            }
-          });
-        }
-        if (savedData['quimicos'] != null) {
-          _quimicosData = QuimicosFormulacaoData.fromJson(
-            savedData['quimicos'] as Map<String, dynamic>,
-          );
-        }
-      });
-    }
+    // ✅ NÃO carrega dados anteriores - cada apontamento é novo
+    // Comentado: _loadSavedData();
   }
 
   @override
@@ -142,8 +92,9 @@ class _StageFormState extends State<StageForm> {
   }
 
   Future<void> _openQuimicosDialog() async {
-    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running);
-    
+    final canEdit =
+        (_status == StageStatus.idle || _status == StageStatus.running);
+
     final result = await showQuimicosDialog(
       context,
       dadosAtuais: _quimicosData,
@@ -172,6 +123,13 @@ class _StageFormState extends State<StageForm> {
         'Quantidade excede o saldo! Restam apenas ${widget.quantidadeRestante} peles.',
         isError: true,
       );
+      return;
+    }
+
+    // ✅ Validação: Deve ter iniciado e encerrado o estágio
+    if (_status != StageStatus.closed) {
+      _show('Você deve Iniciar e Encerrar o estágio antes de salvar!',
+          isError: true);
       return;
     }
 
@@ -316,6 +274,7 @@ class _StageFormState extends State<StageForm> {
 
                     const SizedBox(height: 20),
 
+                    // ✅ Barra de ações: SEMPRE permite Iniciar/Pausar/Encerrar
                     StageActionBar(
                       status: _status,
                       onStatusChange: _onStatusChange,
@@ -331,23 +290,28 @@ class _StageFormState extends State<StageForm> {
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _fulaoSel,
-                              decoration: const InputDecoration(labelText: 'Fulão'),
+                              decoration:
+                                  const InputDecoration(labelText: 'Fulão'),
                               items: (widget.stage.machines ?? [])
                                   .map((m) => int.parse(m))
-                                  .map((i) => DropdownMenuItem(value: i, child: Text('Fulão $i')))
+                                  .map((i) => DropdownMenuItem(
+                                      value: i, child: Text('Fulão $i')))
                                   .toList(),
-                              onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
+                              onChanged: (_status == StageStatus.idle ||
+                                      _status == StageStatus.running)
                                   ? (v) => setState(() => _fulaoSel = v)
                                   : null,
-                              validator: (_) =>
-                                  _fulaoSel == null ? 'Selecione o fulão' : null,
+                              validator: (_) => _fulaoSel == null
+                                  ? 'Selecione o fulão'
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 12),
                           OutlinedButton.icon(
                             onPressed: _openQuimicosDialog,
                             icon: const Icon(Icons.science, size: 18),
-                            label: Text('Químicos (${_getQuimicosInformados()})'),
+                            label:
+                                Text('Químicos (${_getQuimicosInformados()})'),
                           ),
                         ],
                       ),
@@ -356,15 +320,19 @@ class _StageFormState extends State<StageForm> {
 
                     DropdownButtonFormField<String>(
                       value: _respSel,
-                      decoration: const InputDecoration(labelText: 'Responsável'),
+                      decoration:
+                          const InputDecoration(labelText: 'Responsável'),
                       items: _responsaveis
-                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map(
+                              (r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
-                      onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
+                      onChanged: (_status == StageStatus.idle ||
+                              _status == StageStatus.running)
                           ? (v) => setState(() => _respSel = v!)
                           : null,
-                      validator: (v) =>
-                          v == '— selecione —' ? 'Selecione o responsável' : null,
+                      validator: (v) => v == '— selecione —'
+                          ? 'Selecione o responsável'
+                          : null,
                     ),
 
                     const SizedBox(height: 16),
@@ -372,18 +340,23 @@ class _StageFormState extends State<StageForm> {
                     if (widget.stage.needsResponsibleSuperior)
                       DropdownButtonFormField<String>(
                         value: _respSupSel,
-                        decoration: const InputDecoration(labelText: 'Responsável Superior'),
+                        decoration: const InputDecoration(
+                            labelText: 'Responsável Superior'),
                         items: _responsaveisSup
-                            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                            .map((r) =>
+                                DropdownMenuItem(value: r, child: Text(r)))
                             .toList(),
-                        onChanged: (_status == StageStatus.idle || _status == StageStatus.running)
+                        onChanged: (_status == StageStatus.idle ||
+                                _status == StageStatus.running)
                             ? (v) => setState(() => _respSupSel = v!)
                             : null,
-                        validator: (v) =>
-                            v == '— selecione —' ? 'Selecione o responsável superior' : null,
+                        validator: (v) => v == '— selecione —'
+                            ? 'Selecione o responsável superior'
+                            : null,
                       ),
 
-                    if (widget.stage.needsResponsibleSuperior) const SizedBox(height: 16),
+                    if (widget.stage.needsResponsibleSuperior)
+                      const SizedBox(height: 16),
 
                     // Campo de quantidade processada com destaque
                     TextFormField(
@@ -396,13 +369,15 @@ class _StageFormState extends State<StageForm> {
                       ),
                       decoration: InputDecoration(
                         labelText: 'QTD PROCESSADA NESTE APONTAMENTO *',
-                        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        labelStyle:
+                            const TextStyle(fontWeight: FontWeight.bold),
                         suffixText: 'peles',
                         suffixStyle: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
-                        helperText: 'Máximo: ${widget.quantidadeRestante} peles',
+                        helperText:
+                            'Máximo: ${widget.quantidadeRestante} peles',
                         helperStyle: TextStyle(
                           color: Colors.orange.shade700,
                           fontWeight: FontWeight.bold,
@@ -411,19 +386,23 @@ class _StageFormState extends State<StageForm> {
                         fillColor: Colors.orange.shade50,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.orange.shade200, width: 2),
+                          borderSide: BorderSide(
+                              color: Colors.orange.shade200, width: 2),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.orange.shade300, width: 2),
+                          borderSide: BorderSide(
+                              color: Colors.orange.shade300, width: 2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.orange.shade700, width: 2),
+                          borderSide: BorderSide(
+                              color: Colors.orange.shade700, width: 2),
                         ),
                       ),
                       validator: (txt) {
-                        if (txt == null || txt.isEmpty) return 'Informe a quantidade';
+                        if (txt == null || txt.isEmpty)
+                          return 'Informe a quantidade';
                         final n = int.tryParse(txt);
                         if (n == null) return 'Valor inválido';
                         if (n <= 0) return 'Quantidade deve ser maior que 0';
@@ -453,7 +432,8 @@ class _StageFormState extends State<StageForm> {
                         padding: const EdgeInsets.only(bottom: 16),
                         child: TextFormField(
                           controller: ctrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
                           decoration: InputDecoration(
                             labelText: '${v.name} (${v.unit})',
                             hintText: v.hint,
@@ -465,7 +445,8 @@ class _StageFormState extends State<StageForm> {
                             if (txt == null || txt.isEmpty) {
                               return 'Informe ${v.name}';
                             }
-                            final num = double.tryParse(txt.replaceAll(',', '.'));
+                            final num =
+                                double.tryParse(txt.replaceAll(',', '.'));
                             if (num == null) return 'Valor inválido';
                             if (v.min != null && num < v.min!) {
                               return 'Mínimo: ${v.min}';
