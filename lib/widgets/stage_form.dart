@@ -69,8 +69,8 @@ class _StageFormState extends State<StageForm> {
       _controllers[v.name] = TextEditingController();
     }
 
-    // Sugere processar o restante
-    _qtdProcessadaCtrl.text = widget.quantidadeRestante.toString();
+    // ✅ ALTERAÇÃO: Inicia zerado para o usuário informar
+    _qtdProcessadaCtrl.text = '0';
 
     // ✅ NÃO carrega dados anteriores - cada apontamento é novo
     // Comentado: _loadSavedData();
@@ -218,13 +218,13 @@ class _StageFormState extends State<StageForm> {
                                 Text(
                                   '${widget.quantidadeTotal} peles',
                                   style: const TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
                             ),
-                            const Divider(height: 16),
+                            const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -238,14 +238,14 @@ class _StageFormState extends State<StageForm> {
                                 Text(
                                   '${widget.quantidadeProcessada} peles',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.green.shade700,
                                   ),
                                 ),
                               ],
                             ),
-                            const Divider(height: 16),
+                            const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -308,10 +308,13 @@ class _StageFormState extends State<StageForm> {
                           ),
                           const SizedBox(width: 12),
                           OutlinedButton.icon(
-                            onPressed: _openQuimicosDialog,
-                            icon: const Icon(Icons.science, size: 18),
-                            label:
-                                Text('Químicos (${_getQuimicosInformados()})'),
+                            icon: const Icon(Icons.science),
+                            label: Text(
+                                'Químicos (${_getQuimicosInformados()})'),
+                            onPressed: (_status == StageStatus.idle ||
+                                    _status == StageStatus.running)
+                                ? _openQuimicosDialog
+                                : null,
                           ),
                         ],
                       ),
@@ -319,12 +322,11 @@ class _StageFormState extends State<StageForm> {
                     ],
 
                     DropdownButtonFormField<String>(
-                      initialValue: _respSel,
+                      value: _respSel,
                       decoration:
                           const InputDecoration(labelText: 'Responsável'),
                       items: _responsaveis
-                          .map(
-                              (r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
                       onChanged: (_status == StageStatus.idle ||
                               _status == StageStatus.running)
@@ -339,12 +341,11 @@ class _StageFormState extends State<StageForm> {
 
                     if (widget.stage.needsResponsibleSuperior)
                       DropdownButtonFormField<String>(
-                        initialValue: _respSupSel,
+                        value: _respSupSel,
                         decoration: const InputDecoration(
                             labelText: 'Responsável Superior'),
                         items: _responsaveisSup
-                            .map((r) =>
-                                DropdownMenuItem(value: r, child: Text(r)))
+                            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                             .toList(),
                         onChanged: (_status == StageStatus.idle ||
                                 _status == StageStatus.running)
@@ -358,7 +359,7 @@ class _StageFormState extends State<StageForm> {
                     if (widget.stage.needsResponsibleSuperior)
                       const SizedBox(height: 16),
 
-                    // Campo de quantidade processada com destaque
+                    // ✅ Campo de quantidade processada com destaque (INICIA ZERADO)
                     TextFormField(
                       controller: _qtdProcessadaCtrl,
                       keyboardType: TextInputType.number,
