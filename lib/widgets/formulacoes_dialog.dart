@@ -29,7 +29,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
       (f) => f.codigo == formulacaoSelecionada,
       orElse: () => formulacoes.first,
     );
-
+    
     for (final q in formulacao.quimicos) {
       controllers[q.nome] = TextEditingController(
         text: dadosAtuais?.quantidades[q.nome] ?? '',
@@ -55,8 +55,8 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
             );
 
             // Remove controllers não usados
-            controllers.removeWhere(
-                (key, _) => !formulacao.quimicos.any((q) => q.nome == key));
+            controllers.removeWhere((key, _) => 
+              !formulacao.quimicos.any((q) => q.nome == key));
 
             // Adiciona novos controllers
             for (final q in formulacao.quimicos) {
@@ -95,6 +95,8 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                         IconButton(
                           onPressed: () => Navigator.pop(ctx),
                           icon: const Icon(Icons.close, color: Colors.white),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
                       ],
                     ),
@@ -105,8 +107,6 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                     child: ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        // ✅ REMOVIDO: Caixa "Como Funciona"
-
                         // Dropdown Formulação
                         const Text(
                           'Formulação *',
@@ -118,13 +118,12 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: formulacaoSelecionada.isEmpty
-                              ? null
-                              : formulacaoSelecionada,
+                          value: formulacaoSelecionada.isEmpty ? null : formulacaoSelecionada,
+                          isExpanded: true, // ✅ Evita overflow
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
-                              vertical: 16,
+                              vertical: 12, // ✅ Reduzido de 16 para 12
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(4),
@@ -158,26 +157,14 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                           items: formulacoes.map((form) {
                             return DropdownMenuItem(
                               value: form.codigo,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    form.nome,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF424242),
-                                    ),
-                                  ),
-                                  Text(
-                                    '${form.quimicos.length} produtos químicos',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF757575),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                form.nome, // ✅ Apenas o nome, sem linha extra
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF424242),
+                                ),
+                                overflow: TextOverflow.ellipsis, // ✅ Evita overflow
                               ),
                             );
                           }).toList(),
@@ -193,9 +180,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                           ),
                         ),
 
-                        const SizedBox(height: 20),
-                        const Divider(color: Color(0xFFE0E0E0), thickness: 1),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
 
                         // Local de Estoque (só aparece se formulação selecionada)
                         if (formulacaoSelecionada.isNotEmpty) ...[
@@ -208,21 +193,22 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Local onde TODOS os químicos desta formulação estão armazenados',
+                          Text(
+                            'Local onde todos os químicos estão armazenados',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF757575),
+                              fontSize: 11, // ✅ Reduzido de 12 para 11
+                              color: Colors.grey[600],
                               fontStyle: FontStyle.italic,
                             ),
                           ),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
                             value: localEstoque,
+                            isExpanded: true, // ✅ Evita overflow
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
-                                vertical: 16,
+                                vertical: 12, // ✅ Reduzido
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(4),
@@ -260,8 +246,8 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: local != '— selecione —'
-                                        ? const Color(0xFF757575)
-                                        : const Color(0xFF424242),
+                                        ? const Color(0xFF424242)
+                                        : Colors.grey[600],
                                     fontWeight: local != '— selecione —'
                                         ? FontWeight.w500
                                         : FontWeight.normal,
@@ -280,9 +266,9 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                             ),
                           ),
 
-                          const SizedBox(height: 20),
-                          const Divider(color: Color(0xFFE0E0E0), thickness: 1),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
+                          const Divider(height: 1),
+                          const SizedBox(height: 16),
 
                           // Lista de químicos da formulação
                           const Text(
@@ -296,85 +282,90 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                           const SizedBox(height: 12),
 
                           ...formulacoes
-                              .firstWhere(
-                                  (f) => f.codigo == formulacaoSelecionada)
+                              .firstWhere((f) => f.codigo == formulacaoSelecionada)
                               .quimicos
                               .map((quimico) {
                             final ctrl = controllers[quimico.nome]!;
-
+                            final hasValue = ctrl.text.isNotEmpty;
+                            
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: Column(
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    quimico.nome,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF424242),
+                                  // Nome do químico
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          quimico.nome,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xFF424242),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: ctrl,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                            hintText: 'Quantidade',
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 12,
-                                            ),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                              borderSide: BorderSide(
-                                                color: ctrl.text.isNotEmpty
-                                                    ? const Color(0xFF4CAF50)
-                                                    : const Color(0xFFE0E0E0),
-                                              ),
-                                            ),
-                                            filled: true,
-                                            fillColor: ctrl.text.isNotEmpty
-                                                ? const Color(0xFFE8F5E9)
-                                                : Colors.white,
-                                          ),
-                                          onChanged: (_) =>
-                                              setDialogState(() {}),
+                                  const SizedBox(width: 12),
+                                  // Campo de quantidade
+                                  SizedBox(
+                                    width: 100, // ✅ Largura fixa menor
+                                    child: TextField(
+                                      controller: ctrl,
+                                      keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.right, // ✅ Alinhado à direita
+                                      decoration: InputDecoration(
+                                        hintText: '0',
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 10, // ✅ Compacto
                                         ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(4),
+                                          borderSide: BorderSide(
+                                            color: hasValue
+                                                ? const Color(0xFF4CAF50)
+                                                : const Color(0xFFE0E0E0),
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: hasValue
+                                            ? const Color(0xFFE8F5E9)
+                                            : Colors.white,
+                                        isDense: true, // ✅ Compacto
                                       ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF5F5F5),
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                          border: Border.all(
-                                            color: const Color(0xFFE0E0E0),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          quimico.unidade,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xFF757575),
-                                          ),
-                                        ),
+                                      onChanged: (_) => setDialogState(() {}),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Unidade
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF5F5F5),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color: const Color(0xFFE0E0E0),
                                       ),
-                                    ],
+                                    ),
+                                    child: Text(
+                                      quimico.unidade,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF757575),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -390,13 +381,12 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, -2),
+                      border: Border(
+                        top: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
                         ),
-                      ],
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -404,7 +394,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(ctx),
                             style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: const Text('Cancelar'),
                           ),
@@ -420,7 +410,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                                     // Valida se há pelo menos um químico preenchido
                                     final quantidades = <String, String>{};
                                     bool temAlgumPreenchido = false;
-
+                                    
                                     for (final entry in controllers.entries) {
                                       final valor = entry.value.text.trim();
                                       quantidades[entry.key] = valor;
@@ -430,11 +420,9 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                                     }
 
                                     if (!temAlgumPreenchido) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
-                                          content: Text(
-                                              'Informe pelo menos um químico'),
+                                          content: Text('Informe pelo menos um químico'),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -450,7 +438,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                                     Navigator.pop(ctx, resultado);
                                   },
                             style: FilledButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               backgroundColor: const Color(0xFF4CAF50),
                             ),
                             child: const Text('Confirmar'),
