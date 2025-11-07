@@ -177,6 +177,18 @@ class _StageFormState extends State<StageForm> {
     });
   }
 
+  String _calcularDuracao(DateTime inicio, DateTime fim) {
+    final duracao = fim.difference(inicio);
+    final horas = duracao.inHours;
+    final minutos = duracao.inMinutes.remainder(60);
+    
+    if (horas > 0) {
+      return '${horas}h ${minutos}min';
+    } else {
+      return '${minutos}min';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -281,6 +293,105 @@ class _StageFormState extends State<StageForm> {
                       start: _start,
                       end: _end,
                     ),
+
+                    const SizedBox(height: 16),
+
+                    // ✅ Exibição de Hora Início e Hora Término
+                    if (_start != null || _end != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            if (_start != null)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Início',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    dfTime.format(_start!),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            if (_start != null && _end != null)
+                              Container(
+                                height: 30,
+                                width: 1,
+                                color: Colors.grey.shade400,
+                              ),
+                            if (_end != null)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Término',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    dfTime.format(_end!),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            if (_start != null && _end != null) ...[
+                              Container(
+                                height: 30,
+                                width: 1,
+                                color: Colors.grey.shade400,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Duração',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _calcularDuracao(_start!, _end!),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
 
                     const SizedBox(height: 20),
 
