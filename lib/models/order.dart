@@ -13,7 +13,7 @@ extension StatusOrdemExtension on StatusOrdem {
       case StatusOrdem.emProducao:
         return 'Em Produção';
       case StatusOrdem.aguardando:
-        return 'Aguardando';
+        return 'Não Iniciado';
       case StatusOrdem.finalizada:
         return 'Finalizada';
       case StatusOrdem.cancelada:
