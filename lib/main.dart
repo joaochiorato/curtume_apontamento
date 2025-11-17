@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'core/theme/app_theme.dart';
-import 'providers/ordem_provider.dart';
-import 'screens/home/home_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'theme.dart';
+import 'pages/home_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => OrdemProducaoProvider(),
-        ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Apontamento • Produção',
+      theme: buildTheme(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
-      child: MaterialApp(
-        title: 'Ordem de Produção - QUARTZO',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
-      ),
+      supportedLocales: const [Locale('pt', 'BR')],
+      home: const HomePage(),
     );
   }
 }
