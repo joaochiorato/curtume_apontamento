@@ -1,7 +1,7 @@
-name: curtume_apontamento_remolho
-description: Sistema de Apontamento de Producao para Curtume - Vancouros
+name: ordem_producao_quartzo
+description: Sistema de gerenciamento de Ordem de Produção - Processo QUARTZO
 publish_to: 'none'
-version: 2.0.0+1
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -9,9 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  intl: ^0.20.2
+  
+  # Gerenciamento de estado
+  provider: ^6.1.1
+  
+  # Formatação de datas
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
@@ -20,6 +23,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
-  assets:
-    - assets/images/logo_atak.png
