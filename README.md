@@ -1,16 +1,84 @@
-# curtume_apontamento
+# 🔧 Ajuste - Remover Botões do Rodapé
 
-A new Flutter project.
+## 📦 O que foi removido:
 
-## Getting Started
+❌ **Botões do rodapé (dentro do quadro vermelho):**
+- Botão "Cancelar"
+- Botão "Salvar Apontamento"
 
-This project is a starting point for a Flutter application.
+## ✅ O que foi mantido:
 
-A few resources to get you started if this is your first Flutter project:
+✅ **Botões de controle (no meio da tela):**
+- Botão "Iniciar" (verde)
+- Botão "Pausar" (cinza)
+- Botão "Encerrar" (cinza)
+- Botão "Reabrir" (branco)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+✅ **Todo o resto da interface:**
+- Header com informações da OF
+- Dropdown Fulão
+- Botão Químicos
+- Campos de Responsável
+- Campo Quantidade Processada
+- Variáveis do Processo
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🚀 Como instalar:
+
+1. **Extraia este ZIP na pasta raiz do projeto**
+   ```
+   curtume_apontamento_remolho/
+   ```
+
+2. **O arquivo será colocado em:**
+   ```
+   lib/screens/stage/stage_screen.dart
+   ```
+
+3. **Execute o projeto:**
+   ```bash
+   flutter pub get
+   flutter run -d windows
+   ```
+
+---
+
+## 📝 Mudanças técnicas:
+
+### Removido do código:
+- ❌ Método `_buildFooterButtons()` 
+- ❌ Método `_getButtonLabel()`
+- ❌ Método `_buildActionButton()`
+- ❌ Método `_getButtonColor()`
+- ❌ Container do rodapé com os 2 botões
+
+### Estrutura final:
+```dart
+return Column(
+  children: [
+    _buildHeader(),        // ✅ Mantido
+    Expanded(
+      child: SingleChildScrollView(
+        // ✅ Todo conteúdo mantido
+        // ✅ Botões Iniciar/Pausar/Encerrar/Reabrir mantidos
+      ),
+    ),
+    // ❌ REMOVIDO: _buildFooterButtons()
+  ],
+);
+```
+
+---
+
+## 🎯 Resultado:
+
+- ✅ Interface limpa sem os botões do rodapé
+- ✅ Todos os 4 botões de controle mantidos
+- ✅ Funcionalidade completa preservada
+- ✅ Layout fiel ao projeto original
+
+---
+
+**Agora os únicos botões de ação são os 4 do meio da tela!** 🎉
+

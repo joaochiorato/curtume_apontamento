@@ -58,7 +58,7 @@ class _StageScreenState extends State<StageScreen> {
               // Header com informações da OF
               _buildHeader(context, ordem, estagio, restante),
 
-              // Conteúdo com scroll
+              // Conteúdo com scroll (sem botões no rodapé)
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -83,7 +83,6 @@ class _StageScreenState extends State<StageScreen> {
                           setState(() => _responsavel = value);
                         },
                       ),
-
                       const SizedBox(height: 16),
 
                       // Responsável Superior
@@ -94,45 +93,40 @@ class _StageScreenState extends State<StageScreen> {
                           setState(() => _responsavelSuperior = value);
                         },
                       ),
-
                       const SizedBox(height: 20),
 
                       // Quantidade Processada
                       QuantidadeInput(
                         label: 'Quantidade Processada*',
-                        unidade: 'peles',
-                        maximo: restante,
+                        maxQuantidade: restante,
+                        value: _quantidadeProcessada,
                         onChanged: (value) {
                           setState(() => _quantidadeProcessada = value);
                         },
                       ),
-
                       const SizedBox(height: 20),
 
-                      // Variáveis do Processo
+                      // Variáveis de Controle (se houver)
                       if (estagio.variaveisControle.isNotEmpty) ...[
-                        const Divider(),
-                        const SizedBox(height: 20),
                         Text(
                           'Variáveis do Processo',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
-                        const SizedBox(height: 16),
-                        ...estagio.variaveisControle.map((variavel) {
-                          return _buildVariavelControl(context, variavel);
-                        }).toList(),
+                        const SizedBox(height: 12),
+                        ...estagio.variaveisControle.map(
+                          (variavel) => _buildVariavelControl(context, variavel),
+                        ),
                       ],
 
-                      const SizedBox(height: 100), // Espaço para os botões fixos
+                      const SizedBox(height: 20), // Espaço final
                     ],
                   ),
                 ),
               ),
 
-              // Botões fixos no rodapé
-              _buildFooterButtons(context, provider, ordem, estagio, restante),
+              // ❌ REMOVIDO: _buildFooterButtons - Os botões Cancelar e Salvar Apontamento foram removidos
             ],
           );
         },
@@ -309,46 +303,29 @@ class _StageScreenState extends State<StageScreen> {
               Expanded(
                 child: Text(
                   variavel.nome,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ),
-              if (variavel.padrao != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'Padrão: ${variavel.padrao}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.blue.shade700,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 8),
           TextField(
             controller: controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
               hintText: 'Digite o valor',
               suffixText: variavel.unidade,
             ),
             onChanged: (value) {
-              final numericValue = double.tryParse(value);
-              variavel.resultado = numericValue;
+              _dadosAdicionais[variavel.nome] = value;
             },
           ),
           if (variavel.valorMinimo != null || variavel.valorMaximo != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Limite: ${variavel.valorMinimo ?? '-'} a ${variavel.valorMaximo ?? '-'} ${variavel.unidade}',
+              'Faixa: ${variavel.valorMinimo ?? '-'} a ${variavel.valorMaximo ?? '-'} ${variavel.unidade}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.textHint,
                   ),
@@ -359,141 +336,8 @@ class _StageScreenState extends State<StageScreen> {
     );
   }
 
-  Widget _buildFooterButtons(
-    BuildContext context,
-    OrdemProducaoProvider provider,
-    OrdemProducao ordem,
-    Estagio estagio,
-    int restante,
-  ) {
-    final bool podeIniciar = !estagio.isIniciado && _responsavel != null;
-    final bool podeSalvar = estagio.isIniciado && _quantidadeProcessada > 0;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Botão Cancelar
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 48),
-                side: BorderSide(color: Colors.grey.shade400),
-              ),
-              child: const Text('Cancelar'),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Botão Salvar/Iniciar/Encerrar
-          Expanded(
-            flex: 2,
-            child: ElevatedButton(
-              onPressed: _buildActionButton(
-                context,
-                provider,
-                ordem,
-                estagio,
-                restante,
-                podeIniciar,
-                podeSalvar,
-              ),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 48),
-                backgroundColor: AppTheme.accentColor,
-              ),
-              child: Text(_getButtonLabel(estagio, podeIniciar, podeSalvar)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getButtonLabel(Estagio estagio, bool podeIniciar, bool podeSalvar) {
-    if (!estagio.isIniciado && podeIniciar) {
-      return 'Iniciar';
-    } else if (estagio.isIniciado && !estagio.isConcluido) {
-      return 'Salvar Apontamento';
-    }
-    return 'Salvar Apontamento';
-  }
-
-  VoidCallback? _buildActionButton(
-    BuildContext context,
-    OrdemProducaoProvider provider,
-    OrdemProducao ordem,
-    Estagio estagio,
-    int restante,
-    bool podeIniciar,
-    bool podeSalvar,
-  ) {
-    // Se ainda não iniciou
-    if (!estagio.isIniciado) {
-      if (!podeIniciar) return null;
-      
-      return () {
-        provider.iniciarApontamento(
-          widget.ordemId,
-          widget.estagioId,
-          responsavel: _responsavel!,
-          responsavelSuperior: _responsavelSuperior,
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Apontamento iniciado com sucesso')),
-        );
-      };
-    }
-
-    // Se já iniciou, mas não pode salvar
-    if (!podeSalvar) return null;
-
-    // Pode salvar apontamento
-    return () {
-      // Atualiza dados adicionais
-      if (_dadosAdicionais.isNotEmpty) {
-        provider.atualizarDadosAdicionais(
-          widget.ordemId,
-          widget.estagioId,
-          _dadosAdicionais,
-        );
-      }
-
-      // Processa quantidade
-      provider.processarQuantidade(
-        widget.ordemId,
-        widget.estagioId,
-        _quantidadeProcessada,
-      );
-
-      // Se processou tudo, finaliza o estágio
-      if (restante - _quantidadeProcessada <= 0) {
-        provider.finalizarEstagio(widget.ordemId, widget.estagioId);
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            restante - _quantidadeProcessada <= 0
-                ? 'Estágio finalizado com sucesso'
-                : 'Apontamento salvo com sucesso',
-          ),
-        ),
-      );
-
-      Navigator.pop(context);
-    };
-  }
+  // ❌ REMOVIDO: Método _buildFooterButtons() - Botões do rodapé foram removidos
+  // ❌ REMOVIDO: Método _getButtonLabel() - Não é mais necessário
+  // ❌ REMOVIDO: Método _buildActionButton() - Não é mais necessário
+  // ❌ REMOVIDO: Método _getButtonColor() - Não é mais necessário
 }
