@@ -1,84 +1,145 @@
-# 🔧 Ajuste - Remover Botões do Rodapé
+# 🔧 Ajuste Completo - Curtume Apontamento Remolho
 
-## 📦 O que foi removido:
+## 📦 O que este pacote contém:
 
-❌ **Botões do rodapé (dentro do quadro vermelho):**
-- Botão "Cancelar"
-- Botão "Salvar Apontamento"
+### ✅ Arquivo ajustado:
+- `lib/widgets/stage_form.dart` - Formulário de apontamento ajustado
 
-## ✅ O que foi mantido:
+## 🎯 Mudanças realizadas:
 
-✅ **Botões de controle (no meio da tela):**
-- Botão "Iniciar" (verde)
-- Botão "Pausar" (cinza)
-- Botão "Encerrar" (cinza)
-- Botão "Reabrir" (branco)
+### ❌ REMOVIDO:
+1. Botões "Cancelar" e "Salvar Apontamento" do rodapé
+2. Container com a seção de botões fixos no final
 
-✅ **Todo o resto da interface:**
-- Header com informações da OF
-- Dropdown Fulão
-- Botão Químicos
-- Campos de Responsável
-- Campo Quantidade Processada
-- Variáveis do Processo
+### ✅ MODIFICADO:
+1. Método `_onStatusChange()` - Agora chama `_save()` automaticamente ao clicar em "Encerrar"
+2. Lógica de salvamento integrada ao botão "Encerrar"
 
 ---
 
 ## 🚀 Como instalar:
 
-1. **Extraia este ZIP na pasta raiz do projeto**
-   ```
-   curtume_apontamento_remolho/
-   ```
+### 1. **Faça backup (IMPORTANTE!)**
+```bash
+cp lib/widgets/stage_form.dart lib/widgets/stage_form.dart.backup
+```
 
-2. **O arquivo será colocado em:**
-   ```
-   lib/screens/stage/stage_screen.dart
-   ```
+### 2. **Extraia o ZIP na raiz do projeto**
+```
+curtume_apontamento_remolho/
+```
 
-3. **Execute o projeto:**
-   ```bash
-   flutter pub get
-   flutter run -d windows
-   ```
+O arquivo será colocado em:
+```
+lib/widgets/stage_form.dart
+```
 
----
-
-## 📝 Mudanças técnicas:
-
-### Removido do código:
-- ❌ Método `_buildFooterButtons()` 
-- ❌ Método `_getButtonLabel()`
-- ❌ Método `_buildActionButton()`
-- ❌ Método `_getButtonColor()`
-- ❌ Container do rodapé com os 2 botões
-
-### Estrutura final:
-```dart
-return Column(
-  children: [
-    _buildHeader(),        // ✅ Mantido
-    Expanded(
-      child: SingleChildScrollView(
-        // ✅ Todo conteúdo mantido
-        // ✅ Botões Iniciar/Pausar/Encerrar/Reabrir mantidos
-      ),
-    ),
-    // ❌ REMOVIDO: _buildFooterButtons()
-  ],
-);
+### 3. **Execute o projeto**
+```bash
+flutter pub get
+flutter run -d windows
 ```
 
 ---
 
-## 🎯 Resultado:
+## 🎯 Comportamento NOVO:
 
-- ✅ Interface limpa sem os botões do rodapé
-- ✅ Todos os 4 botões de controle mantidos
-- ✅ Funcionalidade completa preservada
-- ✅ Layout fiel ao projeto original
+### Botão "Encerrar":
+1. ✅ Usuário clica em "Encerrar"
+2. ✅ Sistema registra hora de término
+3. ✅ Sistema valida os dados (quantidade, responsável, etc)
+4. ✅ **Sistema SALVA automaticamente**
+5. ✅ **Sistema VOLTA para tela anterior**
+
+### Se houver erro:
+- ❌ Quantidade inválida → Mostra mensagem de erro
+- ❌ Quantidade excede restante → Mostra mensagem de erro
+- ❌ Não encerrou o estágio → Mostra mensagem de erro
 
 ---
 
-**Agora os únicos botões de ação são os 4 do meio da tela!** 🎉
+## 📋 Validações mantidas:
 
+O botão "Encerrar" executa TODAS as validações:
+- ✅ Quantidade maior que 0
+- ✅ Quantidade não excede o restante
+- ✅ Estágio deve estar encerrado (status = closed)
+- ✅ Formulário válido
+
+---
+
+## 🔄 Fluxo completo:
+
+```
+1. Usuário preenche os dados
+2. Clica em "Iniciar" → Registra início
+3. Preenche variáveis do processo
+4. Clica em "Encerrar" → Registra término + SALVA + VOLTA
+```
+
+---
+
+## ⚠️ IMPORTANTE:
+
+- Os 4 botões (Iniciar, Pausar, Encerrar, Reabrir) **continuam funcionando normalmente**
+- Apenas os 2 botões do rodapé foram removidos
+- A lógica de salvamento foi movida para o botão "Encerrar"
+
+---
+
+## 🐛 Solução de problemas:
+
+### Erro de compilação?
+```bash
+flutter clean
+flutter pub get
+flutter run
+```
+
+### Botões não aparecem?
+- Verifique se o arquivo foi extraído no local correto
+- Confirme que está na pasta raiz do projeto
+
+### Salvamento não funciona?
+- Verifique se preencheu todos os campos obrigatórios
+- Verifique se a quantidade é válida
+- Verifique se clicou em "Encerrar" (não em Pausar)
+
+---
+
+## 📊 Estrutura final do arquivo:
+
+```
+stage_form.dart
+├── Campos do formulário
+├── Botões: Iniciar/Pausar/Encerrar/Reabrir
+├── Informações de início/término/duração
+├── Dropdown Fulão
+├── Botão Químicos
+├── Responsável/Responsável Superior
+├── Quantidade Processada
+├── Variáveis do Processo
+├── Observação
+└── ❌ SEM botões do rodapé
+```
+
+---
+
+## ✅ Checklist pós-instalação:
+
+- [ ] Arquivo extraído na raiz do projeto
+- [ ] `flutter pub get` executado
+- [ ] Projeto compilou sem erros
+- [ ] Botões "Cancelar" e "Salvar" NÃO aparecem
+- [ ] Os 4 botões (Iniciar/Pausar/Encerrar/Reabrir) aparecem
+- [ ] Clicar em "Encerrar" salva e volta para tela anterior
+
+---
+
+**Versão:** 1.0  
+**Data:** 17/11/2025  
+**Compatível com:** Flutter 3.0+
+
+---
+
+🎉 **Pronto para usar!**

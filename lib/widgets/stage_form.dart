@@ -69,11 +69,7 @@ class _StageFormState extends State<StageForm> {
       _controllers[v.name] = TextEditingController();
     }
 
-    // ✅ ALTERAÇÃO: Inicia zerado para o usuário informar
     _qtdProcessadaCtrl.text = '0';
-
-    // ✅ NÃO carrega dados anteriores - cada apontamento é novo
-    // Comentado: _loadSavedData();
   }
 
   @override
@@ -86,6 +82,13 @@ class _StageFormState extends State<StageForm> {
     _scroll.dispose();
     super.dispose();
   }
+
+  // Verifica se o estágio é REMOLHO (único que tem Fulão e Químicos)
+  bool get _isRemolho => widget.stage.code.toUpperCase() == 'REMOLHO';
+
+  // Verifica se tem máquinas/fulões disponíveis
+  bool get _hasMachines =>
+      widget.stage.machines != null && widget.stage.machines!.isNotEmpty;
 
   int _getQuimicosInformados() {
     return _quimicosData?.getQuantidadeInformados() ?? 0;
@@ -111,7 +114,6 @@ class _StageFormState extends State<StageForm> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Validação adicional de quantidade
     final qtdApontamento = int.tryParse(_qtdProcessadaCtrl.text) ?? 0;
     if (qtdApontamento <= 0) {
       _show('Informe uma quantidade válida!', isError: true);
@@ -126,7 +128,6 @@ class _StageFormState extends State<StageForm> {
       return;
     }
 
-    // ✅ Validação: Deve ter iniciado e encerrado o estágio
     if (_status != StageStatus.closed) {
       _show('Você deve Iniciar e Encerrar o estágio antes de salvar!',
           isError: true);
@@ -175,13 +176,18 @@ class _StageFormState extends State<StageForm> {
       }
       _status = newStatus;
     });
+
+    // ✅ Ao clicar em ENCERRAR, salva automaticamente
+    if (newStatus == StageStatus.closed) {
+      _save();
+    }
   }
 
   String _calcularDuracao(DateTime inicio, DateTime fim) {
     final duracao = fim.difference(inicio);
     final horas = duracao.inHours;
     final minutos = duracao.inMinutes.remainder(60);
-    
+
     if (horas > 0) {
       return '${horas}h ${minutos}min';
     } else {
@@ -286,7 +292,7 @@ class _StageFormState extends State<StageForm> {
 
                     const SizedBox(height: 20),
 
-                    // ✅ Barra de ações: SEMPRE permite Iniciar/Pausar/Encerrar
+                    // Barra de ações: Iniciar/Pausar/Encerrar/Reabrir
                     StageActionBar(
                       status: _status,
                       onStatusChange: _onStatusChange,
@@ -296,7 +302,7 @@ class _StageFormState extends State<StageForm> {
 
                     const SizedBox(height: 16),
 
-                    // ✅ Exibição de Hora Início e Hora Término
+                    // Exibição de Hora Início e Hora Término
                     if (_start != null || _end != null)
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -380,10 +386,10 @@ class _StageFormState extends State<StageForm> {
                                   const SizedBox(height: 4),
                                   Text(
                                     _calcularDuracao(_start!, _end!),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.blue.shade700,
+                                      color: Colors.black87,
                                     ),
                                   ),
                                 ],
@@ -395,99 +401,84 @@ class _StageFormState extends State<StageForm> {
 
                     const SizedBox(height: 20),
 
-                    if (widget.stage.hasFulao) ...[
+                    // Dropdown Fulão e Botão Químicos (apenas para REMOLHO)
+                    if (_isRemolho && _hasMachines)
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
-                              initialValue: _fulaoSel,
-                              decoration:
-                                  const InputDecoration(labelText: 'Fulão'),
-                              items: (widget.stage.machines ?? [])
+                              value: _fulaoSel,
+                              decoration: const InputDecoration(
+                                labelText: 'Fulão',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: widget.stage.machines!
                                   .map((m) => int.parse(m))
-                                  .map((i) => DropdownMenuItem(
-                                      value: i, child: Text('Fulão $i')))
+                                  .map((m) => DropdownMenuItem(
+                                        value: m,
+                                        child: Text('Fulão $m'),
+                                      ))
                                   .toList(),
-                              onChanged: (_status == StageStatus.idle ||
-                                      _status == StageStatus.running)
-                                  ? (v) => setState(() => _fulaoSel = v)
-                                  : null,
-                              validator: (_) => _fulaoSel == null
-                                  ? 'Selecione o fulão'
-                                  : null,
+                              onChanged: (v) => setState(() => _fulaoSel = v),
                             ),
                           ),
                           const SizedBox(width: 12),
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.science),
-                            label: Text(
-                                'Químicos (${_getQuimicosInformados()})'),
-                            onPressed: (_status == StageStatus.idle ||
-                                    _status == StageStatus.running)
-                                ? _openQuimicosDialog
-                                : null,
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _openQuimicosDialog,
+                              icon: const Icon(Icons.science),
+                              label: Text(
+                                  'Químicos (${_getQuimicosInformados()})'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                    ],
 
+                    const SizedBox(height: 16),
+
+                    // Responsável
                     DropdownButtonFormField<String>(
                       value: _respSel,
-                      decoration:
-                          const InputDecoration(labelText: 'Responsável'),
+                      decoration: const InputDecoration(
+                        labelText: 'Responsável',
+                        border: OutlineInputBorder(),
+                      ),
                       items: _responsaveis
-                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map(
+                              (r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
-                      onChanged: (_status == StageStatus.idle ||
-                              _status == StageStatus.running)
-                          ? (v) => setState(() => _respSel = v!)
-                          : null,
-                      validator: (v) => v == '— selecione —'
-                          ? 'Selecione o responsável'
-                          : null,
+                      onChanged: (v) => setState(() => _respSel = v!),
                     ),
 
                     const SizedBox(height: 16),
 
-                    if (widget.stage.needsResponsibleSuperior)
-                      DropdownButtonFormField<String>(
-                        value: _respSupSel,
-                        decoration: const InputDecoration(
-                            labelText: 'Responsável Superior'),
-                        items: _responsaveisSup
-                            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                            .toList(),
-                        onChanged: (_status == StageStatus.idle ||
-                                _status == StageStatus.running)
-                            ? (v) => setState(() => _respSupSel = v!)
-                            : null,
-                        validator: (v) => v == '— selecione —'
-                            ? 'Selecione o responsável superior'
-                            : null,
+                    // Responsável Superior
+                    DropdownButtonFormField<String>(
+                      value: _respSupSel,
+                      decoration: const InputDecoration(
+                        labelText: 'Responsável Superior',
+                        border: OutlineInputBorder(),
                       ),
+                      items: _responsaveisSup
+                          .map(
+                              (r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .toList(),
+                      onChanged: (v) => setState(() => _respSupSel = v!),
+                    ),
 
-                    if (widget.stage.needsResponsibleSuperior)
-                      const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                    // ✅ Campo de quantidade processada com destaque (INICIA ZERADO)
+                    // Quantidade Processada
                     TextFormField(
                       controller: _qtdProcessadaCtrl,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
                       decoration: InputDecoration(
                         labelText: 'Quantidade Processada*',
-                        labelStyle:
-                            const TextStyle(fontWeight: FontWeight.bold),
                         suffixText: 'peles',
-                        suffixStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
                         helperText:
                             'Máximo: ${widget.quantidadeRestante} peles',
                         helperStyle: TextStyle(
@@ -588,6 +579,9 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
           ),
+
+          // ❌ REMOVIDO: Rodapé com botões "Cancelar" e "Salvar Apontamento"
+          // A lógica de salvamento agora está no botão "Encerrar"
         ],
       ),
     );
