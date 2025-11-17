@@ -17,13 +17,12 @@ class _StagePageState extends State<StagePage> {
   @override
   void initState() {
     super.initState();
-    // Define a quantidade total da OF/Artigo
-    final qtdTotal = int.tryParse(widget.articleHeader['quantidade'] ?? '0') ?? 0;
+    final qtdTotal =
+        int.tryParse(widget.articleHeader['quantidade'] ?? '0') ?? 0;
     storage.setQuantidadeTotal(qtdTotal);
   }
 
   void _openStageForm(StageModel stage) {
-    // Verifica se já atingiu o total
     final info = storage.getStageInfo(stage.code);
     final processada = info['processada'] as int;
     final total = info['total'] as int;
@@ -33,7 +32,6 @@ class _StagePageState extends State<StagePage> {
       builder: (_) => Scaffold(
         appBar: AppBar(
           title: Text(stage.title),
-          // Mostra quantidade processada no AppBar
           actions: [
             if (total > 0)
               Padding(
@@ -58,9 +56,9 @@ class _StagePageState extends State<StagePage> {
           quantidadeProcessada: processada,
           quantidadeRestante: restante,
           onSaved: (data) {
-            // Valida se não vai ultrapassar o total
-            final qtdApontamento = int.tryParse(data['qtdProcessada']?.toString() ?? '0') ?? 0;
-            
+            final qtdApontamento =
+                int.tryParse(data['qtdProcessada']?.toString() ?? '0') ?? 0;
+
             if (processada + qtdApontamento > total) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -74,19 +72,17 @@ class _StagePageState extends State<StagePage> {
               return;
             }
 
-            // Salva o apontamento
             final finalizarEstagio = (processada + qtdApontamento) >= total;
             storage.saveData(stage.code, data, finalizar: finalizarEstagio);
-            
+
             setState(() {});
             Navigator.pop(context);
-            
-            // Mensagem de sucesso
+
             final novoTotal = processada + qtdApontamento;
             final msg = finalizarEstagio
                 ? '✓ ${stage.title} FINALIZADO! ($novoTotal / $total)'
                 : '✓ Apontamento salvo! ($novoTotal / $total) - Restam ${total - novoTotal}';
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(msg),
@@ -124,6 +120,7 @@ class _StagePageState extends State<StagePage> {
     );
   }
 
+  // ✅ NOVO: Mostra histórico de apontamentos
   void _showStageDetails(StageModel stage) {
     final info = storage.getStageInfo(stage.code);
     final apontamentos = storage.getApontamentos(stage.code);
@@ -131,7 +128,7 @@ class _StagePageState extends State<StagePage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Detalhes - ${stage.title}'),
+        title: Text('Histórico - ${stage.title}'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -157,9 +154,82 @@ class _StagePageState extends State<StagePage> {
                   final idx = entry.key + 1;
                   final apt = entry.value;
                   final qtd = apt['qtdProcessada'] ?? 0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text('$idx. Quantidade: $qtd peles'),
+                  final resp = apt['responsavel'] ?? 'Não informado';
+                  final start = apt['start'] != null
+                      ? DateTime.parse(apt['start'])
+                          .toString()
+                          .substring(11, 16)
+                      : '-';
+                  final end = apt['end'] != null
+                      ? DateTime.parse(apt['end']).toString().substring(11, 16)
+                      : '-';
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Apontamento #$idx',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border:
+                                      Border.all(color: Colors.green.shade200),
+                                ),
+                                child: Text(
+                                  '$qtd peles',
+                                  style: TextStyle(
+                                    color: Colors.green.shade700,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.person,
+                                  size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                resp,
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.access_time,
+                                  size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$start - $end',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 }),
             ],
@@ -284,7 +354,6 @@ class _StagePageState extends State<StagePage> {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: InkWell(
                     onTap: () => _openStageForm(stage),
-                    onLongPress: () => _showStageDetails(stage),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(
@@ -294,17 +363,18 @@ class _StagePageState extends State<StagePage> {
                             isFinalizado
                                 ? Icons.check_circle
                                 : processada > 0
-                                    ? Icons.pending
-                                    : Icons.radio_button_unchecked,
+                                    ? Icons.play_circle
+                                    : Icons.circle_outlined,
                             color: isFinalizado
                                 ? Colors.green
                                 : processada > 0
                                     ? Colors.orange
                                     : Colors.grey,
+                            size: 32,
                           ),
                           const SizedBox(width: 12),
-                          
-                          // Nome do estágio
+
+                          // Informações do estágio
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,54 +386,60 @@ class _StagePageState extends State<StagePage> {
                                     fontSize: 16,
                                   ),
                                 ),
-                                if (processada > 0) ...[
-                                  const SizedBox(height: 4),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '$processada / $qtdTotal peles',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                if (apontamentos > 0)
                                   Text(
-                                    '$processada / $qtdTotal peles',
+                                    '$apontamentos apontamento${apontamentos > 1 ? 's' : ''}',
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade700,
+                                      color: Colors.blue.shade600,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  if (apontamentos > 1)
-                                    Text(
-                                      '$apontamentos apontamentos',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                ],
                               ],
                             ),
                           ),
-                          
-                          // Badge com quantidade restante
-                          if (!isFinalizado && processada > 0)
+
+                          // Badge de falta
+                          if (restante > 0)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 10,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.orange.shade200,
-                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border:
+                                    Border.all(color: Colors.orange.shade200),
                               ),
                               child: Text(
                                 'Faltam $restante',
                                 style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
                                   color: Colors.orange.shade900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
                                 ),
                               ),
                             ),
-                          
-                          const SizedBox(width: 8),
-                          const Icon(Icons.chevron_right),
+
+                          // ✅ NOVO: Botão de histórico
+                          if (apontamentos > 0) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.history),
+                              color: Colors.blue.shade700,
+                              tooltip: 'Ver histórico',
+                              onPressed: () => _showStageDetails(stage),
+                            ),
+                          ],
                         ],
                       ),
                     ),

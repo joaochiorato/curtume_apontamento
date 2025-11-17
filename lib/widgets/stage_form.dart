@@ -5,6 +5,7 @@ import '../models/stage.dart';
 import '../models/formulacoes_model.dart';
 import '../widgets/stage_action_bar.dart';
 import '../widgets/formulacoes_dialog.dart';
+import '../widgets/variaveis_dialog.dart'; // ✅ NOVO IMPORT
 
 class StageForm extends StatefulWidget {
   final StageModel stage;
@@ -30,8 +31,8 @@ class StageForm extends StatefulWidget {
 
 class _StageFormState extends State<StageForm> {
   final _formKey = GlobalKey<FormState>();
-  final Map<String, TextEditingController> _controllers = {};
   QuimicosFormulacaoData? _quimicosData;
+  Map<String, String> _variaveisData = {}; // ✅ NOVO: Dados das variáveis
   final _obs = TextEditingController();
   final _qtdProcessadaCtrl = TextEditingController();
   final _scroll = ScrollController();
@@ -64,39 +65,31 @@ class _StageFormState extends State<StageForm> {
   @override
   void initState() {
     super.initState();
-
-    for (final v in widget.stage.variables) {
-      _controllers[v.name] = TextEditingController();
-    }
-
     _qtdProcessadaCtrl.text = '0';
   }
 
   @override
   void dispose() {
-    for (final c in _controllers.values) {
-      c.dispose();
-    }
     _obs.dispose();
     _qtdProcessadaCtrl.dispose();
     _scroll.dispose();
     super.dispose();
   }
 
-  // Verifica se o estágio é REMOLHO (único que tem Fulão e Químicos)
   bool get _isRemolho => widget.stage.code.toUpperCase() == 'REMOLHO';
-
-  // Verifica se tem máquinas/fulões disponíveis
-  bool get _hasMachines =>
-      widget.stage.machines != null && widget.stage.machines!.isNotEmpty;
+  bool get _hasMachines => widget.stage.machines != null && widget.stage.machines!.isNotEmpty;
 
   int _getQuimicosInformados() {
     return _quimicosData?.getQuantidadeInformados() ?? 0;
   }
 
+  // ✅ NOVO: Conta variáveis preenchidas
+  int _getVariaveisPreenchidas() {
+    return _variaveisData.values.where((v) => v.isNotEmpty).length;
+  }
+
   Future<void> _openQuimicosDialog() async {
-    final canEdit =
-        (_status == StageStatus.idle || _status == StageStatus.running);
+    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running);
 
     final result = await showQuimicosDialog(
       context,
@@ -109,6 +102,42 @@ class _StageFormState extends State<StageForm> {
         _quimicosData = result;
       });
     }
+  }
+
+  // ✅ NOVO: Abre dialog de variáveis
+  Future<void> _openVariaveisDialog() async {
+    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running);
+
+    final result = await showVariaveisDialog(
+      context,
+      variables: widget.stage.variables,
+      valoresAtuais: _variaveisData,
+      canEdit: canEdit,
+    );
+
+    if (result != null) {
+      setState(() {
+        _variaveisData = result;
+      });
+    }
+  }
+
+  // ✅ Métodos do contador
+  int get _currentValue => int.tryParse(_qtdProcessadaCtrl.text) ?? 0;
+
+  void _updateValue(int newValue) {
+    if (newValue < 0) newValue = 0;
+    setState(() {
+      _qtdProcessadaCtrl.text = newValue.toString();
+    });
+  }
+
+  void _increment(int amount) {
+    _updateValue(_currentValue + amount);
+  }
+
+  void _decrement() {
+    _updateValue(_currentValue - 1);
   }
 
   Future<void> _save() async {
@@ -136,11 +165,7 @@ class _StageFormState extends State<StageForm> {
 
     setState(() => _isSaving = true);
 
-    final variables = <String, dynamic>{};
-    _controllers.forEach((key, ctrl) {
-      variables[key] = ctrl.text;
-    });
-
+    // ✅ Usa _variaveisData ao invés de controllers
     final data = <String, dynamic>{
       'fulao': _fulaoSel,
       'responsavel': _respSel,
@@ -150,7 +175,7 @@ class _StageFormState extends State<StageForm> {
       'start': _start?.toIso8601String(),
       'end': _end?.toIso8601String(),
       'status': _status.name,
-      'variables': variables,
+      'variables': _variaveisData,
       if (_quimicosData != null) 'quimicos': _quimicosData!.toJson(),
     };
 
@@ -177,7 +202,6 @@ class _StageFormState extends State<StageForm> {
       _status = newStatus;
     });
 
-    // ✅ Ao clicar em ENCERRAR, salva automaticamente
     if (newStatus == StageStatus.closed) {
       _save();
     }
@@ -211,87 +235,6 @@ class _StageFormState extends State<StageForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Card com informações de quantidade
-                    Card(
-                      color: Colors.blue.shade50,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(color: Colors.blue.shade200),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total da OF:',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                Text(
-                                  '${widget.quantidadeTotal} peles',
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Já processado:',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                Text(
-                                  '${widget.quantidadeProcessada} peles',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'RESTANTE:',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.orange.shade900,
-                                  ),
-                                ),
-                                Text(
-                                  '${widget.quantidadeRestante} peles',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.orange.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
                     // Barra de ações: Iniciar/Pausar/Encerrar/Reabrir
                     StageActionBar(
                       status: _status,
@@ -302,7 +245,40 @@ class _StageFormState extends State<StageForm> {
 
                     const SizedBox(height: 16),
 
-                    // Exibição de Hora Início e Hora Término
+                    // ✅ Botões Químicos e Variáveis lado a lado (REMOLHO)
+                    if (_isRemolho)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _openQuimicosDialog,
+                              icon: const Icon(Icons.science),
+                              label: Text('Químicos (${_getQuimicosInformados()})'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                                side: BorderSide(color: Colors.blue.shade700, width: 2),
+                                foregroundColor: Colors.blue.shade700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _openVariaveisDialog,
+                              icon: const Icon(Icons.tune),
+                              label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                                side: BorderSide(color: Colors.green.shade700, width: 2),
+                                foregroundColor: Colors.green.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                    const SizedBox(height: 16),
+
                     if (_start != null || _end != null)
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -399,47 +375,8 @@ class _StageFormState extends State<StageForm> {
                         ),
                       ),
 
-                    const SizedBox(height: 20),
-
-                    // Dropdown Fulão e Botão Químicos (apenas para REMOLHO)
-                    if (_isRemolho && _hasMachines)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<int>(
-                              value: _fulaoSel,
-                              decoration: const InputDecoration(
-                                labelText: 'Fulão',
-                                border: OutlineInputBorder(),
-                              ),
-                              items: widget.stage.machines!
-                                  .map((m) => int.parse(m))
-                                  .map((m) => DropdownMenuItem(
-                                        value: m,
-                                        child: Text('Fulão $m'),
-                                      ))
-                                  .toList(),
-                              onChanged: (v) => setState(() => _fulaoSel = v),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _openQuimicosDialog,
-                              icon: const Icon(Icons.science),
-                              label: Text(
-                                  'Químicos (${_getQuimicosInformados()})'),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
                     const SizedBox(height: 16),
 
-                    // Responsável
                     DropdownButtonFormField<String>(
                       value: _respSel,
                       decoration: const InputDecoration(
@@ -447,15 +384,13 @@ class _StageFormState extends State<StageForm> {
                         border: OutlineInputBorder(),
                       ),
                       items: _responsaveis
-                          .map(
-                              (r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
                       onChanged: (v) => setState(() => _respSel = v!),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Responsável Superior
                     DropdownButtonFormField<String>(
                       value: _respSupSel,
                       decoration: const InputDecoration(
@@ -463,106 +398,259 @@ class _StageFormState extends State<StageForm> {
                         border: OutlineInputBorder(),
                       ),
                       items: _responsaveisSup
-                          .map(
-                              (r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
                       onChanged: (v) => setState(() => _respSupSel = v!),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                    // Quantidade Processada
-                    TextFormField(
-                      controller: _qtdProcessadaCtrl,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        labelText: 'Quantidade Processada*',
-                        suffixText: 'peles',
-                        helperText:
-                            'Máximo: ${widget.quantidadeRestante} peles',
-                        helperStyle: TextStyle(
-                          color: Colors.orange.shade700,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        filled: true,
-                        fillColor: Colors.orange.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                              color: Colors.orange.shade200, width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                              color: Colors.orange.shade300, width: 2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                              color: Colors.orange.shade700, width: 2),
-                        ),
-                      ),
-                      validator: (txt) {
-                        if (txt == null || txt.isEmpty) {
-                          return 'Informe a quantidade';
-                        }
-                        final n = int.tryParse(txt);
-                        if (n == null) return 'Valor inválido';
-                        if (n <= 0) return 'Quantidade deve ser maior que 0';
-                        if (n > widget.quantidadeRestante) {
-                          return 'Máximo: ${widget.quantidadeRestante} peles';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-
-                    const Text(
-                      'Variáveis do Processo',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    ...widget.stage.variables.map((v) {
-                      final ctrl = _controllers[v.name]!;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: TextFormField(
-                          controller: ctrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: InputDecoration(
-                            labelText: '${v.name} (${v.unit})',
-                            hintText: v.hint,
-                            helperText: v.min != null && v.max != null
-                                ? 'Faixa: ${v.min} - ${v.max}'
-                                : null,
+                    // ✅ CONTADOR DE QUANTIDADE (COMPACTO)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Quantidade Processada*',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
-                          validator: (txt) {
-                            if (txt == null || txt.isEmpty) {
-                              return 'Informe ${v.name}';
-                            }
-                            final num =
-                                double.tryParse(txt.replaceAll(',', '.'));
-                            if (num == null) return 'Valor inválido';
-                            if (v.min != null && num < v.min!) {
-                              return 'Mínimo: ${v.min}';
-                            }
-                            if (v.max != null && num > v.max!) {
-                              return 'Máximo: ${v.max}';
-                            }
-                            return null;
-                          },
                         ),
-                      );
-                    }),
+                        const SizedBox(height: 8),
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.orange.shade300,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              // Linha com - [ valor ] +
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Botão -
+                                  Material(
+                                    color: Colors.red.shade400,
+                                    shape: const CircleBorder(),
+                                    child: InkWell(
+                                      onTap: _decrement,
+                                      customBorder: const CircleBorder(),
+                                      child: Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.remove,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 16),
+
+                                  // Display do valor
+                                  Container(
+                                    constraints: const BoxConstraints(minWidth: 80),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.orange.shade400,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _currentValue.toString(),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orange.shade900,
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 16),
+
+                                  // Botão +
+                                  Material(
+                                    color: Colors.green.shade400,
+                                    shape: const CircleBorder(),
+                                    child: InkWell(
+                                      onTap: () => _increment(1),
+                                      customBorder: const CircleBorder(),
+                                      child: Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 8),
+
+                                  Text(
+                                    'peles',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+                              
+                              Divider(
+                                color: Colors.orange.shade200,
+                                thickness: 1,
+                                height: 1,
+                              ),
+                              
+                              const SizedBox(height: 12),
+
+                              // Botões de incremento rápido (COMPACTOS)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Material(
+                                      color: Colors.blue.shade600,
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: InkWell(
+                                        onTap: () => _increment(10),
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '+10',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Material(
+                                      color: Colors.blue.shade600,
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: InkWell(
+                                        onTap: () => _increment(20),
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '+20',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Material(
+                                      color: Colors.blue.shade600,
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: InkWell(
+                                        onTap: () => _increment(50),
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '+50',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'Máximo: ${widget.quantidadeRestante} peles',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
                     const SizedBox(height: 16),
 
@@ -579,9 +667,6 @@ class _StageFormState extends State<StageForm> {
               ),
             ),
           ),
-
-          // ❌ REMOVIDO: Rodapé com botões "Cancelar" e "Salvar Apontamento"
-          // A lógica de salvamento agora está no botão "Encerrar"
         ],
       ),
     );
