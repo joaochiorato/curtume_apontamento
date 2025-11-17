@@ -1,42 +1,85 @@
 import 'package:flutter/material.dart';
+import '../models/stage.dart';
 
-class StageButton extends StatelessWidget {
-  final String label;
-  final bool finalizado;
-  final VoidCallback onTap;
+class StageActionBar extends StatelessWidget {
+  final StageStatus status;
+  final void Function(StageStatus) onStatusChange;
+  final DateTime? start;
+  final DateTime? end;
 
-  const StageButton({
+  const StageActionBar({
     super.key,
-    required this.label,
-    required this.finalizado,
-    required this.onTap,
+    required this.status,
+    required this.onStatusChange,
+    this.start,
+    this.end,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: finalizado ? Colors.green : const Color(0xFF546E7A),
-          child: Icon(
-            finalizado ? Icons.check : Icons.play_arrow,
-            color: Colors.white,
+    return Row(
+      children: [
+        // Botão INICIAR
+        Expanded(
+          child: FilledButton(
+            onPressed: (status == StageStatus.idle || status == StageStatus.paused)
+                ? () => onStatusChange(StageStatus.running)
+                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green,
+              disabledBackgroundColor: Colors.grey.shade300,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Iniciar'),
           ),
         ),
-        title: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        const SizedBox(width: 8),
+        
+        // Botão PAUSAR
+        Expanded(
+          child: FilledButton(
+            onPressed: status == StageStatus.running 
+                ? () => onStatusChange(StageStatus.paused)
+                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
+              disabledBackgroundColor: Colors.grey.shade300,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Pausar'),
+          ),
         ),
-        trailing: finalizado
-            ? const Chip(
-                label: Text('Concluído', style: TextStyle(fontSize: 11)),
-                backgroundColor: Color(0xFF4CAF50),
-                labelStyle: TextStyle(color: Colors.white),
-              )
-            : const Icon(Icons.arrow_forward_ios),
-        onTap: onTap,
-      ),
+        const SizedBox(width: 8),
+        
+        // Botão ENCERRAR
+        Expanded(
+          child: FilledButton(
+            onPressed: (status == StageStatus.running || status == StageStatus.paused)
+                ? () => onStatusChange(StageStatus.closed)
+                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              disabledBackgroundColor: Colors.grey.shade300,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Encerrar'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        
+        // Botão REABRIR
+        Expanded(
+          child: OutlinedButton(
+            onPressed: status == StageStatus.closed 
+                ? () => onStatusChange(StageStatus.running)
+                : null,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text('Reabrir'),
+          ),
+        ),
+      ],
     );
   }
 }
