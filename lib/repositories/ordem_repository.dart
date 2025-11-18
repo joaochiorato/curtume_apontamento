@@ -2,7 +2,8 @@ import '../models/ordem_producao.dart';
 
 /// 💾 Repositório de Ordens de Produção (Dados em Memória)
 class OrdemProducaoRepository {
-  static final OrdemProducaoRepository _instance = OrdemProducaoRepository._internal();
+  static final OrdemProducaoRepository _instance =
+      OrdemProducaoRepository._internal();
   factory OrdemProducaoRepository() => _instance;
   OrdemProducaoRepository._internal();
 
@@ -207,16 +208,6 @@ class OrdemProducaoRepository {
         dadosAdicionais: {
           'maquina': null, // 1, 2, 3, 4, 5 ou 6
           'espessuraRebaixe': '1.2/1.3+1.2',
-          'plt1': null,
-          'plt2': null,
-          'plt3': null,
-          'plt4': null,
-          'plt5': null,
-          'plt6': null,
-          'plt7': null,
-          'plt8': null,
-          'plt9': null,
-          'plt10': null,
           'pesoCupim': null,
           'pesoRefile': null,
           'pesoLiquido': null,

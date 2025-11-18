@@ -436,7 +436,7 @@ class _StagePageState extends State<StagePage> {
                             IconButton(
                               icon: const Icon(Icons.history),
                               color: Colors.blue.shade700,
-                              tooltip: 'Ver histórico',
+                              tooltip: 'Apontamentos',
                               onPressed: () => _showStageDetails(stage),
                             ),
                           ],
