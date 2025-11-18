@@ -128,7 +128,7 @@ class _StagePageState extends State<StagePage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Histórico - ${stage.title}'),
+        title: Text('${stage.title}'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -432,7 +432,7 @@ class _StagePageState extends State<StagePage> {
 
                           // ✅ NOVO: Botão de histórico
                           if (apontamentos > 0) ...[
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
                             IconButton(
                               icon: const Icon(Icons.history),
                               color: Colors.blue.shade700,
