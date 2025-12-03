@@ -30,9 +30,9 @@ class _StagePageState extends State<StagePage> {
     final currentStatus = info['status'] as StageProgressStatus;
     final startTime = info['startTime'] as DateTime?;
     final elapsedTime = info['elapsedTime'] as Duration?;
-    final savedFormData = info['formData'] as StageFormData?; // ✅ Dados parciais
+    final lastResumeTime = info['lastResumeTime'] as DateTime?; // ✅ Adicionado
+    final savedFormData = info['formData'] as StageFormData?;
 
-    // Se está editando, ajustar o restante
     int restanteAjustado = restante;
     int processadaAjustada = processada;
     if (dadosParaEditar != null && indexApontamento != null) {
@@ -72,8 +72,10 @@ class _StagePageState extends State<StagePage> {
           currentStatus: dadosParaEditar != null ? StageProgressStatus.finalizado : currentStatus,
           startTime: dadosParaEditar != null ? null : startTime,
           elapsedTime: dadosParaEditar != null ? null : elapsedTime,
-          savedFormData: dadosParaEditar != null ? null : savedFormData, // ✅ Passa dados parciais
-          onStatusChanged: (status, start, elapsed) {
+          lastResumeTime: dadosParaEditar != null ? null : lastResumeTime, // ✅ Adicionado
+          savedFormData: dadosParaEditar != null ? null : savedFormData,
+          onStatusChanged: (status, start, elapsed, lastResume) {
+            // ✅ Salvar status, startTime, elapsedTime e lastResumeTime
             storage.setStageStatus(stage.code, status);
             if (start != null) {
               storage.setStageStartTime(stage.code, start);
@@ -81,9 +83,11 @@ class _StagePageState extends State<StagePage> {
             if (elapsed != null) {
               storage.setStageElapsedTime(stage.code, elapsed);
             }
-            setState(() {});
+            if (lastResume != null) {
+              storage.setStageLastResumeTime(stage.code, lastResume);
+            }
+            // ✅ Não chamar setState aqui - será atualizado ao voltar
           },
-          // ✅ Callback para salvar dados parciais
           onFormDataChanged: (formData) {
             storage.setStageFormData(stage.code, formData);
           },
@@ -166,9 +170,15 @@ class _StagePageState extends State<StagePage> {
 
   void _showAllStagesHistory() {
     int totalApontamentos = 0;
+    int totalPelesProcessadas = 0;
+    
     for (final stage in availableStages) {
       totalApontamentos += storage.getApontamentos(stage.code).length;
+      totalPelesProcessadas += storage.getQuantidadeProcessada(stage.code);
     }
+
+    // ✅ Quantidade Total da OF (não a soma dos apontamentos)
+    final qtdTotalOF = storage.getQuantidadeTotal();
 
     showDialog(
       context: context,
@@ -203,9 +213,10 @@ class _StagePageState extends State<StagePage> {
                         '$totalApontamentos',
                       ),
                       const SizedBox(height: 4),
+                      // ✅ CORRIGIDO: Mostra quantidade da OF, não soma
                       _buildSummaryRow(
-                        'Quantidade Total:',
-                        '${storage.getQuantidadeTotal()} peles',
+                        'Quantidade da OF:',
+                        '$qtdTotalOF peles',
                       ),
                     ],
                   ),
@@ -291,7 +302,7 @@ class _StagePageState extends State<StagePage> {
                           final idx = entry.key;
                           final apt = entry.value;
                           final qtd = apt['qtdProcessada'] ?? 0;
-                          final resp = apt['responsavel'] ?? 'Não informado';
+                          final resp = apt['responsavelSuperior'] ?? 'Não informado';
                           final start = apt['start'] != null
                               ? DateTime.parse(apt['start'])
                                   .toString()
@@ -430,32 +441,38 @@ class _StagePageState extends State<StagePage> {
     );
   }
 
-  Widget _buildStatusBadge(StageProgressStatus status) {
+  Widget _buildStatusBadge(StageProgressStatus status, bool isComplete) {
     String text;
     Color bgColor;
     Color textColor;
     
-    switch (status) {
-      case StageProgressStatus.aguardando:
-        text = 'Aguardando';
-        bgColor = Colors.grey.shade100;
-        textColor = Colors.grey.shade700;
-        break;
-      case StageProgressStatus.emProducao:
-        text = 'Em Produção';
-        bgColor = Colors.green.shade100;
-        textColor = Colors.green.shade700;
-        break;
-      case StageProgressStatus.parado:
-        text = 'Parado';
-        bgColor = Colors.orange.shade100;
-        textColor = Colors.orange.shade700;
-        break;
-      case StageProgressStatus.finalizado:
-        text = 'Finalizado';
-        bgColor = Colors.blue.shade100;
-        textColor = Colors.blue.shade700;
-        break;
+    if (isComplete) {
+      text = 'Finalizado';
+      bgColor = Colors.blue.shade100;
+      textColor = Colors.blue.shade700;
+    } else {
+      switch (status) {
+        case StageProgressStatus.aguardando:
+          text = 'Aguardando';
+          bgColor = Colors.grey.shade100;
+          textColor = Colors.grey.shade700;
+          break;
+        case StageProgressStatus.emProducao:
+          text = 'Em Produção';
+          bgColor = Colors.green.shade100;
+          textColor = Colors.green.shade700;
+          break;
+        case StageProgressStatus.parado:
+          text = 'Parado';
+          bgColor = Colors.orange.shade100;
+          textColor = Colors.orange.shade700;
+          break;
+        case StageProgressStatus.finalizado:
+          text = 'Aguardando';
+          bgColor = Colors.grey.shade100;
+          textColor = Colors.grey.shade700;
+          break;
+      }
     }
 
     return Container(
@@ -582,7 +599,7 @@ class _StagePageState extends State<StagePage> {
               itemBuilder: (context, index) {
                 final stage = availableStages[index];
                 final info = storage.getStageInfo(stage.code);
-                final isFinalizado = info['completo'] as bool;
+                final isComplete = info['completo'] as bool;
                 final processada = info['processada'] as int;
                 final apontamentos = info['apontamentos'] as int;
                 final status = info['status'] as StageProgressStatus;
@@ -596,14 +613,14 @@ class _StagePageState extends State<StagePage> {
                       child: Row(
                         children: [
                           Icon(
-                            isFinalizado
+                            isComplete
                                 ? Icons.check_circle
                                 : status == StageProgressStatus.emProducao
                                     ? Icons.play_circle
                                     : status == StageProgressStatus.parado
                                         ? Icons.pause_circle
                                         : Icons.circle_outlined,
-                            color: isFinalizado
+                            color: isComplete
                                 ? Colors.green
                                 : status == StageProgressStatus.emProducao
                                     ? Colors.green
@@ -646,7 +663,7 @@ class _StagePageState extends State<StagePage> {
                             ),
                           ),
 
-                          _buildStatusBadge(isFinalizado ? StageProgressStatus.finalizado : status),
+                          _buildStatusBadge(status, isComplete),
                         ],
                       ),
                     ),

@@ -9,9 +9,8 @@ enum StageProgressStatus {
   finalizado,  // Encerrado
 }
 
-/// ✅ Dados parciais do formulário em andamento
+/// ✅ Dados parciais do formulário em andamento (sem campo responsavel)
 class StageFormData {
-  String? responsavel;
   String? responsavelSuperior;
   int? quantidade;
   String? observacao;
@@ -19,7 +18,6 @@ class StageFormData {
   QuimicosFormulacaoData? quimicos;
 
   StageFormData({
-    this.responsavel,
     this.responsavelSuperior,
     this.quantidade,
     this.observacao,
@@ -29,7 +27,6 @@ class StageFormData {
 
   Map<String, dynamic> toMap() {
     return {
-      'responsavel': responsavel,
       'responsavelSuperior': responsavelSuperior,
       'quantidade': quantidade,
       'observacao': observacao,
@@ -40,7 +37,6 @@ class StageFormData {
 
   factory StageFormData.fromMap(Map<String, dynamic> map) {
     return StageFormData(
-      responsavel: map['responsavel'],
       responsavelSuperior: map['responsavelSuperior'],
       quantidade: map['quantidade'],
       observacao: map['observacao'],
@@ -61,7 +57,8 @@ class StageMemoryStorage {
   final Map<String, StageProgressStatus> _stageStatus = {};
   final Map<String, DateTime?> _stageStartTime = {};
   final Map<String, Duration> _stageElapsedTime = {};
-  final Map<String, StageFormData> _stageFormData = {}; // ✅ Dados parciais do formulário
+  final Map<String, DateTime?> _stageLastResumeTime = {}; // ✅ Momento que retomou
+  final Map<String, StageFormData> _stageFormData = {};
   int _quantidadeTotal = 0;
 
   void setQuantidadeTotal(int qtd) {
@@ -70,7 +67,6 @@ class StageMemoryStorage {
 
   int getQuantidadeTotal() => _quantidadeTotal;
 
-  // ✅ Status do estágio
   StageProgressStatus getStageStatus(String stageCode) {
     return _stageStatus[stageCode] ?? StageProgressStatus.aguardando;
   }
@@ -79,7 +75,6 @@ class StageMemoryStorage {
     _stageStatus[stageCode] = status;
   }
 
-  // ✅ Tempo de início do estágio
   DateTime? getStageStartTime(String stageCode) {
     return _stageStartTime[stageCode];
   }
@@ -88,7 +83,6 @@ class StageMemoryStorage {
     _stageStartTime[stageCode] = time;
   }
 
-  // ✅ Tempo decorrido do estágio
   Duration getStageElapsedTime(String stageCode) {
     return _stageElapsedTime[stageCode] ?? Duration.zero;
   }
@@ -97,7 +91,15 @@ class StageMemoryStorage {
     _stageElapsedTime[stageCode] = elapsed;
   }
 
-  // ✅ Dados parciais do formulário
+  // ✅ Momento que o timer foi retomado/iniciado
+  DateTime? getStageLastResumeTime(String stageCode) {
+    return _stageLastResumeTime[stageCode];
+  }
+
+  void setStageLastResumeTime(String stageCode, DateTime? time) {
+    _stageLastResumeTime[stageCode] = time;
+  }
+
   StageFormData? getStageFormData(String stageCode) {
     return _stageFormData[stageCode];
   }
@@ -107,7 +109,6 @@ class StageMemoryStorage {
   }
 
   void updateStageFormData(String stageCode, {
-    String? responsavel,
     String? responsavelSuperior,
     int? quantidade,
     String? observacao,
@@ -116,7 +117,6 @@ class StageMemoryStorage {
   }) {
     final current = _stageFormData[stageCode] ?? StageFormData();
     _stageFormData[stageCode] = StageFormData(
-      responsavel: responsavel ?? current.responsavel,
       responsavelSuperior: responsavelSuperior ?? current.responsavelSuperior,
       quantidade: quantidade ?? current.quantidade,
       observacao: observacao ?? current.observacao,
@@ -130,7 +130,9 @@ class StageMemoryStorage {
     _apontamentos.putIfAbsent(stageCode, () => []);
     _apontamentos[stageCode]!.add(Map<String, dynamic>.from(data));
     
-    if (finalizar) {
+    // ✅ Só marca como finalizado se completou TODAS as peles
+    final processada = getQuantidadeProcessada(stageCode);
+    if (processada >= _quantidadeTotal) {
       _finalized[stageCode] = true;
       _stageStatus[stageCode] = StageProgressStatus.finalizado;
     }
@@ -139,12 +141,12 @@ class StageMemoryStorage {
     _clearStageProgress(stageCode);
   }
 
-  // ✅ Limpa o progresso do estágio (após salvar)
   void _clearStageProgress(String stageCode) {
     _stageStatus[stageCode] = StageProgressStatus.aguardando;
     _stageStartTime.remove(stageCode);
     _stageElapsedTime.remove(stageCode);
-    _stageFormData.remove(stageCode); // ✅ Limpa dados parciais
+    _stageLastResumeTime.remove(stageCode); // ✅ Limpar
+    _stageFormData.remove(stageCode);
   }
 
   /// ✅ Atualiza um apontamento existente
@@ -159,6 +161,8 @@ class StageMemoryStorage {
       if (processada >= _quantidadeTotal) {
         _finalized[stageCode] = true;
         _stageStatus[stageCode] = StageProgressStatus.finalizado;
+      } else {
+        _finalized[stageCode] = false;
       }
     }
   }
@@ -170,7 +174,6 @@ class StageMemoryStorage {
         index < _apontamentos[stageCode]!.length) {
       _apontamentos[stageCode]!.removeAt(index);
       
-      // Recalcular se o estágio está completo
       final processada = getQuantidadeProcessada(stageCode);
       if (processada >= _quantidadeTotal) {
         _finalized[stageCode] = true;
@@ -181,7 +184,6 @@ class StageMemoryStorage {
     }
   }
 
-  /// Retorna o último dado salvo para pré-preencher o formulário
   Map<String, dynamic>? getLastData(String stageCode) {
     final list = _apontamentos[stageCode];
     if (list != null && list.isNotEmpty) {
@@ -190,12 +192,10 @@ class StageMemoryStorage {
     return null;
   }
 
-  /// Retorna todos os apontamentos de um estágio
   List<Map<String, dynamic>> getApontamentos(String stageCode) {
     return List.unmodifiable(_apontamentos[stageCode] ?? []);
   }
 
-  /// Calcula o total de quantidade já processada no estágio
   int getQuantidadeProcessada(String stageCode) {
     final list = _apontamentos[stageCode];
     if (list == null || list.isEmpty) return 0;
@@ -212,30 +212,25 @@ class StageMemoryStorage {
     return total;
   }
 
-  /// Calcula quanto ainda falta processar no estágio
   int getQuantidadeRestante(String stageCode) {
     final processada = getQuantidadeProcessada(stageCode);
     return _quantidadeTotal - processada;
   }
 
-  /// Retorna percentual processado (0 a 100)
   double getPercentualProcessado(String stageCode) {
     if (_quantidadeTotal == 0) return 0;
     final processada = getQuantidadeProcessada(stageCode);
     return (processada / _quantidadeTotal) * 100;
   }
 
-  /// Verifica se o estágio está completo
   bool isStageComplete(String stageCode) {
     return getQuantidadeProcessada(stageCode) >= _quantidadeTotal;
   }
 
-  /// Verifica se pode adicionar mais apontamentos
   bool canAddMore(String stageCode) {
     return getQuantidadeRestante(stageCode) > 0;
   }
 
-  /// Retorna informações consolidadas do estágio
   Map<String, dynamic> getStageInfo(String stageCode) {
     return {
       'total': _quantidadeTotal,
@@ -247,6 +242,7 @@ class StageMemoryStorage {
       'status': getStageStatus(stageCode),
       'startTime': getStageStartTime(stageCode),
       'elapsedTime': getStageElapsedTime(stageCode),
+      'lastResumeTime': getStageLastResumeTime(stageCode), // ✅ Adicionado
       'formData': getStageFormData(stageCode),
     };
   }
@@ -261,6 +257,7 @@ class StageMemoryStorage {
     _stageStatus.remove(stageCode);
     _stageStartTime.remove(stageCode);
     _stageElapsedTime.remove(stageCode);
+    _stageLastResumeTime.remove(stageCode); // ✅ Limpar
     _stageFormData.remove(stageCode);
   }
   
@@ -270,10 +267,10 @@ class StageMemoryStorage {
     _stageStatus.clear();
     _stageStartTime.clear();
     _stageElapsedTime.clear();
+    _stageLastResumeTime.clear(); // ✅ Limpar
     _stageFormData.clear();
   }
 
-  /// Debug: Imprime resumo de todos os estágios
   void printSummary() {
     print('═══════════════════════════════════════');
     print('RESUMO DA OF - Total: $_quantidadeTotal peles');

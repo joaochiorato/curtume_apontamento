@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/stage.dart';
 import '../models/formulacoes_model.dart';
-import '../widgets/stage_action_bar.dart';
 import '../widgets/formulacoes_dialog.dart';
 import '../widgets/variaveis_dialog.dart';
 import '../pages/stage_memory_storage.dart';
@@ -12,8 +11,8 @@ import '../pages/stage_memory_storage.dart';
 class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
-  final void Function(StageProgressStatus status, DateTime? startTime, Duration? elapsed)? onStatusChanged;
-  final void Function(StageFormData data)? onFormDataChanged; // ✅ Callback para salvar dados parciais
+  final void Function(StageProgressStatus status, DateTime? startTime, Duration? elapsed, DateTime? lastResumeTime)? onStatusChanged;
+  final void Function(StageFormData data)? onFormDataChanged;
   final Map<String, dynamic>? initialData;
   final int quantidadeTotal;
   final int quantidadeProcessada;
@@ -22,7 +21,8 @@ class StageForm extends StatefulWidget {
   final StageProgressStatus currentStatus;
   final DateTime? startTime;
   final Duration? elapsedTime;
-  final StageFormData? savedFormData; // ✅ Dados parciais salvos
+  final DateTime? lastResumeTime; // ✅ Adicionado
+  final StageFormData? savedFormData;
 
   const StageForm({
     super.key,
@@ -38,6 +38,7 @@ class StageForm extends StatefulWidget {
     this.currentStatus = StageProgressStatus.aguardando,
     this.startTime,
     this.elapsedTime,
+    this.lastResumeTime, // ✅ Adicionado
     this.savedFormData,
   });
 
@@ -53,13 +54,6 @@ class _StageFormState extends State<StageForm> {
   final _qtdProcessadaCtrl = TextEditingController();
   final _scroll = ScrollController();
 
-  final List<String> _responsaveis = const [
-    '— selecione —',
-    'Ana',
-    'Bruno',
-    'Carlos',
-    'Daniela'
-  ];
   final List<String> _responsaveisSup = const [
     '— selecione —',
     'Supervisor A',
@@ -67,20 +61,17 @@ class _StageFormState extends State<StageForm> {
     'Supervisor C'
   ];
 
-  String _respSel = '— selecione —';
   String _respSupSel = '— selecione —';
   DateTime? _start;
   DateTime? _end;
   StageStatus _status = StageStatus.idle;
   bool _isSaving = false;
 
-  // ✅ Timer para tempo decorrido
   Timer? _timer;
   Duration _elapsed = Duration.zero;
   Duration _elapsedBeforePause = Duration.zero;
   DateTime? _lastResumeTime;
 
-  // ✅ Flag para indicar se está visualizando apontamento encerrado
   bool _isViewingClosed = false;
 
   final dfDate = DateFormat('dd/MM/yyyy');
@@ -91,18 +82,15 @@ class _StageFormState extends State<StageForm> {
     super.initState();
     _qtdProcessadaCtrl.text = '0';
 
-    // ✅ Se está editando um apontamento existente (do histórico)
     if (widget.isEditing && widget.initialData != null) {
       _loadInitialData();
       _isViewingClosed = true;
       _status = StageStatus.closed;
-    }
-    // ✅ Restaurar estado de estágio em andamento
-    else if (widget.currentStatus == StageProgressStatus.emProducao || 
+    } else if (widget.currentStatus == StageProgressStatus.emProducao || 
         widget.currentStatus == StageProgressStatus.parado) {
+      // ✅ Restaurar estado de estágio em andamento
       _start = widget.startTime;
       _elapsedBeforePause = widget.elapsedTime ?? Duration.zero;
-      _elapsed = _elapsedBeforePause;
       
       // ✅ Carregar dados parciais salvos
       if (widget.savedFormData != null) {
@@ -111,22 +99,31 @@ class _StageFormState extends State<StageForm> {
       
       if (widget.currentStatus == StageProgressStatus.emProducao) {
         _status = StageStatus.running;
-        _lastResumeTime = DateTime.now();
+        
+        // ✅ CORREÇÃO: Usar lastResumeTime salvo para manter o tempo correndo
+        if (widget.lastResumeTime != null) {
+          // Tem lastResumeTime salvo - tempo continuou correndo fora da tela
+          _lastResumeTime = widget.lastResumeTime;
+          // O timer vai calcular: _elapsedBeforePause + (now - _lastResumeTime)
+          // Isso inclui o tempo que passou enquanto estava fora da tela
+        } else {
+          // Não tem lastResumeTime, começar do _elapsedBeforePause
+          _lastResumeTime = DateTime.now();
+        }
+        
         _startTimer();
       } else {
+        // ✅ Parado - restaurar tempo sem iniciar timer
         _status = StageStatus.paused;
+        _elapsed = _elapsedBeforePause;
       }
-    }
-    // ✅ Carregar dados parciais se existirem (mesmo se não iniciou ainda)
-    else if (widget.savedFormData != null) {
+    } else if (widget.savedFormData != null) {
       _loadSavedFormData();
     }
   }
 
-  // ✅ Carrega dados parciais salvos
   void _loadSavedFormData() {
     final data = widget.savedFormData!;
-    if (data.responsavel != null) _respSel = data.responsavel!;
     if (data.responsavelSuperior != null) _respSupSel = data.responsavelSuperior!;
     if (data.quantidade != null) _qtdProcessadaCtrl.text = data.quantidade.toString();
     if (data.observacao != null) _obs.text = data.observacao!;
@@ -134,10 +131,8 @@ class _StageFormState extends State<StageForm> {
     if (data.quimicos != null) _quimicosData = data.quimicos;
   }
 
-  // ✅ Salva dados parciais do formulário
   void _saveFormData() {
     widget.onFormDataChanged?.call(StageFormData(
-      responsavel: _respSel,
       responsavelSuperior: _respSupSel,
       quantidade: int.tryParse(_qtdProcessadaCtrl.text),
       observacao: _obs.text,
@@ -149,12 +144,10 @@ class _StageFormState extends State<StageForm> {
   void _loadInitialData() {
     final data = widget.initialData!;
     
-    _respSel = data['responsavel'] as String? ?? '— selecione —';
     _respSupSel = data['responsavelSuperior'] as String? ?? '— selecione —';
     _qtdProcessadaCtrl.text = (data['qtdProcessada'] ?? 0).toString();
     _obs.text = data['observacao'] as String? ?? '';
     
-    // Carregar tempo do apontamento
     if (data['start'] != null) {
       _start = DateTime.parse(data['start']);
     }
@@ -166,13 +159,11 @@ class _StageFormState extends State<StageForm> {
       _elapsedBeforePause = _elapsed;
     }
     
-    // Carregar variáveis
     final variables = data['variables'] as Map<String, dynamic>?;
     if (variables != null) {
       _variaveisData = variables.map((k, v) => MapEntry(k, v?.toString() ?? ''));
     }
     
-    // Carregar químicos
     if (data['quimicos'] != null) {
       _quimicosData = QuimicosFormulacaoData.fromJson(data['quimicos']);
     }
@@ -181,6 +172,13 @@ class _StageFormState extends State<StageForm> {
   @override
   void dispose() {
     _timer?.cancel();
+    // ✅ Salvar tempo atual antes de sair se estiver rodando
+    if (_status == StageStatus.running && _start != null) {
+      // Salvar de forma síncrona no storage (não usa setState)
+      widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause, _lastResumeTime);
+    } else if (_status == StageStatus.paused && _start != null) {
+      widget.onStatusChanged?.call(StageProgressStatus.parado, _start, _elapsed, null);
+    }
     _obs.dispose();
     _qtdProcessadaCtrl.dispose();
     _scroll.dispose();
@@ -191,8 +189,8 @@ class _StageFormState extends State<StageForm> {
   bool get _hasVariables => widget.stage.variables.isNotEmpty;
   bool get _isFieldsLocked => _isViewingClosed;
 
-  int _getQuimicosInformados() {
-    return _quimicosData?.getQuantidadeInformados() ?? 0;
+  int _getQuimicosApontamentos() {
+    return _quimicosData?.getQuantidadeApontamentos() ?? 0;
   }
 
   int _getVariaveisPreenchidas() {
@@ -201,7 +199,8 @@ class _StageFormState extends State<StageForm> {
 
   void _startTimer() {
     _timer?.cancel();
-    _lastResumeTime = DateTime.now();
+    // ✅ Se não tem lastResumeTime, definir agora
+    _lastResumeTime ??= DateTime.now();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_status == StageStatus.running && _lastResumeTime != null) {
         setState(() {
@@ -246,7 +245,7 @@ class _StageFormState extends State<StageForm> {
       setState(() {
         _quimicosData = result;
       });
-      _saveFormData(); // ✅ Salva dados
+      _saveFormData();
     }
   }
 
@@ -269,7 +268,7 @@ class _StageFormState extends State<StageForm> {
       setState(() {
         _variaveisData = result;
       });
-      _saveFormData(); // ✅ Salva dados
+      _saveFormData();
     }
   }
 
@@ -293,7 +292,7 @@ class _StageFormState extends State<StageForm> {
     setState(() {
       _qtdProcessadaCtrl.text = newValue.toString();
     });
-    _saveFormData(); // ✅ Salva dados
+    _saveFormData();
   }
 
   void _increment(int amount) {
@@ -330,7 +329,6 @@ class _StageFormState extends State<StageForm> {
     setState(() => _isSaving = true);
 
     final data = <String, dynamic>{
-      'responsavel': _respSel,
       'responsavelSuperior': _respSupSel,
       'qtdProcessada': qtdApontamento,
       'observacao': _obs.text,
@@ -356,39 +354,34 @@ class _StageFormState extends State<StageForm> {
 
   void _onStatusChange(StageStatus newStatus) {
     setState(() {
-      // ✅ INICIAR (novo ou retomar de pausa)
       if (newStatus == StageStatus.running) {
         if (_start == null) {
           _start = DateTime.now();
           _elapsedBeforePause = Duration.zero;
           _elapsed = Duration.zero;
+          _lastResumeTime = DateTime.now();
+        } else if (_status == StageStatus.paused) {
+          // Retomando de pausa - atualizar lastResumeTime
+          _lastResumeTime = DateTime.now();
         }
         _startTimer();
         _isViewingClosed = false;
-        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause);
-      }
-      // ✅ PAUSAR
-      else if (newStatus == StageStatus.paused) {
+        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause, _lastResumeTime);
+      } else if (newStatus == StageStatus.paused) {
         _stopTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.parado, _start, _elapsed);
-        _saveFormData(); // ✅ Salva dados ao pausar
-      }
-      // ✅ ENCERRAR
-      else if (newStatus == StageStatus.closed) {
+        widget.onStatusChanged?.call(StageProgressStatus.parado, _start, _elapsed, null);
+        _saveFormData();
+      } else if (newStatus == StageStatus.closed) {
         _end = DateTime.now();
         _stopTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.finalizado, _start, _elapsed);
-      }
-      // ✅ REABRIR (de apontamento encerrado do histórico)
-      else if (newStatus == StageStatus.idle && _isViewingClosed) {
-        // ✅ CORRIGIDO: NÃO zera o tempo, continua de onde parou
+        widget.onStatusChanged?.call(StageProgressStatus.finalizado, _start, _elapsed, null);
+      } else if (newStatus == StageStatus.idle && _isViewingClosed) {
         _end = null;
         _isViewingClosed = false;
-        // Mantém _start e _elapsedBeforePause como estavam
-        // Muda para running automaticamente
+        _lastResumeTime = DateTime.now();
         newStatus = StageStatus.running;
         _startTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause);
+        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause, _lastResumeTime);
       }
       
       _status = newStatus;
@@ -401,14 +394,6 @@ class _StageFormState extends State<StageForm> {
     }
   }
 
-  // ✅ Atualiza responsável e salva
-  void _onResponsavelChanged(String? value) {
-    if (value == null || _isFieldsLocked) return;
-    setState(() => _respSel = value);
-    _saveFormData();
-  }
-
-  // ✅ Atualiza responsável superior e salva
   void _onResponsavelSupChanged(String? value) {
     if (value == null || _isFieldsLocked) return;
     setState(() => _respSupSel = value);
@@ -431,12 +416,10 @@ class _StageFormState extends State<StageForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Barra de ações customizada
                     _buildActionBar(),
 
                     const SizedBox(height: 16),
 
-                    // Aviso de campos bloqueados
                     if (_isViewingClosed)
                       Container(
                         width: double.infinity,
@@ -464,7 +447,6 @@ class _StageFormState extends State<StageForm> {
                         ),
                       ),
 
-                    // Cronômetro - Só aparece quando iniciado
                     if (_start != null)
                       Card(
                         color: _status == StageStatus.running 
@@ -585,10 +567,10 @@ class _StageFormState extends State<StageForm> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: _openQuimicosDialog,
-                              icon: const Icon(Icons.science),
-                              label: Text('Químicos (${_getQuimicosInformados()}/3)'),
+                              icon: const Icon(Icons.science, size: 18),
+                              label: Text('Químicos (${_getQuimicosApontamentos()})'),
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
+                                minimumSize: const Size.fromHeight(48),
                                 side: BorderSide(
                                   color: _isFieldsLocked ? Colors.grey : Colors.blue.shade700, 
                                   width: 2,
@@ -601,10 +583,10 @@ class _StageFormState extends State<StageForm> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: _openVariaveisDialog,
-                              icon: const Icon(Icons.tune),
+                              icon: const Icon(Icons.tune, size: 18),
                               label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
+                                minimumSize: const Size.fromHeight(48),
                                 side: BorderSide(
                                   color: _isFieldsLocked ? Colors.grey : Colors.green.shade700, 
                                   width: 2,
@@ -622,10 +604,10 @@ class _StageFormState extends State<StageForm> {
                     if (!_isRemolho && _hasVariables) ...[
                       OutlinedButton.icon(
                         onPressed: _openVariaveisDialog,
-                        icon: const Icon(Icons.tune),
+                        icon: const Icon(Icons.tune, size: 18),
                         label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
                         style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(56),
+                          minimumSize: const Size.fromHeight(48),
                           side: BorderSide(
                             color: _isFieldsLocked ? Colors.grey : Colors.green.shade700, 
                             width: 2,
@@ -638,25 +620,9 @@ class _StageFormState extends State<StageForm> {
 
                     // Responsável
                     DropdownButtonFormField<String>(
-                      value: _respSel,
-                      decoration: InputDecoration(
-                        labelText: 'Responsável',
-                        border: const OutlineInputBorder(),
-                        enabled: !_isFieldsLocked,
-                      ),
-                      items: _responsaveis
-                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                          .toList(),
-                      onChanged: _isFieldsLocked ? null : _onResponsavelChanged,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Responsável Superior
-                    DropdownButtonFormField<String>(
                       value: _respSupSel,
                       decoration: InputDecoration(
-                        labelText: 'Responsável Superior',
+                        labelText: 'Responsável',
                         border: const OutlineInputBorder(),
                         enabled: !_isFieldsLocked,
                       ),
