@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -5,24 +6,39 @@ import '../models/stage.dart';
 import '../models/formulacoes_model.dart';
 import '../widgets/stage_action_bar.dart';
 import '../widgets/formulacoes_dialog.dart';
-import '../widgets/variaveis_dialog.dart'; // ✅ NOVO IMPORT
+import '../widgets/variaveis_dialog.dart';
+import '../pages/stage_memory_storage.dart';
 
 class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
+  final void Function(StageProgressStatus status, DateTime? startTime, Duration? elapsed)? onStatusChanged;
+  final void Function(StageFormData data)? onFormDataChanged; // ✅ Callback para salvar dados parciais
   final Map<String, dynamic>? initialData;
   final int quantidadeTotal;
   final int quantidadeProcessada;
   final int quantidadeRestante;
+  final bool isEditing;
+  final StageProgressStatus currentStatus;
+  final DateTime? startTime;
+  final Duration? elapsedTime;
+  final StageFormData? savedFormData; // ✅ Dados parciais salvos
 
   const StageForm({
     super.key,
     required this.stage,
     required this.onSaved,
+    this.onStatusChanged,
+    this.onFormDataChanged,
     this.initialData,
     required this.quantidadeTotal,
     required this.quantidadeProcessada,
     required this.quantidadeRestante,
+    this.isEditing = false,
+    this.currentStatus = StageProgressStatus.aguardando,
+    this.startTime,
+    this.elapsedTime,
+    this.savedFormData,
   });
 
   @override
@@ -32,7 +48,7 @@ class StageForm extends StatefulWidget {
 class _StageFormState extends State<StageForm> {
   final _formKey = GlobalKey<FormState>();
   QuimicosFormulacaoData? _quimicosData;
-  Map<String, String> _variaveisData = {}; // ✅ NOVO: Dados das variáveis
+  Map<String, String> _variaveisData = {};
   final _obs = TextEditingController();
   final _qtdProcessadaCtrl = TextEditingController();
   final _scroll = ScrollController();
@@ -51,13 +67,21 @@ class _StageFormState extends State<StageForm> {
     'Supervisor C'
   ];
 
-  int? _fulaoSel;
   String _respSel = '— selecione —';
   String _respSupSel = '— selecione —';
   DateTime? _start;
   DateTime? _end;
   StageStatus _status = StageStatus.idle;
   bool _isSaving = false;
+
+  // ✅ Timer para tempo decorrido
+  Timer? _timer;
+  Duration _elapsed = Duration.zero;
+  Duration _elapsedBeforePause = Duration.zero;
+  DateTime? _lastResumeTime;
+
+  // ✅ Flag para indicar se está visualizando apontamento encerrado
+  bool _isViewingClosed = false;
 
   final dfDate = DateFormat('dd/MM/yyyy');
   final dfTime = DateFormat('HH:mm');
@@ -66,10 +90,97 @@ class _StageFormState extends State<StageForm> {
   void initState() {
     super.initState();
     _qtdProcessadaCtrl.text = '0';
+
+    // ✅ Se está editando um apontamento existente (do histórico)
+    if (widget.isEditing && widget.initialData != null) {
+      _loadInitialData();
+      _isViewingClosed = true;
+      _status = StageStatus.closed;
+    }
+    // ✅ Restaurar estado de estágio em andamento
+    else if (widget.currentStatus == StageProgressStatus.emProducao || 
+        widget.currentStatus == StageProgressStatus.parado) {
+      _start = widget.startTime;
+      _elapsedBeforePause = widget.elapsedTime ?? Duration.zero;
+      _elapsed = _elapsedBeforePause;
+      
+      // ✅ Carregar dados parciais salvos
+      if (widget.savedFormData != null) {
+        _loadSavedFormData();
+      }
+      
+      if (widget.currentStatus == StageProgressStatus.emProducao) {
+        _status = StageStatus.running;
+        _lastResumeTime = DateTime.now();
+        _startTimer();
+      } else {
+        _status = StageStatus.paused;
+      }
+    }
+    // ✅ Carregar dados parciais se existirem (mesmo se não iniciou ainda)
+    else if (widget.savedFormData != null) {
+      _loadSavedFormData();
+    }
+  }
+
+  // ✅ Carrega dados parciais salvos
+  void _loadSavedFormData() {
+    final data = widget.savedFormData!;
+    if (data.responsavel != null) _respSel = data.responsavel!;
+    if (data.responsavelSuperior != null) _respSupSel = data.responsavelSuperior!;
+    if (data.quantidade != null) _qtdProcessadaCtrl.text = data.quantidade.toString();
+    if (data.observacao != null) _obs.text = data.observacao!;
+    if (data.variaveis != null) _variaveisData = Map.from(data.variaveis!);
+    if (data.quimicos != null) _quimicosData = data.quimicos;
+  }
+
+  // ✅ Salva dados parciais do formulário
+  void _saveFormData() {
+    widget.onFormDataChanged?.call(StageFormData(
+      responsavel: _respSel,
+      responsavelSuperior: _respSupSel,
+      quantidade: int.tryParse(_qtdProcessadaCtrl.text),
+      observacao: _obs.text,
+      variaveis: _variaveisData.isNotEmpty ? Map.from(_variaveisData) : null,
+      quimicos: _quimicosData,
+    ));
+  }
+
+  void _loadInitialData() {
+    final data = widget.initialData!;
+    
+    _respSel = data['responsavel'] as String? ?? '— selecione —';
+    _respSupSel = data['responsavelSuperior'] as String? ?? '— selecione —';
+    _qtdProcessadaCtrl.text = (data['qtdProcessada'] ?? 0).toString();
+    _obs.text = data['observacao'] as String? ?? '';
+    
+    // Carregar tempo do apontamento
+    if (data['start'] != null) {
+      _start = DateTime.parse(data['start']);
+    }
+    if (data['end'] != null) {
+      _end = DateTime.parse(data['end']);
+    }
+    if (_start != null && _end != null) {
+      _elapsed = _end!.difference(_start!);
+      _elapsedBeforePause = _elapsed;
+    }
+    
+    // Carregar variáveis
+    final variables = data['variables'] as Map<String, dynamic>?;
+    if (variables != null) {
+      _variaveisData = variables.map((k, v) => MapEntry(k, v?.toString() ?? ''));
+    }
+    
+    // Carregar químicos
+    if (data['quimicos'] != null) {
+      _quimicosData = QuimicosFormulacaoData.fromJson(data['quimicos']);
+    }
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _obs.dispose();
     _qtdProcessadaCtrl.dispose();
     _scroll.dispose();
@@ -77,19 +188,53 @@ class _StageFormState extends State<StageForm> {
   }
 
   bool get _isRemolho => widget.stage.code.toUpperCase() == 'REMOLHO';
-  bool get _hasMachines => widget.stage.machines != null && widget.stage.machines!.isNotEmpty;
+  bool get _hasVariables => widget.stage.variables.isNotEmpty;
+  bool get _isFieldsLocked => _isViewingClosed;
 
   int _getQuimicosInformados() {
     return _quimicosData?.getQuantidadeInformados() ?? 0;
   }
 
-  // ✅ NOVO: Conta variáveis preenchidas
   int _getVariaveisPreenchidas() {
     return _variaveisData.values.where((v) => v.isNotEmpty).length;
   }
 
+  void _startTimer() {
+    _timer?.cancel();
+    _lastResumeTime = DateTime.now();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_status == StageStatus.running && _lastResumeTime != null) {
+        setState(() {
+          _elapsed = _elapsedBeforePause + DateTime.now().difference(_lastResumeTime!);
+        });
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _elapsedBeforePause = _elapsed;
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+  }
+
   Future<void> _openQuimicosDialog() async {
-    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running);
+    if (_isFieldsLocked) {
+      _showLockedMessage();
+      return;
+    }
+    
+    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running || _status == StageStatus.paused);
 
     final result = await showQuimicosDialog(
       context,
@@ -101,12 +246,17 @@ class _StageFormState extends State<StageForm> {
       setState(() {
         _quimicosData = result;
       });
+      _saveFormData(); // ✅ Salva dados
     }
   }
 
-  // ✅ NOVO: Abre dialog de variáveis
   Future<void> _openVariaveisDialog() async {
-    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running);
+    if (_isFieldsLocked) {
+      _showLockedMessage();
+      return;
+    }
+    
+    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running || _status == StageStatus.paused);
 
     final result = await showVariaveisDialog(
       context,
@@ -119,17 +269,31 @@ class _StageFormState extends State<StageForm> {
       setState(() {
         _variaveisData = result;
       });
+      _saveFormData(); // ✅ Salva dados
     }
   }
 
-  // ✅ Métodos do contador
+  void _showLockedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Clique em REABRIR para editar este apontamento.'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+  }
+
   int get _currentValue => int.tryParse(_qtdProcessadaCtrl.text) ?? 0;
 
   void _updateValue(int newValue) {
+    if (_isFieldsLocked) {
+      _showLockedMessage();
+      return;
+    }
     if (newValue < 0) newValue = 0;
     setState(() {
       _qtdProcessadaCtrl.text = newValue.toString();
     });
+    _saveFormData(); // ✅ Salva dados
   }
 
   void _increment(int amount) {
@@ -165,9 +329,7 @@ class _StageFormState extends State<StageForm> {
 
     setState(() => _isSaving = true);
 
-    // ✅ Usa _variaveisData ao invés de controllers
     final data = <String, dynamic>{
-      'fulao': _fulaoSel,
       'responsavel': _respSel,
       'responsavelSuperior': _respSupSel,
       'qtdProcessada': qtdApontamento,
@@ -194,29 +356,63 @@ class _StageFormState extends State<StageForm> {
 
   void _onStatusChange(StageStatus newStatus) {
     setState(() {
-      if (newStatus == StageStatus.running && _start == null) {
-        _start = DateTime.now();
-      } else if (newStatus == StageStatus.closed && _end == null) {
-        _end = DateTime.now();
+      // ✅ INICIAR (novo ou retomar de pausa)
+      if (newStatus == StageStatus.running) {
+        if (_start == null) {
+          _start = DateTime.now();
+          _elapsedBeforePause = Duration.zero;
+          _elapsed = Duration.zero;
+        }
+        _startTimer();
+        _isViewingClosed = false;
+        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause);
       }
+      // ✅ PAUSAR
+      else if (newStatus == StageStatus.paused) {
+        _stopTimer();
+        widget.onStatusChanged?.call(StageProgressStatus.parado, _start, _elapsed);
+        _saveFormData(); // ✅ Salva dados ao pausar
+      }
+      // ✅ ENCERRAR
+      else if (newStatus == StageStatus.closed) {
+        _end = DateTime.now();
+        _stopTimer();
+        widget.onStatusChanged?.call(StageProgressStatus.finalizado, _start, _elapsed);
+      }
+      // ✅ REABRIR (de apontamento encerrado do histórico)
+      else if (newStatus == StageStatus.idle && _isViewingClosed) {
+        // ✅ CORRIGIDO: NÃO zera o tempo, continua de onde parou
+        _end = null;
+        _isViewingClosed = false;
+        // Mantém _start e _elapsedBeforePause como estavam
+        // Muda para running automaticamente
+        newStatus = StageStatus.running;
+        _startTimer();
+        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause);
+      }
+      
       _status = newStatus;
     });
 
-    if (newStatus == StageStatus.closed) {
+    if (newStatus == StageStatus.closed && !widget.isEditing) {
+      _save();
+    } else if (newStatus == StageStatus.closed && widget.isEditing && !_isViewingClosed) {
       _save();
     }
   }
 
-  String _calcularDuracao(DateTime inicio, DateTime fim) {
-    final duracao = fim.difference(inicio);
-    final horas = duracao.inHours;
-    final minutos = duracao.inMinutes.remainder(60);
+  // ✅ Atualiza responsável e salva
+  void _onResponsavelChanged(String? value) {
+    if (value == null || _isFieldsLocked) return;
+    setState(() => _respSel = value);
+    _saveFormData();
+  }
 
-    if (horas > 0) {
-      return '${horas}h ${minutos}min';
-    } else {
-      return '${minutos}min';
-    }
+  // ✅ Atualiza responsável superior e salva
+  void _onResponsavelSupChanged(String? value) {
+    if (value == null || _isFieldsLocked) return;
+    setState(() => _respSupSel = value);
+    _saveFormData();
   }
 
   @override
@@ -235,29 +431,169 @@ class _StageFormState extends State<StageForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Barra de ações: Iniciar/Pausar/Encerrar/Reabrir
-                    StageActionBar(
-                      status: _status,
-                      onStatusChange: _onStatusChange,
-                      start: _start,
-                      end: _end,
-                    ),
+                    // Barra de ações customizada
+                    _buildActionBar(),
 
                     const SizedBox(height: 16),
 
-                    // ✅ Botões Químicos e Variáveis lado a lado (REMOLHO)
-                    if (_isRemolho)
+                    // Aviso de campos bloqueados
+                    if (_isViewingClosed)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.lock, color: Colors.orange.shade700, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Apontamento encerrado. Clique em REABRIR para editar.',
+                                style: TextStyle(
+                                  color: Colors.orange.shade800,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Cronômetro - Só aparece quando iniciado
+                    if (_start != null)
+                      Card(
+                        color: _status == StageStatus.running 
+                            ? Colors.green.shade50 
+                            : _status == StageStatus.paused
+                                ? Colors.orange.shade50
+                                : Colors.grey.shade50,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(
+                            color: _status == StageStatus.running 
+                                ? Colors.green.shade300 
+                                : _status == StageStatus.paused
+                                    ? Colors.orange.shade300
+                                    : Colors.grey.shade300,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Início:',
+                                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                                    ),
+                                    Text(
+                                      '${dfDate.format(_start!)} ${dfTime.format(_start!)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    if (_end != null) ...[
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Término:',
+                                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                                      ),
+                                      Text(
+                                        '${dfDate.format(_end!)} ${dfTime.format(_end!)}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: _status == StageStatus.running 
+                                      ? Colors.green.shade100 
+                                      : _status == StageStatus.paused
+                                          ? Colors.orange.shade100
+                                          : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _status == StageStatus.running 
+                                        ? Colors.green.shade400 
+                                        : _status == StageStatus.paused
+                                            ? Colors.orange.shade400
+                                            : Colors.grey.shade400,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _status == StageStatus.running 
+                                          ? Icons.timer 
+                                          : _status == StageStatus.paused
+                                              ? Icons.pause
+                                              : Icons.check_circle,
+                                      size: 24,
+                                      color: _status == StageStatus.running 
+                                          ? Colors.green.shade700 
+                                          : _status == StageStatus.paused
+                                              ? Colors.orange.shade700
+                                              : Colors.grey.shade700,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _formatDuration(_elapsed),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                        fontFamily: 'monospace',
+                                        color: _status == StageStatus.running 
+                                            ? Colors.green.shade700 
+                                            : _status == StageStatus.paused
+                                                ? Colors.orange.shade700
+                                                : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    if (_start != null)
+                      const SizedBox(height: 16),
+
+                    // BOTÕES: Químicos e Variáveis (REMOLHO)
+                    if (_isRemolho && _hasVariables) ...[
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: _openQuimicosDialog,
                               icon: const Icon(Icons.science),
-                              label: Text('Químicos (${_getQuimicosInformados()})'),
+                              label: Text('Químicos (${_getQuimicosInformados()}/3)'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(56),
-                                side: BorderSide(color: Colors.blue.shade700, width: 2),
-                                foregroundColor: Colors.blue.shade700,
+                                side: BorderSide(
+                                  color: _isFieldsLocked ? Colors.grey : Colors.blue.shade700, 
+                                  width: 2,
+                                ),
+                                foregroundColor: _isFieldsLocked ? Colors.grey : Colors.blue.shade700,
                               ),
                             ),
                           ),
@@ -269,405 +605,291 @@ class _StageFormState extends State<StageForm> {
                               label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(56),
-                                side: BorderSide(color: Colors.green.shade700, width: 2),
-                                foregroundColor: Colors.green.shade700,
+                                side: BorderSide(
+                                  color: _isFieldsLocked ? Colors.grey : Colors.green.shade700, 
+                                  width: 2,
+                                ),
+                                foregroundColor: _isFieldsLocked ? Colors.grey : Colors.green.shade700,
                               ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                    ],
 
-                    const SizedBox(height: 16),
-
-                    if (_start != null || _end != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            if (_start != null)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Início',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    dfTime.format(_start!),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (_start != null && _end != null)
-                              Container(
-                                height: 30,
-                                width: 1,
-                                color: Colors.grey.shade400,
-                              ),
-                            if (_end != null)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Término',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    dfTime.format(_end!),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (_start != null && _end != null) ...[
-                              Container(
-                                height: 30,
-                                width: 1,
-                                color: Colors.grey.shade400,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Duração',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _calcularDuracao(_start!, _end!),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
+                    // BOTÃO VARIÁVEIS - Para outros estágios
+                    if (!_isRemolho && _hasVariables) ...[
+                      OutlinedButton.icon(
+                        onPressed: _openVariaveisDialog,
+                        icon: const Icon(Icons.tune),
+                        label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(56),
+                          side: BorderSide(
+                            color: _isFieldsLocked ? Colors.grey : Colors.green.shade700, 
+                            width: 2,
+                          ),
+                          foregroundColor: _isFieldsLocked ? Colors.grey : Colors.green.shade700,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                    ],
 
-                    const SizedBox(height: 16),
-
+                    // Responsável
                     DropdownButtonFormField<String>(
                       value: _respSel,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Responsável',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        enabled: !_isFieldsLocked,
                       ),
                       items: _responsaveis
                           .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
-                      onChanged: (v) => setState(() => _respSel = v!),
+                      onChanged: _isFieldsLocked ? null : _onResponsavelChanged,
                     ),
 
                     const SizedBox(height: 16),
 
+                    // Responsável Superior
                     DropdownButtonFormField<String>(
                       value: _respSupSel,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Responsável Superior',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        enabled: !_isFieldsLocked,
                       ),
                       items: _responsaveisSup
                           .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
-                      onChanged: (v) => setState(() => _respSupSel = v!),
+                      onChanged: _isFieldsLocked ? null : _onResponsavelSupChanged,
                     ),
 
                     const SizedBox(height: 20),
 
-                    // ✅ CONTADOR DE QUANTIDADE (COMPACTO)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Quantidade Processada*',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.orange.shade300,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              // Linha com - [ valor ] +
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Botão -
-                                  Material(
-                                    color: Colors.red.shade400,
-                                    shape: const CircleBorder(),
-                                    child: InkWell(
-                                      onTap: _decrement,
-                                      customBorder: const CircleBorder(),
-                                      child: Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.remove,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  // Display do valor
-                                  Container(
-                                    constraints: const BoxConstraints(minWidth: 80),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.orange.shade400,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _currentValue.toString(),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orange.shade900,
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  // Botão +
-                                  Material(
-                                    color: Colors.green.shade400,
-                                    shape: const CircleBorder(),
-                                    child: InkWell(
-                                      onTap: () => _increment(1),
-                                      customBorder: const CircleBorder(),
-                                      child: Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 8),
-
-                                  Text(
-                                    'peles',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-                              
-                              Divider(
-                                color: Colors.orange.shade200,
-                                thickness: 1,
-                                height: 1,
-                              ),
-                              
-                              const SizedBox(height: 12),
-
-                              // Botões de incremento rápido (COMPACTOS)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Material(
-                                      color: Colors.blue.shade600,
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: InkWell(
-                                        onTap: () => _increment(10),
-                                        borderRadius: BorderRadius.circular(6),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            '+10',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Material(
-                                      color: Colors.blue.shade600,
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: InkWell(
-                                        onTap: () => _increment(20),
-                                        borderRadius: BorderRadius.circular(6),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            '+20',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Material(
-                                      color: Colors.blue.shade600,
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: InkWell(
-                                        onTap: () => _increment(50),
-                                        borderRadius: BorderRadius.circular(6),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            '+50',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 6),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            'Máximo: ${widget.quantidadeRestante} peles',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextFormField(
-                      controller: _obs,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        labelText: 'Observação (opcional)',
-                        hintText: 'Adicione observações sobre o processo...',
+                    // Quantidade Processada
+                    const Text(
+                      'Quantidade Processada*',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: _isFieldsLocked ? Colors.grey.shade100 : Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _isFieldsLocked ? Colors.grey.shade300 : Colors.orange.shade200,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Material(
+                                color: _isFieldsLocked ? Colors.grey : Colors.red.shade400,
+                                borderRadius: BorderRadius.circular(25),
+                                child: InkWell(
+                                  onTap: _isFieldsLocked ? null : _decrement,
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(Icons.remove, color: Colors.white, size: 20),
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(width: 16),
+                              
+                              Container(
+                                constraints: const BoxConstraints(minWidth: 80),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: _isFieldsLocked ? Colors.grey : Colors.orange.shade400, 
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Text(
+                                  _currentValue.toString(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isFieldsLocked ? Colors.grey : Colors.orange.shade900,
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(width: 16),
+                              
+                              Material(
+                                color: _isFieldsLocked ? Colors.grey : Colors.green.shade400,
+                                borderRadius: BorderRadius.circular(25),
+                                child: InkWell(
+                                  onTap: _isFieldsLocked ? null : () => _increment(1),
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(Icons.add, color: Colors.white, size: 20),
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(width: 12),
+                              const Text('peles', style: TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildQuickButton('+10', _isFieldsLocked ? null : () => _increment(10)),
+                              const SizedBox(width: 12),
+                              _buildQuickButton('+20', _isFieldsLocked ? null : () => _increment(20)),
+                              const SizedBox(width: 12),
+                              _buildQuickButton('+50', _isFieldsLocked ? null : () => _increment(50)),
+                            ],
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          Text(
+                            'Máximo: ${widget.quantidadeRestante} peles',
+                            style: TextStyle(
+                              color: _isFieldsLocked ? Colors.grey : Colors.orange.shade700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Observação
+                    TextFormField(
+                      controller: _obs,
+                      enabled: !_isFieldsLocked,
+                      decoration: const InputDecoration(
+                        labelText: 'Observação (opcional)',
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
+                      maxLines: 3,
+                      onChanged: _isFieldsLocked ? null : (_) => _saveFormData(),
+                    ),
+
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionBar() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: (_status == StageStatus.idle || _status == StageStatus.paused) && !_isViewingClosed
+                ? () => _onStatusChange(StageStatus.running)
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: (_status == StageStatus.idle || _status == StageStatus.paused) && !_isViewingClosed
+                  ? Colors.green
+                  : Colors.grey.shade300,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: Text(_status == StageStatus.paused ? 'Retomar' : 'Iniciar'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _status == StageStatus.running
+                ? () => _onStatusChange(StageStatus.paused)
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _status == StageStatus.running
+                  ? Colors.orange
+                  : Colors.grey.shade300,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text('Pausar'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: (_status == StageStatus.running || _status == StageStatus.paused)
+                ? () => _onStatusChange(StageStatus.closed)
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: (_status == StageStatus.running || _status == StageStatus.paused)
+                  ? Colors.red
+                  : Colors.grey.shade300,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text('Encerrar'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _isViewingClosed
+                ? () => _onStatusChange(StageStatus.idle)
+                : null,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _isViewingClosed ? Colors.blue : Colors.grey,
+              side: BorderSide(
+                color: _isViewingClosed ? Colors.blue : Colors.grey.shade300,
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text('Reabrir'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickButton(String label, VoidCallback? onPressed) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: onPressed != null ? Colors.blue.shade500 : Colors.grey,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

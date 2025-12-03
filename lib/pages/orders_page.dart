@@ -51,7 +51,7 @@ class _OrdersPageState extends State<OrdersPage> {
     //   Qtde_pri: 100000
     //   Cod_lote_couro: N5K001
     // ═══════════════════════════════════════════════════════════════
-    
+
     _ordens = [
       OrdemModel(
         of: '120-ORP-3',
@@ -62,7 +62,7 @@ class _OrdersPageState extends State<OrdersPage> {
           // Apenas QUARTZO BLACK conforme teste de mesa
           ArtigoModel(
             codigo: 'CSA001',
-            descricao: 'QUARTZO BLACK',
+            descricao: 'PRP001- QUARTZO BLACK',
             quantidade: 350,
           ),
         ],

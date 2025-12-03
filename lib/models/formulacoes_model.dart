@@ -53,19 +53,23 @@ const List<Quimico> quimicosRemolho = [
 
 // Modelo para armazenar os dados completos dos químicos
 // Conforme Teste de Mesa - tbSaidasApontamento
+// ✅ Agora inclui Fulão
 class QuimicosFormulacaoData {
   final String localEstoque;
   final Map<String, String> quantidades; // código do químico → quantidade
+  final int? fulao; // ✅ Fulão selecionado
 
   QuimicosFormulacaoData({
     required this.localEstoque,
     required this.quantidades,
+    this.fulao,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'localEstoque': localEstoque,
       'quantidades': quantidades,
+      'fulao': fulao,
       'formatoGravacao': toFormatoGravacao(),
     };
   }
@@ -74,6 +78,7 @@ class QuimicosFormulacaoData {
     return QuimicosFormulacaoData(
       localEstoque: json['localEstoque'] ?? '— selecione —',
       quantidades: Map<String, String>.from(json['quantidades'] ?? {}),
+      fulao: json['fulao'] as int?,
     );
   }
 
@@ -100,21 +105,25 @@ class QuimicosFormulacaoData {
     for (final quimico in quimicosRemolho) {
       final qtd = quantidades[quimico.codigo] ?? '';
       if (qtd.isNotEmpty) {
-        // Usa abreviação conforme teste de mesa
-        String abrev;
-        if (quimico.codigo == '89396') {
-          abrev = 'CAL';  // CAL VIRGEM 20 KG
-        } else if (quimico.codigo == '95001') {
-          abrev = 'SUL';  // SULFETO DE SODIO 60%
-        } else if (quimico.codigo == '95209') {
-          abrev = 'TEN';  // TENSOATIVO
-        } else {
-          abrev = quimico.nome.substring(0, 3).toUpperCase();
-        }
+        // Pega as 3 primeiras letras do nome para abreviar
+        final abrev = quimico.nome.substring(0, 3).toUpperCase();
         partes.add('$abrev:$qtd');
       }
     }
     
     return partes.join('|');
+  }
+
+  // Cria uma cópia com modificações
+  QuimicosFormulacaoData copyWith({
+    String? localEstoque,
+    Map<String, String>? quantidades,
+    int? fulao,
+  }) {
+    return QuimicosFormulacaoData(
+      localEstoque: localEstoque ?? this.localEstoque,
+      quantidades: quantidades ?? this.quantidades,
+      fulao: fulao ?? this.fulao,
+    );
   }
 }

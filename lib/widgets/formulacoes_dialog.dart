@@ -4,6 +4,7 @@ import '../models/formulacoes_model.dart';
 
 /// Dialog para informar químicos do REMOLHO
 /// Conforme Teste de Mesa - lista direta dos químicos (sem formulação)
+/// ✅ Fulão agora está dentro deste dialog
 Future<QuimicosFormulacaoData?> showQuimicosDialog(
   BuildContext context, {
   required QuimicosFormulacaoData? dadosAtuais,
@@ -21,6 +22,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
 
   // Estado inicial
   String localEstoque = dadosAtuais?.localEstoque ?? '— selecione —';
+  int? fulaoSelecionado = dadosAtuais?.fulao;
   
   // Controllers para cada químico do teste de mesa
   final Map<String, TextEditingController> controllers = {};
@@ -45,7 +47,7 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
 
           return Dialog(
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+              constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
               child: Column(
                 children: [
                   // Header
@@ -104,6 +106,59 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                     child: ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
+                        // ✅ FULÃO - Adicionado aqui
+                        const Text(
+                          'Fulão *',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF424242),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          value: fulaoSelecionado,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            hintText: '— selecione o fulão —',
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: fulaoSelecionado != null
+                                    ? const Color(0xFF4CAF50)
+                                    : const Color(0xFFE0E0E0),
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: fulaoSelecionado != null
+                                ? const Color(0xFFE8F5E9)
+                                : Colors.white,
+                          ),
+                          items: [1, 2, 3, 4].map((num) {
+                            return DropdownMenuItem(
+                              value: num,
+                              child: Text('Fulão $num'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              fulaoSelecionado = value;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+                        const Divider(height: 1),
+                        const SizedBox(height: 16),
+
                         // Local de Estoque
                         const Text(
                           'Local de Estoque *',
@@ -325,11 +380,21 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                         const SizedBox(width: 12),
                         FilledButton(
                           onPressed: () {
+                            // ✅ Validar Fulão
+                            if (fulaoSelecionado == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Selecione o Fulão!'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
                             if (localEstoque == '— selecione —') {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content:
-                                      Text('Selecione o local de estoque!'),
+                                  content: Text('Selecione o local de estoque!'),
                                   backgroundColor: Colors.red,
                                 ),
                               );
@@ -342,10 +407,11 @@ Future<QuimicosFormulacaoData?> showQuimicosDialog(
                               quantidades[codigo] = ctrl.text;
                             });
 
-                            // Retorna os dados
+                            // Retorna os dados com Fulão
                             final data = QuimicosFormulacaoData(
                               localEstoque: localEstoque,
                               quantidades: quantidades,
+                              fulao: fulaoSelecionado,
                             );
 
                             Navigator.pop(ctx, data);

@@ -160,7 +160,7 @@ OrdemModel(
   of: '18283',
   cliente: 'Cliente A',
   artigos: [
-    ArtigoModel(codigo: 'ART001', descricao: 'QUARTZO', quantidade: 350),
+    ArtigoModel(codigo: 'PRP001', descricao: 'QUARTZO', quantidade: 350),
   ],
 )
 ```

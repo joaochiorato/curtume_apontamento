@@ -22,11 +22,24 @@ class _StagePageState extends State<StagePage> {
     storage.setQuantidadeTotal(qtdTotal);
   }
 
-  void _openStageForm(StageModel stage) {
+  void _openStageForm(StageModel stage, {Map<String, dynamic>? dadosParaEditar, int? indexApontamento}) {
     final info = storage.getStageInfo(stage.code);
     final processada = info['processada'] as int;
     final total = info['total'] as int;
     final restante = info['restante'] as int;
+    final currentStatus = info['status'] as StageProgressStatus;
+    final startTime = info['startTime'] as DateTime?;
+    final elapsedTime = info['elapsedTime'] as Duration?;
+    final savedFormData = info['formData'] as StageFormData?; // ✅ Dados parciais
+
+    // Se está editando, ajustar o restante
+    int restanteAjustado = restante;
+    int processadaAjustada = processada;
+    if (dadosParaEditar != null && indexApontamento != null) {
+      final qtdApontamentoOriginal = dadosParaEditar['qtdProcessada'] as int? ?? 0;
+      restanteAjustado = restante + qtdApontamentoOriginal;
+      processadaAjustada = processada - qtdApontamentoOriginal;
+    }
 
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => Scaffold(
@@ -38,11 +51,11 @@ class _StagePageState extends State<StagePage> {
                 padding: const EdgeInsets.only(right: 16),
                 child: Center(
                   child: Text(
-                    '$processada / $total',
+                    '${dadosParaEditar != null ? processadaAjustada : processada} / $total',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: restante == 0 ? Colors.green : Colors.white,
+                      color: restanteAjustado == 0 ? Colors.green : Colors.white,
                     ),
                   ),
                 ),
@@ -51,19 +64,38 @@ class _StagePageState extends State<StagePage> {
         ),
         body: StageForm(
           stage: stage,
-          initialData: storage.getLastData(stage.code),
+          initialData: dadosParaEditar ?? storage.getLastData(stage.code),
           quantidadeTotal: total,
-          quantidadeProcessada: processada,
-          quantidadeRestante: restante,
+          quantidadeProcessada: dadosParaEditar != null ? processadaAjustada : processada,
+          quantidadeRestante: restanteAjustado,
+          isEditing: dadosParaEditar != null,
+          currentStatus: dadosParaEditar != null ? StageProgressStatus.finalizado : currentStatus,
+          startTime: dadosParaEditar != null ? null : startTime,
+          elapsedTime: dadosParaEditar != null ? null : elapsedTime,
+          savedFormData: dadosParaEditar != null ? null : savedFormData, // ✅ Passa dados parciais
+          onStatusChanged: (status, start, elapsed) {
+            storage.setStageStatus(stage.code, status);
+            if (start != null) {
+              storage.setStageStartTime(stage.code, start);
+            }
+            if (elapsed != null) {
+              storage.setStageElapsedTime(stage.code, elapsed);
+            }
+            setState(() {});
+          },
+          // ✅ Callback para salvar dados parciais
+          onFormDataChanged: (formData) {
+            storage.setStageFormData(stage.code, formData);
+          },
           onSaved: (data) {
             final qtdApontamento =
                 int.tryParse(data['qtdProcessada']?.toString() ?? '0') ?? 0;
 
-            if (processada + qtdApontamento > total) {
+            if ((dadosParaEditar != null ? processadaAjustada : processada) + qtdApontamento > total) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Quantidade excede o total! Restam apenas $restante peles.',
+                    'Quantidade excede o total! Restam apenas $restanteAjustado peles.',
                   ),
                   backgroundColor: Colors.red,
                   duration: const Duration(seconds: 4),
@@ -72,28 +104,40 @@ class _StagePageState extends State<StagePage> {
               return;
             }
 
-            final finalizarEstagio = (processada + qtdApontamento) >= total;
-            storage.saveData(stage.code, data, finalizar: finalizarEstagio);
+            if (dadosParaEditar != null && indexApontamento != null) {
+              storage.updateApontamento(stage.code, indexApontamento, data);
+            } else {
+              final finalizarEstagio = (processada + qtdApontamento) >= total;
+              storage.saveData(stage.code, data, finalizar: finalizarEstagio);
+            }
 
             setState(() {});
             Navigator.pop(context);
 
-            final novoTotal = processada + qtdApontamento;
-            final msg = finalizarEstagio
-                ? '✓ ${stage.title} FINALIZADO! ($novoTotal / $total)'
-                : '✓ Apontamento salvo! ($novoTotal / $total) - Restam ${total - novoTotal}';
+            final novoProcessado = dadosParaEditar != null 
+                ? processadaAjustada + qtdApontamento
+                : processada + qtdApontamento;
+            final finalizou = novoProcessado >= total;
+            
+            final msg = dadosParaEditar != null
+                ? '✓ Apontamento atualizado! ($novoProcessado / $total)'
+                : finalizou
+                    ? '✓ ${stage.title} FINALIZADO! ($novoProcessado / $total)'
+                    : '✓ Apontamento salvo! ($novoProcessado / $total) - Restam ${total - novoProcessado}';
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(msg),
-                backgroundColor: finalizarEstagio ? Colors.green : Colors.blue,
+                backgroundColor: finalizou ? Colors.green : Colors.blue,
                 duration: const Duration(seconds: 3),
               ),
             );
           },
         ),
       ),
-    ));
+    )).then((_) {
+      setState(() {});
+    });
   }
 
   void _clearAllData() {
@@ -120,119 +164,244 @@ class _StagePageState extends State<StagePage> {
     );
   }
 
-  // ✅ NOVO: Mostra histórico de apontamentos
-  void _showStageDetails(StageModel stage) {
-    final info = storage.getStageInfo(stage.code);
-    final apontamentos = storage.getApontamentos(stage.code);
+  void _showAllStagesHistory() {
+    int totalApontamentos = 0;
+    for (final stage in availableStages) {
+      totalApontamentos += storage.getApontamentos(stage.code).length;
+    }
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('${stage.title}'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildInfoRow('Total:', '${info['total']} peles'),
-              _buildInfoRow('Processada:', '${info['processada']} peles'),
-              _buildInfoRow('Restante:', '${info['restante']} peles'),
-              _buildInfoRow(
-                'Percentual:',
-                '${info['percentual'].toStringAsFixed(1)}%',
-              ),
-              const Divider(height: 24),
-              Text(
-                'Apontamentos (${apontamentos.length}):',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              if (apontamentos.isEmpty)
-                const Text('Nenhum apontamento realizado.')
-              else
-                ...apontamentos.asMap().entries.map((entry) {
-                  final idx = entry.key + 1;
-                  final apt = entry.value;
-                  final qtd = apt['qtdProcessada'] ?? 0;
-                  final resp = apt['responsavel'] ?? 'Não informado';
-                  final start = apt['start'] != null
-                      ? DateTime.parse(apt['start'])
-                          .toString()
-                          .substring(11, 16)
-                      : '-';
-                  final end = apt['end'] != null
-                      ? DateTime.parse(apt['end']).toString().substring(11, 16)
-                      : '-';
+        title: Row(
+          children: [
+            Icon(Icons.history, color: Colors.blue.shade700),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text('Histórico de Apontamentos'),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSummaryRow(
+                        'Total de Apontamentos:',
+                        '$totalApontamentos',
+                      ),
+                      const SizedBox(height: 4),
+                      _buildSummaryRow(
+                        'Quantidade Total:',
+                        '${storage.getQuantidadeTotal()} peles',
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
+                if (totalApontamentos == 0)
+                  const Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      padding: EdgeInsets.all(20),
+                      child: Text(
+                        'Nenhum apontamento realizado.',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ...availableStages.map((stage) {
+                    final stageApontamentos = storage.getApontamentos(stage.code);
+                    if (stageApontamentos.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final info = storage.getStageInfo(stage.code);
+                    
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: info['completo'] == true
+                                ? Colors.green.shade100
+                                : Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
                             children: [
-                              Text(
-                                'Apontamento #$idx',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
+                              Icon(
+                                info['completo'] == true
+                                    ? Icons.check_circle
+                                    : Icons.play_circle,
+                                size: 18,
+                                color: info['completo'] == true
+                                    ? Colors.green.shade700
+                                    : Colors.orange.shade700,
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border:
-                                      Border.all(color: Colors.green.shade200),
-                                ),
+                              const SizedBox(width: 8),
+                              Expanded(
                                 child: Text(
-                                  '$qtd peles',
-                                  style: TextStyle(
-                                    color: Colors.green.shade700,
+                                  stage.title,
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 13,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.person,
-                                  size: 16, color: Colors.grey),
-                              const SizedBox(width: 4),
                               Text(
-                                resp,
-                                style: const TextStyle(fontSize: 13),
+                                '${info['processada']} / ${info['total']}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: info['completo'] == true
+                                      ? Colors.green.shade700
+                                      : Colors.orange.shade700,
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time,
-                                  size: 16, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$start - $end',
-                                style: const TextStyle(fontSize: 13),
+                        ),
+                        
+                        const SizedBox(height: 8),
+
+                        ...stageApontamentos.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final apt = entry.value;
+                          final qtd = apt['qtdProcessada'] ?? 0;
+                          final resp = apt['responsavel'] ?? 'Não informado';
+                          final start = apt['start'] != null
+                              ? DateTime.parse(apt['start'])
+                                  .toString()
+                                  .substring(11, 16)
+                              : '-';
+                          final end = apt['end'] != null
+                              ? DateTime.parse(apt['end'])
+                                  .toString()
+                                  .substring(11, 16)
+                              : '-';
+
+                          String duracao = '-';
+                          if (apt['start'] != null && apt['end'] != null) {
+                            final startDt = DateTime.parse(apt['start']);
+                            final endDt = DateTime.parse(apt['end']);
+                            final diff = endDt.difference(startDt);
+                            final minutes = diff.inMinutes;
+                            final seconds = diff.inSeconds.remainder(60);
+                            duracao = '${minutes}m ${seconds}s';
+                          }
+
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8, left: 8),
+                            elevation: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Apontamento #${idx + 1}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.green.shade200,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '$qtd peles',
+                                          style: TextStyle(
+                                            color: Colors.green.shade800,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Responsável: $resp',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Horário: $start → $end ($duracao)',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton(
+                                      onPressed: () {
+                                        Navigator.pop(ctx);
+                                        _openStageForm(
+                                          stage,
+                                          dadosParaEditar: apt,
+                                          indexApontamento: idx,
+                                        );
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.orange.shade700,
+                                        side: BorderSide(color: Colors.orange.shade300),
+                                      ),
+                                      child: const Text('REABRIR'),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-            ],
+                            ),
+                          );
+                        }),
+                        
+                        const SizedBox(height: 12),
+                      ],
+                    );
+                  }),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -245,15 +414,66 @@ class _StagePageState extends State<StagePage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
+  Widget _buildSummaryRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(StageProgressStatus status) {
+    String text;
+    Color bgColor;
+    Color textColor;
+    
+    switch (status) {
+      case StageProgressStatus.aguardando:
+        text = 'Aguardando';
+        bgColor = Colors.grey.shade100;
+        textColor = Colors.grey.shade700;
+        break;
+      case StageProgressStatus.emProducao:
+        text = 'Em Produção';
+        bgColor = Colors.green.shade100;
+        textColor = Colors.green.shade700;
+        break;
+      case StageProgressStatus.parado:
+        text = 'Parado';
+        bgColor = Colors.orange.shade100;
+        textColor = Colors.orange.shade700;
+        break;
+      case StageProgressStatus.finalizado:
+        text = 'Finalizado';
+        bgColor = Colors.blue.shade100;
+        textColor = Colors.blue.shade700;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -262,6 +482,11 @@ class _StagePageState extends State<StagePage> {
   Widget build(BuildContext context) {
     final finishedCount = storage.getFinishedCount();
     final qtdTotal = storage.getQuantidadeTotal();
+
+    int totalApontamentos = 0;
+    for (final stage in availableStages) {
+      totalApontamentos += storage.getApontamentos(stage.code).length;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -276,7 +501,6 @@ class _StagePageState extends State<StagePage> {
       ),
       body: Column(
         children: [
-          // Card com informações da OF/Artigo
           Card(
             margin: const EdgeInsets.all(12),
             child: Padding(
@@ -318,17 +542,31 @@ class _StagePageState extends State<StagePage> {
             ),
           ),
 
-          // Card de progresso
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
                   const Icon(Icons.check_circle_outline),
                   const SizedBox(width: 8),
-                  Text(
-                    'Progresso: $finishedCount de ${availableStages.length} estágios',
+                  Expanded(
+                    child: Text(
+                      'Progresso: $finishedCount de ${availableStages.length} estágios',
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _showAllStagesHistory,
+                    icon: const Icon(Icons.history, size: 18),
+                    label: Text(
+                      'Apontamentos${totalApontamentos > 0 ? ' ($totalApontamentos)' : ''}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue.shade700,
+                      side: BorderSide(color: Colors.blue.shade300),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
                   ),
                 ],
               ),
@@ -337,7 +575,6 @@ class _StagePageState extends State<StagePage> {
 
           const SizedBox(height: 12),
 
-          // Lista de estágios
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -347,8 +584,8 @@ class _StagePageState extends State<StagePage> {
                 final info = storage.getStageInfo(stage.code);
                 final isFinalizado = info['completo'] as bool;
                 final processada = info['processada'] as int;
-                final restante = info['restante'] as int;
                 final apontamentos = info['apontamentos'] as int;
+                final status = info['status'] as StageProgressStatus;
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -358,23 +595,25 @@ class _StagePageState extends State<StagePage> {
                       padding: const EdgeInsets.all(12),
                       child: Row(
                         children: [
-                          // Ícone de status
                           Icon(
                             isFinalizado
                                 ? Icons.check_circle
-                                : processada > 0
+                                : status == StageProgressStatus.emProducao
                                     ? Icons.play_circle
-                                    : Icons.circle_outlined,
+                                    : status == StageProgressStatus.parado
+                                        ? Icons.pause_circle
+                                        : Icons.circle_outlined,
                             color: isFinalizado
                                 ? Colors.green
-                                : processada > 0
-                                    ? Colors.orange
-                                    : Colors.grey,
+                                : status == StageProgressStatus.emProducao
+                                    ? Colors.green
+                                    : status == StageProgressStatus.parado
+                                        ? Colors.orange
+                                        : Colors.grey,
                             size: 32,
                           ),
                           const SizedBox(width: 12),
 
-                          // Informações do estágio
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,39 +646,7 @@ class _StagePageState extends State<StagePage> {
                             ),
                           ),
 
-                          // Badge de falta
-                          if (restante > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border:
-                                    Border.all(color: Colors.orange.shade200),
-                              ),
-                              child: Text(
-                                'Faltam $restante',
-                                style: TextStyle(
-                                  color: Colors.orange.shade900,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-
-                          // ✅ NOVO: Botão de histórico
-                          if (apontamentos > 0) ...[
-                            const SizedBox(width: 10),
-                            IconButton(
-                              icon: const Icon(Icons.history),
-                              color: Colors.blue.shade700,
-                              tooltip: 'Apontamentos',
-                              onPressed: () => _showStageDetails(stage),
-                            ),
-                          ],
+                          _buildStatusBadge(isFinalizado ? StageProgressStatus.finalizado : status),
                         ],
                       ),
                     ),
