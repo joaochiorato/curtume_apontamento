@@ -35,34 +35,36 @@ class _OrdersPageState extends State<OrdersPage> {
   Future<void> _load() async {
     await Future.delayed(const Duration(milliseconds: 500));
 
+    // ═══════════════════════════════════════════════════════════════
+    // DADOS CONFORME TESTE DE MESA - Apontamento Curtume
+    // ═══════════════════════════════════════════════════════════════
+    // tbentradas:
+    //   Chave_fato: XYD459939
+    //   Num_docto: 120-ORP-3
+    //   Cod_cli_for: 6357
+    //   Cod_linha: C90
+    //
+    // tbentradasitem:
+    //   Cod_produto: CSA001
+    //   Desc_produto: QUARTZO BLACK
+    //   Cod_classif: 7
+    //   Qtde_pri: 100000
+    //   Cod_lote_couro: N5K001
+    // ═══════════════════════════════════════════════════════════════
+    
     _ordens = [
       OrdemModel(
-        of: '18283',
-        cliente: 'Cliente A',
+        of: '120-ORP-3',
+        cliente: 'Cliente 6357',
         data: DateTime.now(),
-        status: StatusOrdem.emProducao,
-        artigos: [
-          ArtigoModel(codigo: 'ART001', descricao: 'QUARTZO', quantidade: 350),
-          ArtigoModel(codigo: 'ART002', descricao: 'GRANITO', quantidade: 200),
-        ],
-      ),
-      OrdemModel(
-        of: '18284',
-        cliente: 'Cliente B',
-        data: DateTime.now().subtract(const Duration(days: 1)),
         status: StatusOrdem.aguardando,
         artigos: [
-          ArtigoModel(codigo: 'ART003', descricao: 'MÁRMORE', quantidade: 150),
-        ],
-      ),
-      OrdemModel(
-        of: '18285',
-        cliente: 'Cliente C',
-        data: DateTime.now().subtract(const Duration(days: 2)),
-        status: StatusOrdem.emProducao,
-        artigos: [
-          ArtigoModel(codigo: 'ART004', descricao: 'BASALTO', quantidade: 400),
-          ArtigoModel(codigo: 'ART005', descricao: 'ARDÓSIA', quantidade: 250),
+          // Apenas QUARTZO BLACK conforme teste de mesa
+          ArtigoModel(
+            codigo: 'CSA001',
+            descricao: 'QUARTZO BLACK',
+            quantidade: 350,
+          ),
         ],
       ),
     ];
@@ -93,18 +95,30 @@ class _OrdersPageState extends State<OrdersPage> {
       initialDate: _dataFiltro ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
-      locale: const Locale('pt', 'BR'),
     );
 
     if (picked != null) {
-      setState(() => _dataFiltro = picked);
-      _aplicarFiltros();
+      setState(() {
+        _dataFiltro = picked;
+        _aplicarFiltros();
+      });
     }
   }
 
   void _limparFiltroData() {
-    setState(() => _dataFiltro = null);
-    _aplicarFiltros();
+    setState(() {
+      _dataFiltro = null;
+      _aplicarFiltros();
+    });
+  }
+
+  void _abrirArtigos(OrdemModel ordem) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArticlesPage(of: ordem),
+      ),
+    );
   }
 
   @override
@@ -112,126 +126,156 @@ class _OrdersPageState extends State<OrdersPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text('SELECIONE A ORDEM'),
-        centerTitle: false,
+        backgroundColor: const Color(0xFF546E7A),
+        foregroundColor: Colors.white,
+        title: const Text(
+          'SELECIONE A ORDEM',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
+      body: Column(
+        children: [
+          // Instrução
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            color: Colors.white,
+            child: const Text(
+              'Click duas vezes no item para selecionar',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF757575),
+                fontSize: 14,
+              ),
+            ),
+          ),
+
+          // Filtros
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                // Instrução no topo - estilo Frigosoft
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.white,
-                  child: const Text(
-                    'Click duas vezes no item para selecionar',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF616161),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                // Filtros
-                Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _filtroOF,
-                          decoration: InputDecoration(
-                            labelText: 'Filtrar por OF',
-                            prefixIcon: const Icon(Icons.search),
-                            filled: true,
-                            fillColor: const Color(0xFFF5F5F5),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: _selecionarData,
-                        icon: const Icon(Icons.calendar_today),
-                        style: IconButton.styleFrom(
-                          backgroundColor: _dataFiltro != null
-                              ? const Color(0xFF4CAF50)
-                              : const Color(0xFF424242),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.all(12),
-                        ),
-                      ),
-                      if (_dataFiltro != null)
-                        IconButton(
-                          onPressed: _limparFiltroData,
-                          icon: const Icon(Icons.clear),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.all(12),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                // Contador de resultados
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: const Color(0xFFE0E0E0),
-                  child: Text(
-                    '${_ordensFiltradas.length} ordem(ns) encontrada(s)',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF424242),
-                    ),
-                  ),
-                ),
-
-                // Lista de ordens
+                // Filtro por OF
                 Expanded(
-                  child: _ordensFiltradas.isEmpty
-                      ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.search_off,
-                                  size: 64, color: Colors.grey),
-                              SizedBox(height: 16),
-                              Text(
-                                'Nenhuma ordem encontrada',
-                                style:
-                                    TextStyle(fontSize: 16, color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(12),
-                          itemCount: _ordensFiltradas.length,
-                          itemBuilder: (context, index) {
-                            final ordem = _ordensFiltradas[index];
-                            return _buildOrderCard(ordem);
-                          },
-                        ),
+                  child: TextField(
+                    controller: _filtroOF,
+                    decoration: InputDecoration(
+                      hintText: 'Filtrar por OF',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Filtro por data
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: _selecionarData,
+                    icon: Icon(
+                      Icons.calendar_today,
+                      color: _dataFiltro != null
+                          ? const Color(0xFF1976D2)
+                          : const Color(0xFF757575),
+                    ),
+                    tooltip: _dataFiltro != null
+                        ? dfDate.format(_dataFiltro!)
+                        : 'Filtrar por data',
+                  ),
                 ),
               ],
             ),
+          ),
+
+          // Contador de resultados
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: const Color(0xFFEEEEEE),
+            child: Text(
+              '${_ordensFiltradas.length} ordem(ns) encontrada(s)',
+              style: const TextStyle(
+                color: Color(0xFF616161),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          // Lista de ordens
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _ordensFiltradas.isEmpty
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text(
+                              'Nenhuma ordem encontrada',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _ordensFiltradas.length,
+                        itemBuilder: (context, index) {
+                          final ordem = _ordensFiltradas[index];
+                          return _buildOrdemCard(ordem);
+                        },
+                      ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildOrderCard(OrdemModel ordem) {
+  Widget _buildOrdemCard(OrdemModel ordem) {
+    // Determina cor do status
+    Color statusColor;
+    String statusText;
+
+    switch (ordem.status) {
+      case StatusOrdem.emProducao:
+        statusColor = const Color(0xFF4CAF50);
+        statusText = 'Em Produção';
+        break;
+      case StatusOrdem.aguardando:
+        statusColor = const Color(0xFFFF9800);
+        statusText = 'Não Iniciado';
+        break;
+      case StatusOrdem.finalizada:
+        statusColor = const Color(0xFF2196F3);
+        statusText = 'Finalizada';
+        break;
+      case StatusOrdem.cancelada:
+        statusColor = const Color(0xFFF44336);
+        statusText = 'Cancelada';
+        break;
+      default:
+        statusColor = const Color(0xFF9E9E9E);
+        statusText = 'Indefinido';
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -239,13 +283,7 @@ class _OrdersPageState extends State<OrdersPage> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
-        onDoubleTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ArticlesPage(of: ordem),
-            ),
-          );
-        },
+        onDoubleTap: () => _abrirArtigos(ordem),
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -261,23 +299,41 @@ class _OrdersPageState extends State<OrdersPage> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF424242),
+                      color: Color(0xFF212121),
                     ),
                   ),
-                  if (ordem.status != null) _buildStatusBadge(ordem.status!),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      statusText,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-
-              const SizedBox(height: 12),
-              const Divider(height: 1),
               const SizedBox(height: 12),
 
-              // Informações detalhadas
-              _buildInfoRow('Cliente', ordem.cliente),
-              const SizedBox(height: 6),
-              _buildInfoRow('Data', dfDate.format(ordem.data)),
-              const SizedBox(height: 6),
-              _buildInfoRow('Artigos', '${ordem.artigos.length} item(ns)'),
+              // Info: Cliente
+              _buildInfoRow('Cliente:', ordem.cliente),
+              const SizedBox(height: 4),
+
+              // Info: Data
+              _buildInfoRow('Data:', dfDate.format(ordem.data)),
+              const SizedBox(height: 4),
+
+              // Info: Artigos
+              _buildInfoRow('Artigos:', '${ordem.artigos.length} item(ns)'),
             ],
           ),
         ),
@@ -288,48 +344,23 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildInfoRow(String label, String value) {
     return Row(
       children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            '$label:',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF757575),
-              fontWeight: FontWeight.w500,
-            ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF757575),
+            fontSize: 14,
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF424242),
-              fontWeight: FontWeight.w600,
-            ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Color(0xFF212121),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatusBadge(StatusOrdem status) {
-    final isProduction = status == StatusOrdem.emProducao;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isProduction ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        status.displayName,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
     );
   }
 }
