@@ -44,44 +44,47 @@ class VariableModel {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 5 ESTÁGIOS COMPLETOS - Sistema de Apontamento Curtume
+// 3 ESTÁGIOS - Conforme Teste de Mesa Apontamento Curtume
+// Cod_operacao: 1000 (REMOLHO), 1001 (ENXUGADEIRA), 1002 (DIVISORA)
 // ═══════════════════════════════════════════════════════════════
 
 final List<StageModel> availableStages = [
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 1. REMOLHO - Único estágio com Fulão e Químicos
+  // 1. REMOLHO (Cod_operacao: 1000)
+  // Único estágio com Fulão e Químicos
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'REMOLHO',
     title: 'REMOLHO',
     machines: ['1', '2', '3', '4'],
-    hasFulao: true, // ← ÚNICO com Fulão e Químicos
+    hasFulao: true,
     needsResponsibleSuperior: true,
     variables: [
       VariableModel(
         name: 'Volume de Água',
         unit: 'L',
-        hint: '100% do peso líquido do lote',
+        hint: '100% do Peso do Couro',
       ),
       VariableModel(
         name: 'Temperatura da Água',
         unit: 'ºC',
         min: 50,
         max: 70,
-        hint: 'Dentro do fulão (60 +/- 10)',
+        hint: 'Faixa 50 a 70',
       ),
       VariableModel(
         name: 'Tensoativo',
         unit: 'L',
         min: 4.8,
         max: 5.2,
-        hint: '5 +/- 0.200',
+        hint: 'Faixa 4.8 - 5.2',
       ),
     ],
   ),
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 2. ENXUGADEIRA
+  // 2. ENXUGADEIRA (Cod_operacao: 1001)
+  // 4 variáveis conforme teste de mesa
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'ENXUGADEIRA',
@@ -95,18 +98,14 @@ final List<StageModel> availableStages = [
         unit: 'Bar',
         min: 40,
         max: 110,
+        hint: '40 a 110',
       ),
       VariableModel(
         name: 'Pressão do Rolo (2º manômetro)',
         unit: 'Bar',
         min: 60,
         max: 110,
-      ),
-      VariableModel(
-        name: 'Pressão do Rolo (3º manômetro)',
-        unit: 'Bar',
-        min: 60,
-        max: 110,
+        hint: '60 a 110',
       ),
       VariableModel(
         name: 'Velocidade do Feltro',
@@ -126,7 +125,8 @@ final List<StageModel> availableStages = [
   ),
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 3. DIVISORA
+  // 3. DIVISORA (Cod_operacao: 1002)
+  // 4 variáveis conforme teste de mesa
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   StageModel(
     code: 'DIVISORA',
@@ -136,98 +136,32 @@ final List<StageModel> availableStages = [
     needsResponsibleSuperior: true,
     variables: [
       VariableModel(
-        name: 'Espessura Final',
-        unit: 'mm',
-        min: 0.8,
-        max: 2.5,
-        hint: 'Conforme especificação do artigo',
-      ),
-      VariableModel(
         name: 'Velocidade da Máquina',
         unit: 'mt/min',
-        min: 5,
-        max: 15,
-        hint: '10 +/- 5',
+        min: 21,
+        max: 25,
+        hint: '23 +/- 2',
       ),
       VariableModel(
-        name: 'Pressão do Cilindro',
-        unit: 'Bar',
-        min: 80,
-        max: 150,
-      ),
-    ],
-  ),
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 4. REBAIXADEIRA
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  StageModel(
-    code: 'REBAIXADEIRA',
-    title: 'REBAIXADEIRA',
-    machines: ['1', '2'],
-    hasFulao: false,
-    hasPallets: false, // ← SEM sistema de pallets
-    needsResponsibleSuperior: true,
-    variables: [
-      VariableModel(
-        name: 'Altura da Lixa',
+        name: 'Distância da Navalha',
         unit: 'mm',
-        min: 0.5,
-        max: 3.0,
-        hint: 'Ajustar conforme necessidade',
+        min: 8.0,
+        max: 8.5,
+        hint: '8,0 a 8,5',
       ),
       VariableModel(
-        name: 'Velocidade da Esteira',
-        unit: 'mt/min',
-        min: 3,
-        max: 12,
-        hint: '7 +/- 4',
+        name: 'Fio da Navalha Inferior',
+        unit: 'mm',
+        min: 4.5,
+        max: 5.5,
+        hint: '5,0 +/- 0,5',
       ),
       VariableModel(
-        name: 'Granulometria da Lixa',
-        unit: 'mesh',
-        min: 40,
-        max: 180,
-      ),
-      VariableModel(
-        name: 'Pressão do Rolo',
-        unit: 'Bar',
-        min: 20,
-        max: 80,
-      ),
-    ],
-  ),
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 5. REFILADORA (REFILA)
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  StageModel(
-    code: 'REFILA',
-    title: 'REFILADORA',
-    machines: ['1', '2'],
-    hasFulao: false,
-    hasRefilador: true,
-    needsResponsibleSuperior: false, // ← Não precisa supervisor
-    variables: [
-      VariableModel(
-        name: 'Largura de Corte',
-        unit: 'cm',
-        min: 10,
-        max: 200,
-        hint: 'Conforme especificação',
-      ),
-      VariableModel(
-        name: 'Velocidade de Corte',
-        unit: 'mt/min',
-        min: 5,
-        max: 20,
-        hint: '12 +/- 7',
-      ),
-      VariableModel(
-        name: 'Tensão da Lâmina',
-        unit: 'N',
-        min: 100,
-        max: 300,
+        name: 'Fio da Navalha Superior',
+        unit: 'mm',
+        min: 5.5,
+        max: 6.5,
+        hint: '6,0 +/- 0,5',
       ),
     ],
   ),

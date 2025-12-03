@@ -1,6 +1,7 @@
 import '../models/ordem_producao.dart';
 
 /// 💾 Repositório de Ordens de Produção (Dados em Memória)
+/// Conforme Teste de Mesa - Apontamento Curtume
 class OrdemProducaoRepository {
   static final OrdemProducaoRepository _instance =
       OrdemProducaoRepository._internal();
@@ -10,10 +11,10 @@ class OrdemProducaoRepository {
   // Lista de ordens em memória
   final List<OrdemProducao> _ordens = [];
 
-  /// Inicializa com dados da OF 18283 - QUARTZO
+  /// Inicializa com dados do Teste de Mesa
   void inicializarDados() {
     _ordens.clear();
-    _ordens.add(_criarOf18283());
+    _ordens.add(_criarOrdemTesteMesa());
   }
 
   /// Lista todas as ordens
@@ -49,182 +50,164 @@ class OrdemProducaoRepository {
     }
   }
 
-  /// 📋 Cria a OF 18283 - QUARTZO baseada no documento real
-  OrdemProducao _criarOf18283() {
+  // ═══════════════════════════════════════════════════════════════
+  // DADOS DO TESTE DE MESA
+  // tbentradas: XYD459939 | 120-ORP-3 | Cod_cli_for: 6357 | Cod_linha: C90
+  // tbentradasitem: CSA001 | QUARTZO BLACK | Cod_classif: 7
+  // ═══════════════════════════════════════════════════════════════
+
+  OrdemProducao _criarOrdemTesteMesa() {
     return OrdemProducao(
-      id: '1',
-      numeroOf: '18283',
+      id: 'XYD459939',
+      numeroOf: '120-ORP-3',
       artigo: 'QUARTZO',
-      pve: '7315',
-      cor: 'E - BROWN',
-      crustItem: '1165',
-      espFinal: '1.1/1.5',
-      classe: 'G119',
-      po: '7315CK08',
-      loteWetBlue: '32666',
-      numeroPecasNF: 350,
-      metragemNF: 21295.25,
-      avg: 60.84,
+      pve: '',
+      cor: '',
+      crustItem: '',
+      espFinal: '',
+      classe: '',
+      po: '',
+      loteWetBlue: '',
+      numeroPecasNF: 100000,
+      metragemNF: 0,
+      avg: 0,
       numeroPecasEnx: 0,
       metragemEnx: 0,
-      pesoLiquido: 9855.00,
-      dataCriacao: DateTime(2025, 10, 14),
+      pesoLiquido: 100000,
+      dataCriacao: DateTime.now(),
       status: StatusOrdem.aguardando,
-      estagios: _criarEstagiosQuartzo(),
+      estagios: _criarEstagiosTesteMesa(),
     );
   }
 
-  /// 🏭 Cria os estágios do processo QUARTZO
-  List<Estagio> _criarEstagiosQuartzo() {
+  /// 🏭 Cria os estágios conforme Teste de Mesa
+  /// tbSeqOperacao: 1000 (REMOLHO), 1001 (ENXUGADEIRA), 1002 (DIVISORA)
+  List<Estagio> _criarEstagiosTesteMesa() {
     return [
-      // 1. REMOLHO
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 1. REMOLHO (Cod_operacao: 1000)
+      // Desc_operacao: 1A REMOLHO
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       Estagio(
         id: 'remolho',
         nome: 'REMOLHO',
         ordem: 1,
-        quantidadeTotal: 350,
+        quantidadeTotal: 10,
         variaveisControle: [
           VariavelControle(
             nome: 'Volume de Água',
-            unidade: 'Litros',
-            padrao: '100% peso líquido do lote',
+            unidade: 'L',
+            padrao: '100% do Peso do Couro',
           ),
           VariavelControle(
-            nome: 'Temperatura da Água (dentro do fulão remolho)',
-            unidade: '°C',
-            padrao: '60',
+            nome: 'Temperatura da Água',
+            unidade: 'ºC',
             valorMinimo: 50,
             valorMaximo: 70,
+            padrao: 'Faixa 50 a 70',
           ),
           VariavelControle(
             nome: 'Tensoativo',
-            unidade: 'Litros',
-            padrao: '5',
+            unidade: 'L',
             valorMinimo: 4.8,
             valorMaximo: 5.2,
+            padrao: 'Faixa 4.8 - 5.2',
           ),
         ],
         dadosAdicionais: {
-          'fulao': null, // 1, 2, 3 ou 4
-          'tempoRemolho': '120 minutos +/- 60 min',
+          'fulao': null,
+          'numFulao': null,
+          'codLoteCouro': 'N5K001',
         },
       ),
 
-      // 2. ENXUGADEIRA
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 2. ENXUGADEIRA (Cod_operacao: 1001)
+      // Desc_operacao: 2A ENXUGADEIRA
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       Estagio(
         id: 'enxugadeira',
         nome: 'ENXUGADEIRA',
         ordem: 2,
-        quantidadeTotal: 350,
+        quantidadeTotal: 10,
         variaveisControle: [
           VariavelControle(
             nome: 'Pressão do Rolo (1º manômetro)',
             unidade: 'Bar',
             valorMinimo: 40,
             valorMaximo: 110,
+            padrao: '40 a 110',
           ),
           VariavelControle(
-            nome: 'Pressão do Rolo (2º e 3º manômetro)',
+            nome: 'Pressão do Rolo (2º manômetro)',
             unidade: 'Bar',
             valorMinimo: 60,
             valorMaximo: 110,
+            padrao: '60 a 110',
           ),
           VariavelControle(
             nome: 'Velocidade do Feltro',
             unidade: 'mt/min',
-            padrao: '15',
             valorMinimo: 12,
             valorMaximo: 18,
+            padrao: '15 +/- 3',
           ),
           VariavelControle(
             nome: 'Velocidade do Tapete',
             unidade: 'mt/min',
-            padrao: '13',
             valorMinimo: 10,
             valorMaximo: 16,
+            padrao: '13 +/- 3',
           ),
         ],
         dadosAdicionais: {
-          'maquina': null, // 1 ou 2
+          'maquina': null,
+          'codLoteCouro': 'N5K001',
         },
       ),
 
-      // 3. DIVISORA
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 3. DIVISORA (Cod_operacao: 1002)
+      // Desc_operacao: 3A DIVISORA
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       Estagio(
         id: 'divisora',
         nome: 'DIVISORA',
         ordem: 3,
-        quantidadeTotal: 350,
+        quantidadeTotal: 10,
         variaveisControle: [
           VariavelControle(
             nome: 'Velocidade da Máquina',
-            unidade: 'metro/minuto',
-            padrao: '23',
+            unidade: 'mt/min',
             valorMinimo: 21,
             valorMaximo: 25,
+            padrao: '23 +/- 2',
           ),
           VariavelControle(
             nome: 'Distância da Navalha',
             unidade: 'mm',
             valorMinimo: 8.0,
             valorMaximo: 8.5,
+            padrao: '8,0 a 8,5',
           ),
           VariavelControle(
             nome: 'Fio da Navalha Inferior',
             unidade: 'mm',
-            padrao: '5.0',
             valorMinimo: 4.5,
             valorMaximo: 5.5,
+            padrao: '5,0 +/- 0,5',
           ),
           VariavelControle(
             nome: 'Fio da Navalha Superior',
             unidade: 'mm',
-            padrao: '6.0',
             valorMinimo: 5.5,
             valorMaximo: 6.5,
+            padrao: '6,0 +/- 0,5',
           ),
         ],
         dadosAdicionais: {
-          'maquina': null, // 1 ou 2
-          'espessuraDivisao': '1.5/1.6',
-          'pesoBruto': null,
-          'pesoLiquido': null,
-        },
-      ),
-
-      // 4. REBAIXADEIRA
-      Estagio(
-        id: 'rebaixadeira',
-        nome: 'REBAIXADEIRA',
-        ordem: 4,
-        quantidadeTotal: 350,
-        variaveisControle: [
-          VariavelControle(
-            nome: 'Velocidade do Rolo de Transporte',
-            unidade: 'mt/min',
-            padrao: '10/12',
-          ),
-        ],
-        dadosAdicionais: {
-          'maquina': null, // 1, 2, 3, 4, 5 ou 6
-          'espessuraRebaixe': '1.2/1.3+1.2',
-          'pesoCupim': null,
-          'pesoRefile': null,
-          'pesoLiquido': null,
-        },
-      ),
-
-      // 5. REFILA
-      Estagio(
-        id: 'refila',
-        nome: 'REFILA',
-        ordem: 5,
-        quantidadeTotal: 350,
-        dadosAdicionais: {
-          'nomeRefilador': null,
-          'pesoLiquido': null,
-          'pesoRefile': null,
-          'pesoCupim': null,
+          'maquina': null,
+          'codLoteCouro': 'N5K001',
         },
       ),
     ];

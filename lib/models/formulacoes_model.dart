@@ -1,21 +1,16 @@
 // Modelo para os químicos
+// Conforme Teste de Mesa - tbSeqOperacaoProd
+// Apenas Cod_produto_comp != 0
+
 class Quimico {
+  final String codigo;
   final String nome;
   final String unidade;
 
-  const Quimico({required this.nome, this.unidade = 'kg'});
-}
-
-// Modelo para uma formulação
-class Formulacao {
-  final String codigo;
-  final String nome;
-  final List<Quimico> quimicos;
-
-  const Formulacao({
+  const Quimico({
     required this.codigo,
     required this.nome,
-    required this.quimicos,
+    this.unidade = 'kg',
   });
 }
 
@@ -29,82 +24,54 @@ const List<String> locaisEstoque = [
   'Área de Recebimento',
 ];
 
-// Definição das formulações disponíveis
-const List<Formulacao> formulacoes = [
-  // FORMULAÇÃO 1 - 3 produtos
-  Formulacao(
-    codigo: 'FORM_01',
-    nome: 'Formulação 1 - Remolho Básico',
-    quimicos: [
-      Quimico(nome: 'Cal virgem (hidróxido de cálcio)', unidade: 'kg'),
-      Quimico(nome: 'Sulfeto de sódio (Na₂S)', unidade: 'kg'),
-      Quimico(nome: 'Tensoativo / umectante', unidade: 'L'),
-    ],
+// ═══════════════════════════════════════════════════════════════
+// QUÍMICOS DO REMOLHO (Cod_operacao: 1000)
+// Conforme Teste de Mesa - tbSeqOperacaoProd
+// Apenas registros com Cod_produto_comp != 0
+// ═══════════════════════════════════════════════════════════════
+
+const List<Quimico> quimicosRemolho = [
+  // Cod_produto_comp: 89396
+  Quimico(
+    codigo: '89396',
+    nome: 'CAL VIRGEM 20 KG',
+    unidade: 'kg',
   ),
-  
-  // FORMULAÇÃO 2 - 5 produtos
-  Formulacao(
-    codigo: 'FORM_02',
-    nome: 'Formulação 2 - Remolho Completo',
-    quimicos: [
-      Quimico(nome: 'Cal virgem (hidróxido de cálcio)', unidade: 'kg'),
-      Quimico(nome: 'Sulfeto de sódio (Na₂S)', unidade: 'kg'),
-      Quimico(nome: 'Hidrossulfeto de sódio (NaHS)', unidade: 'kg'),
-      Quimico(nome: 'Tensoativo / umectante', unidade: 'L'),
-      Quimico(nome: 'Agente sequestrante', unidade: 'L'),
-    ],
+  // Cod_produto_comp: 95001
+  Quimico(
+    codigo: '95001',
+    nome: 'SULFETO DE SODIO 60%',
+    unidade: 'kg',
   ),
-  
-  // FORMULAÇÃO 3 - 4 produtos
-  Formulacao(
-    codigo: 'FORM_03',
-    nome: 'Formulação 3 - Remolho Ecológico',
-    quimicos: [
-      Quimico(nome: 'Desulfex, EcoLime, Biosafe', unidade: 'kg'),
-      Quimico(nome: 'Hidrossulfeto de sódio (NaHS)', unidade: 'kg'),
-      Quimico(nome: 'Tensoativo / umectante', unidade: 'L'),
-      Quimico(nome: 'Agente sequestrante', unidade: 'L'),
-    ],
-  ),
-  
-  // FORMULAÇÃO 4 - Todos os produtos (6 produtos)
-  Formulacao(
-    codigo: 'FORM_04',
-    nome: 'Formulação 4 - Personalizada',
-    quimicos: [
-      Quimico(nome: 'Cal virgem (hidróxido de cálcio)', unidade: 'kg'),
-      Quimico(nome: 'Sulfeto de sódio (Na₂S)', unidade: 'kg'),
-      Quimico(nome: 'Hidrossulfeto de sódio (NaHS)', unidade: 'kg'),
-      Quimico(nome: 'Desulfex, EcoLime, Biosafe', unidade: 'kg'),
-      Quimico(nome: 'Tensoativo / umectante', unidade: 'L'),
-      Quimico(nome: 'Agente sequestrante', unidade: 'L'),
-    ],
+  // Cod_produto_comp: 95209
+  Quimico(
+    codigo: '95209',
+    nome: 'TENSOATIVO',
+    unidade: 'L',
   ),
 ];
 
 // Modelo para armazenar os dados completos dos químicos
+// Conforme Teste de Mesa - tbSaidasApontamento
 class QuimicosFormulacaoData {
-  final String formulacaoCodigo;
   final String localEstoque;
-  final Map<String, String> quantidades; // nome do químico → quantidade
+  final Map<String, String> quantidades; // código do químico → quantidade
 
   QuimicosFormulacaoData({
-    required this.formulacaoCodigo,
     required this.localEstoque,
     required this.quantidades,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'formulacaoCodigo': formulacaoCodigo,
       'localEstoque': localEstoque,
       'quantidades': quantidades,
+      'formatoGravacao': toFormatoGravacao(),
     };
   }
 
   factory QuimicosFormulacaoData.fromJson(Map<String, dynamic> json) {
     return QuimicosFormulacaoData(
-      formulacaoCodigo: json['formulacaoCodigo'] ?? '',
       localEstoque: json['localEstoque'] ?? '— selecione —',
       quantidades: Map<String, String>.from(json['quantidades'] ?? {}),
     );
@@ -115,21 +82,39 @@ class QuimicosFormulacaoData {
     return quantidades.values.where((q) => q.isNotEmpty).length;
   }
 
-  // Retorna o nome da formulação
-  String getFormulacaoNome() {
-    try {
-      return formulacoes.firstWhere((f) => f.codigo == formulacaoCodigo).nome;
-    } catch (_) {
-      return 'Formulação desconhecida';
-    }
+  // Retorna o total de químicos disponíveis
+  int getTotalQuimicos() {
+    return quimicosRemolho.length;
   }
 
-  // Retorna a lista de químicos da formulação
+  // Retorna a lista de químicos
   List<Quimico> getQuimicos() {
-    try {
-      return formulacoes.firstWhere((f) => f.codigo == formulacaoCodigo).quimicos;
-    } catch (_) {
-      return [];
+    return quimicosRemolho;
+  }
+
+  // Gera string formatada para gravação (conforme teste de mesa)
+  // Formato: "CAL:30|SUL:20|TEN:5" (tbSaidasApontamento.Texto)
+  String toFormatoGravacao() {
+    final partes = <String>[];
+    
+    for (final quimico in quimicosRemolho) {
+      final qtd = quantidades[quimico.codigo] ?? '';
+      if (qtd.isNotEmpty) {
+        // Usa abreviação conforme teste de mesa
+        String abrev;
+        if (quimico.codigo == '89396') {
+          abrev = 'CAL';  // CAL VIRGEM 20 KG
+        } else if (quimico.codigo == '95001') {
+          abrev = 'SUL';  // SULFETO DE SODIO 60%
+        } else if (quimico.codigo == '95209') {
+          abrev = 'TEN';  // TENSOATIVO
+        } else {
+          abrev = quimico.nome.substring(0, 3).toUpperCase();
+        }
+        partes.add('$abrev:$qtd');
+      }
     }
+    
+    return partes.join('|');
   }
 }
