@@ -40,7 +40,7 @@ class AppTheme {
         surface: cardBackground,
       ),
       scaffoldBackgroundColor: backgroundLight,
-      
+
       // AppBar
       appBarTheme: const AppBarTheme(
         backgroundColor: primaryColor,
@@ -115,7 +115,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         labelStyle: const TextStyle(color: textSecondary),
         hintStyle: const TextStyle(color: textHint),
       ),
@@ -129,7 +130,8 @@ class AppTheme {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: Colors.grey.shade300),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
 
@@ -142,17 +144,25 @@ class AppTheme {
 
       // Tipografia
       textTheme: const TextTheme(
-        displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: textPrimary),
-        displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: textPrimary),
-        displaySmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: textPrimary),
-        headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: textPrimary),
-        headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
-        titleLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
-        titleMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary),
+        displayLarge: TextStyle(
+            fontSize: 32, fontWeight: FontWeight.bold, color: textPrimary),
+        displayMedium: TextStyle(
+            fontSize: 28, fontWeight: FontWeight.bold, color: textPrimary),
+        displaySmall: TextStyle(
+            fontSize: 24, fontWeight: FontWeight.w600, color: textPrimary),
+        headlineMedium: TextStyle(
+            fontSize: 20, fontWeight: FontWeight.w600, color: textPrimary),
+        headlineSmall: TextStyle(
+            fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
+        titleLarge: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
+        titleMedium: TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary),
         bodyLarge: TextStyle(fontSize: 16, color: textPrimary),
         bodyMedium: TextStyle(fontSize: 14, color: textPrimary),
         bodySmall: TextStyle(fontSize: 12, color: textSecondary),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary),
+        labelLarge: TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary),
       ),
 
       // Progress Indicator
@@ -165,7 +175,7 @@ class AppTheme {
   /// Retorna cor baseada no status
   static Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'aguardando':
+      case 'Aguardando':
         return statusAguardando;
       case 'em produção':
       case 'em producao':

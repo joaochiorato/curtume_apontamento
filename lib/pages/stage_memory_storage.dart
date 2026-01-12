@@ -3,10 +3,11 @@ import '../models/formulacoes_model.dart';
 
 /// Status possíveis de um estágio na tela de listagem
 enum StageProgressStatus {
-  aguardando,  // Não iniciou
-  emProducao,  // Iniciado e rodando
-  parado,      // Em pausa
-  finalizado,  // Encerrado
+  Aguardando, // Não iniciou
+  emProducao, // Iniciado e rodando
+  parado, // Em pausa durante apontamento
+  encerrado, // Após salvar apontamento (aguardando novo)
+  finalizado, // Todas as peles processadas
 }
 
 /// ✅ Dados parciais do formulário em andamento (sem campo responsavel)
@@ -40,11 +41,11 @@ class StageFormData {
       responsavelSuperior: map['responsavelSuperior'],
       quantidade: map['quantidade'],
       observacao: map['observacao'],
-      variaveis: map['variaveis'] != null 
-          ? Map<String, String>.from(map['variaveis']) 
+      variaveis: map['variaveis'] != null
+          ? Map<String, String>.from(map['variaveis'])
           : null,
-      quimicos: map['quimicos'] != null 
-          ? QuimicosFormulacaoData.fromJson(map['quimicos']) 
+      quimicos: map['quimicos'] != null
+          ? QuimicosFormulacaoData.fromJson(map['quimicos'])
           : null,
     );
   }
@@ -57,7 +58,8 @@ class StageMemoryStorage {
   final Map<String, StageProgressStatus> _stageStatus = {};
   final Map<String, DateTime?> _stageStartTime = {};
   final Map<String, Duration> _stageElapsedTime = {};
-  final Map<String, DateTime?> _stageLastResumeTime = {}; // ✅ Momento que retomou
+  final Map<String, DateTime?> _stageLastResumeTime =
+      {}; // ✅ Momento que retomou
   final Map<String, StageFormData> _stageFormData = {};
   int _quantidadeTotal = 0;
 
@@ -68,7 +70,7 @@ class StageMemoryStorage {
   int getQuantidadeTotal() => _quantidadeTotal;
 
   StageProgressStatus getStageStatus(String stageCode) {
-    return _stageStatus[stageCode] ?? StageProgressStatus.aguardando;
+    return _stageStatus[stageCode] ?? StageProgressStatus.Aguardando;
   }
 
   void setStageStatus(String stageCode, StageProgressStatus status) {
@@ -108,7 +110,8 @@ class StageMemoryStorage {
     _stageFormData[stageCode] = data;
   }
 
-  void updateStageFormData(String stageCode, {
+  void updateStageFormData(
+    String stageCode, {
     String? responsavelSuperior,
     int? quantidade,
     String? observacao,
@@ -126,23 +129,37 @@ class StageMemoryStorage {
   }
 
   /// Salva um novo apontamento
-  void saveData(String stageCode, Map<String, dynamic> data, {bool finalizar = false}) {
+  void saveData(String stageCode, Map<String, dynamic> data,
+      {bool finalizar = false}) {
     _apontamentos.putIfAbsent(stageCode, () => []);
     _apontamentos[stageCode]!.add(Map<String, dynamic>.from(data));
-    
+
     // ✅ Só marca como finalizado se completou TODAS as peles
     final processada = getQuantidadeProcessada(stageCode);
     if (processada >= _quantidadeTotal) {
       _finalized[stageCode] = true;
       _stageStatus[stageCode] = StageProgressStatus.finalizado;
+    } else {
+      // Se ainda não finalizou mas já tem apontamento, muda status para "encerrado"
+      // (aguardando mais apontamentos)
+      _stageStatus[stageCode] = StageProgressStatus.encerrado;
     }
-    
-    // Limpar estado do estágio após salvar apontamento
-    _clearStageProgress(stageCode);
+
+    // Limpar apenas os dados temporários do formulário, mantendo o status
+    _clearStageProgressData(stageCode);
   }
 
+  /// Limpa os dados temporários do formulário, mantendo o status do estágio
+  void _clearStageProgressData(String stageCode) {
+    _stageStartTime.remove(stageCode);
+    _stageElapsedTime.remove(stageCode);
+    _stageLastResumeTime.remove(stageCode);
+    _stageFormData.remove(stageCode);
+  }
+
+  /// Limpa completamente o estágio, incluindo o status
   void _clearStageProgress(String stageCode) {
-    _stageStatus[stageCode] = StageProgressStatus.aguardando;
+    _stageStatus[stageCode] = StageProgressStatus.Aguardando;
     _stageStartTime.remove(stageCode);
     _stageElapsedTime.remove(stageCode);
     _stageLastResumeTime.remove(stageCode); // ✅ Limpar
@@ -150,12 +167,13 @@ class StageMemoryStorage {
   }
 
   /// ✅ Atualiza um apontamento existente
-  void updateApontamento(String stageCode, int index, Map<String, dynamic> newData) {
-    if (_apontamentos.containsKey(stageCode) && 
-        index >= 0 && 
+  void updateApontamento(
+      String stageCode, int index, Map<String, dynamic> newData) {
+    if (_apontamentos.containsKey(stageCode) &&
+        index >= 0 &&
         index < _apontamentos[stageCode]!.length) {
       _apontamentos[stageCode]![index] = Map<String, dynamic>.from(newData);
-      
+
       // Recalcular se o estágio está completo
       final processada = getQuantidadeProcessada(stageCode);
       if (processada >= _quantidadeTotal) {
@@ -163,23 +181,33 @@ class StageMemoryStorage {
         _stageStatus[stageCode] = StageProgressStatus.finalizado;
       } else {
         _finalized[stageCode] = false;
+        // Se ainda tem apontamentos mas não finalizou, mantém como "encerrado"
+        if (_apontamentos[stageCode]!.isNotEmpty) {
+          _stageStatus[stageCode] = StageProgressStatus.encerrado;
+        }
       }
     }
   }
 
   /// ✅ Remove um apontamento
   void removeApontamento(String stageCode, int index) {
-    if (_apontamentos.containsKey(stageCode) && 
-        index >= 0 && 
+    if (_apontamentos.containsKey(stageCode) &&
+        index >= 0 &&
         index < _apontamentos[stageCode]!.length) {
       _apontamentos[stageCode]!.removeAt(index);
-      
+
       final processada = getQuantidadeProcessada(stageCode);
       if (processada >= _quantidadeTotal) {
         _finalized[stageCode] = true;
         _stageStatus[stageCode] = StageProgressStatus.finalizado;
       } else {
         _finalized[stageCode] = false;
+        // Se ainda tem apontamentos, mantém como "encerrado", senão volta para "Aguardando"
+        if (_apontamentos[stageCode]!.isNotEmpty) {
+          _stageStatus[stageCode] = StageProgressStatus.encerrado;
+        } else {
+          _stageStatus[stageCode] = StageProgressStatus.Aguardando;
+        }
       }
     }
   }
@@ -199,7 +227,7 @@ class StageMemoryStorage {
   int getQuantidadeProcessada(String stageCode) {
     final list = _apontamentos[stageCode];
     if (list == null || list.isEmpty) return 0;
-    
+
     int total = 0;
     for (final apt in list) {
       final qtd = apt['qtdProcessada'];
@@ -248,9 +276,9 @@ class StageMemoryStorage {
   }
 
   bool isFinalized(String stageCode) => _finalized[stageCode] ?? false;
-  
+
   int getFinishedCount() => _finalized.values.where((f) => f).length;
-  
+
   void clear(String stageCode) {
     _apontamentos.remove(stageCode);
     _finalized.remove(stageCode);
@@ -260,7 +288,7 @@ class StageMemoryStorage {
     _stageLastResumeTime.remove(stageCode); // ✅ Limpar
     _stageFormData.remove(stageCode);
   }
-  
+
   void clearAll() {
     _apontamentos.clear();
     _finalized.clear();
@@ -275,7 +303,7 @@ class StageMemoryStorage {
     print('═══════════════════════════════════════');
     print('RESUMO DA OF - Total: $_quantidadeTotal peles');
     print('═══════════════════════════════════════');
-    
+
     for (final stageCode in availableStages.map((s) => s.code)) {
       final info = getStageInfo(stageCode);
       print('$stageCode:');

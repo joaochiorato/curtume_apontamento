@@ -110,30 +110,30 @@ Future<Map<String, String>?> showVariaveisDialog(
                             final hasFaixa = variable.min != null && variable.max != null;
                             
                             return Padding(
-                              padding: EdgeInsets.only(bottom: index < variables.length - 1 ? 14 : 0),
+                              padding: EdgeInsets.only(bottom: index < variables.length - 1 ? 18 : 0),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    width: 24,
-                                    height: 24,
-                                    margin: const EdgeInsets.only(top: 2),
+                                    width: 28,
+                                    height: 28,
+                                    margin: const EdgeInsets.only(top: 4),
                                     decoration: BoxDecoration(
                                       color: ctrl.text.isNotEmpty ? _accentColor : Colors.grey.shade300,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                     child: Center(
                                       child: Text(
                                         '${index + 1}',
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 11,
+                                          fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,14 +141,14 @@ Future<Map<String, String>?> showVariaveisDialog(
                                         Text(
                                           variable.name,
                                           style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
                                             color: Color(0xFF37474F),
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 6),
                                         SizedBox(
-                                          height: 40,
+                                          height: 48,
                                           child: TextField(
                                             controller: ctrl,
                                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -156,39 +156,42 @@ Future<Map<String, String>?> showVariaveisDialog(
                                               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                                             ],
                                             decoration: InputDecoration(
-                                              hintText: hasFaixa ? '${variable.min} - ${variable.max}' : 'Valor',
-                                              hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
-                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              hintText: variable.hint != null && variable.hint!.isNotEmpty
+                                                  ? 'Faixa: ${variable.hint}'
+                                                  : (hasFaixa ? 'Faixa: ${variable.min} - ${variable.max}' : 'Informe o valor'),
+                                              hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
-                                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                                borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
                                               ),
                                               enabledBorder: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
-                                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                                borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
-                                                borderSide: const BorderSide(color: _accentColor, width: 1.5),
+                                                borderSide: const BorderSide(color: _accentColor, width: 2),
                                               ),
-                                              suffixText: variable.unit,
+                                              suffixText: variable.unit.isNotEmpty ? variable.unit : null,
                                               suffixStyle: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 13,
                                                 color: Colors.grey.shade600,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            style: const TextStyle(fontSize: 14),
+                                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                             onChanged: (_) => setDialogState(() {}),
                                           ),
                                         ),
-                                        if (hasFaixa) ...[
-                                          const SizedBox(height: 3),
+                                        if (variable.previstoTolerancia != null && variable.previstoTolerancia!.isNotEmpty) ...[
+                                          const SizedBox(height: 4),
                                           Text(
-                                            'Faixa: ${variable.min} - ${variable.max} ${variable.unit}',
+                                            'Previsto / Tolerância: ${variable.previstoTolerancia}',
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: Colors.grey.shade500,
+                                              color: Colors.grey.shade600,
+                                              fontStyle: FontStyle.italic,
                                             ),
                                           ),
                                         ],

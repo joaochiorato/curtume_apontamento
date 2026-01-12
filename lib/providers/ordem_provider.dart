@@ -5,7 +5,7 @@ import '../repositories/ordem_repository.dart';
 /// 🎯 Provider para gerenciar estado das Ordens de Produção
 class OrdemProducaoProvider extends ChangeNotifier {
   final OrdemProducaoRepository _repository = OrdemProducaoRepository();
-  
+
   List<OrdemProducao> _ordens = [];
   bool _isLoading = false;
 
@@ -23,10 +23,10 @@ class OrdemProducaoProvider extends ChangeNotifier {
 
     // Simula delay de carregamento
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     _repository.inicializarDados();
     _ordens = _repository.listarOrdens();
-    
+
     _isLoading = false;
     notifyListeners();
   }
@@ -37,7 +37,9 @@ class OrdemProducaoProvider extends ChangeNotifier {
   }
 
   /// Inicia um apontamento no estágio
-  void iniciarApontamento(String ordemId, String estagioId, {
+  void iniciarApontamento(
+    String ordemId,
+    String estagioId, {
     required String responsavel,
     String? responsavelSuperior,
   }) {
@@ -45,7 +47,7 @@ class OrdemProducaoProvider extends ChangeNotifier {
     if (ordem == null) return;
 
     final estagio = ordem.estagios.firstWhere((e) => e.id == estagioId);
-    
+
     final estagioAtualizado = estagio.copyWith(
       dataInicio: DateTime.now(),
       responsavel: responsavel,
@@ -53,27 +55,24 @@ class OrdemProducaoProvider extends ChangeNotifier {
     );
 
     _repository.atualizarEstagio(ordemId, estagioAtualizado);
-    
+
     // Atualiza status da ordem para Em Produção
-    if (ordem.status == StatusOrdem.aguardando) {
-      _repository.atualizarOrdem(ordem.copyWith(status: StatusOrdem.emProducao));
+    if (ordem.status == StatusOrdem.Aguardando) {
+      _repository
+          .atualizarOrdem(ordem.copyWith(status: StatusOrdem.emProducao));
     }
 
     _atualizarListaLocal();
   }
 
   /// Registra processamento no estágio
-  void processarQuantidade(
-    String ordemId, 
-    String estagioId, 
-    int quantidade,
-    {Map<String, dynamic>? dadosAdicionais}
-  ) {
+  void processarQuantidade(String ordemId, String estagioId, int quantidade,
+      {Map<String, dynamic>? dadosAdicionais}) {
     final ordem = _repository.buscarPorId(ordemId);
     if (ordem == null) return;
 
     final estagio = ordem.estagios.firstWhere((e) => e.id == estagioId);
-    
+
     final novaQuantidade = (estagio.quantidadeProcessada + quantidade)
         .clamp(0, estagio.quantidadeTotal);
 
@@ -95,20 +94,19 @@ class OrdemProducaoProvider extends ChangeNotifier {
     if (ordem == null) return;
 
     final estagio = ordem.estagios.firstWhere((e) => e.id == estagioId);
-    
+
     final estagioAtualizado = estagio.copyWith(
       dataTermino: DateTime.now(),
       quantidadeProcessada: estagio.quantidadeTotal,
     );
 
     _repository.atualizarEstagio(ordemId, estagioAtualizado);
-    
+
     // Verifica se todos os estágios foram concluídos
     final ordemAtualizada = _repository.buscarPorId(ordemId);
     if (ordemAtualizada != null && ordemAtualizada.isCompleta) {
       _repository.atualizarOrdem(
-        ordemAtualizada.copyWith(status: StatusOrdem.finalizado)
-      );
+          ordemAtualizada.copyWith(status: StatusOrdem.finalizado));
     }
 
     _atualizarListaLocal();
@@ -126,7 +124,7 @@ class OrdemProducaoProvider extends ChangeNotifier {
     if (ordem == null) return;
 
     final estagio = ordem.estagios.firstWhere((e) => e.id == estagioId);
-    
+
     final estagioAtualizado = estagio.copyWith(
       dataInicio: null,
       dataTermino: null,
@@ -150,9 +148,11 @@ class OrdemProducaoProvider extends ChangeNotifier {
     if (ordem == null) return;
 
     final estagio = ordem.estagios.firstWhere((e) => e.id == estagioId);
-    final variaveisAtualizadas = List<VariavelControle>.from(estagio.variaveisControle);
-    
-    final index = variaveisAtualizadas.indexWhere((v) => v.nome == nomeVariavel);
+    final variaveisAtualizadas =
+        List<VariavelControle>.from(estagio.variaveisControle);
+
+    final index =
+        variaveisAtualizadas.indexWhere((v) => v.nome == nomeVariavel);
     if (index != -1) {
       variaveisAtualizadas[index] = variaveisAtualizadas[index].copyWith(
         resultado: valor,
@@ -177,7 +177,7 @@ class OrdemProducaoProvider extends ChangeNotifier {
     if (ordem == null) return;
 
     final estagio = ordem.estagios.firstWhere((e) => e.id == estagioId);
-    
+
     final estagioAtualizado = estagio.copyWith(
       dadosAdicionais: {
         ...estagio.dadosAdicionais,
@@ -199,9 +199,7 @@ class OrdemProducaoProvider extends ChangeNotifier {
   void cancelarOrdem(String ordemId) {
     final ordem = _repository.buscarPorId(ordemId);
     if (ordem != null) {
-      _repository.atualizarOrdem(
-        ordem.copyWith(status: StatusOrdem.cancelado)
-      );
+      _repository.atualizarOrdem(ordem.copyWith(status: StatusOrdem.cancelado));
       _atualizarListaLocal();
     }
   }

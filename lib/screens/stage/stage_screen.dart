@@ -162,7 +162,7 @@ class _StageScreenState extends State<StageScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildInfoChip('Total da OF:', '${estagio.quantidadeTotal} peles'),
+              _buildInfoChip('Total da Ordem:', '${estagio.quantidadeTotal} peles'),
               _buildInfoChip('Já processado:', '${estagio.quantidadeProcessada} peles', 
                   color: AppTheme.statusFinalizado),
             ],

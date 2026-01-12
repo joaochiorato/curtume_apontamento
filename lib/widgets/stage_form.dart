@@ -11,7 +11,8 @@ import '../pages/stage_memory_storage.dart';
 class StageForm extends StatefulWidget {
   final StageModel stage;
   final void Function(Map<String, dynamic>) onSaved;
-  final void Function(StageProgressStatus status, DateTime? startTime, Duration? elapsed, DateTime? lastResumeTime)? onStatusChanged;
+  final void Function(StageProgressStatus status, DateTime? startTime,
+      Duration? elapsed, DateTime? lastResumeTime)? onStatusChanged;
   final void Function(StageFormData data)? onFormDataChanged;
   final Map<String, dynamic>? initialData;
   final int quantidadeTotal;
@@ -35,7 +36,7 @@ class StageForm extends StatefulWidget {
     required this.quantidadeProcessada,
     required this.quantidadeRestante,
     this.isEditing = false,
-    this.currentStatus = StageProgressStatus.aguardando,
+    this.currentStatus = StageProgressStatus.Aguardando,
     this.startTime,
     this.elapsedTime,
     this.lastResumeTime, // ✅ Adicionado
@@ -86,20 +87,20 @@ class _StageFormState extends State<StageForm> {
       _loadInitialData();
       _isViewingClosed = true;
       _status = StageStatus.closed;
-    } else if (widget.currentStatus == StageProgressStatus.emProducao || 
+    } else if (widget.currentStatus == StageProgressStatus.emProducao ||
         widget.currentStatus == StageProgressStatus.parado) {
       // ✅ Restaurar estado de estágio em andamento
       _start = widget.startTime;
       _elapsedBeforePause = widget.elapsedTime ?? Duration.zero;
-      
+
       // ✅ Carregar dados parciais salvos
       if (widget.savedFormData != null) {
         _loadSavedFormData();
       }
-      
+
       if (widget.currentStatus == StageProgressStatus.emProducao) {
         _status = StageStatus.running;
-        
+
         // ✅ CORREÇÃO: Usar lastResumeTime salvo para manter o tempo correndo
         if (widget.lastResumeTime != null) {
           // Tem lastResumeTime salvo - tempo continuou correndo fora da tela
@@ -110,7 +111,7 @@ class _StageFormState extends State<StageForm> {
           // Não tem lastResumeTime, começar do _elapsedBeforePause
           _lastResumeTime = DateTime.now();
         }
-        
+
         _startTimer();
       } else {
         // ✅ Parado - restaurar tempo sem iniciar timer
@@ -124,8 +125,10 @@ class _StageFormState extends State<StageForm> {
 
   void _loadSavedFormData() {
     final data = widget.savedFormData!;
-    if (data.responsavelSuperior != null) _respSupSel = data.responsavelSuperior!;
-    if (data.quantidade != null) _qtdProcessadaCtrl.text = data.quantidade.toString();
+    if (data.responsavelSuperior != null)
+      _respSupSel = data.responsavelSuperior!;
+    if (data.quantidade != null)
+      _qtdProcessadaCtrl.text = data.quantidade.toString();
     if (data.observacao != null) _obs.text = data.observacao!;
     if (data.variaveis != null) _variaveisData = Map.from(data.variaveis!);
     if (data.quimicos != null) _quimicosData = data.quimicos;
@@ -143,11 +146,11 @@ class _StageFormState extends State<StageForm> {
 
   void _loadInitialData() {
     final data = widget.initialData!;
-    
+
     _respSupSel = data['responsavelSuperior'] as String? ?? '— selecione —';
     _qtdProcessadaCtrl.text = (data['qtdProcessada'] ?? 0).toString();
     _obs.text = data['observacao'] as String? ?? '';
-    
+
     if (data['start'] != null) {
       _start = DateTime.parse(data['start']);
     }
@@ -158,12 +161,13 @@ class _StageFormState extends State<StageForm> {
       _elapsed = _end!.difference(_start!);
       _elapsedBeforePause = _elapsed;
     }
-    
+
     final variables = data['variables'] as Map<String, dynamic>?;
     if (variables != null) {
-      _variaveisData = variables.map((k, v) => MapEntry(k, v?.toString() ?? ''));
+      _variaveisData =
+          variables.map((k, v) => MapEntry(k, v?.toString() ?? ''));
     }
-    
+
     if (data['quimicos'] != null) {
       _quimicosData = QuimicosFormulacaoData.fromJson(data['quimicos']);
     }
@@ -175,9 +179,11 @@ class _StageFormState extends State<StageForm> {
     // ✅ Salvar tempo atual antes de sair se estiver rodando
     if (_status == StageStatus.running && _start != null) {
       // Salvar de forma síncrona no storage (não usa setState)
-      widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause, _lastResumeTime);
+      widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start,
+          _elapsedBeforePause, _lastResumeTime);
     } else if (_status == StageStatus.paused && _start != null) {
-      widget.onStatusChanged?.call(StageProgressStatus.parado, _start, _elapsed, null);
+      widget.onStatusChanged
+          ?.call(StageProgressStatus.parado, _start, _elapsed, null);
     }
     _obs.dispose();
     _qtdProcessadaCtrl.dispose();
@@ -204,7 +210,8 @@ class _StageFormState extends State<StageForm> {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_status == StageStatus.running && _lastResumeTime != null) {
         setState(() {
-          _elapsed = _elapsedBeforePause + DateTime.now().difference(_lastResumeTime!);
+          _elapsed =
+              _elapsedBeforePause + DateTime.now().difference(_lastResumeTime!);
         });
       }
     });
@@ -219,7 +226,7 @@ class _StageFormState extends State<StageForm> {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    
+
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     } else {
@@ -232,8 +239,10 @@ class _StageFormState extends State<StageForm> {
       _showLockedMessage();
       return;
     }
-    
-    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running || _status == StageStatus.paused);
+
+    final canEdit = (_status == StageStatus.idle ||
+        _status == StageStatus.running ||
+        _status == StageStatus.paused);
 
     final result = await showQuimicosDialog(
       context,
@@ -254,8 +263,10 @@ class _StageFormState extends State<StageForm> {
       _showLockedMessage();
       return;
     }
-    
-    final canEdit = (_status == StageStatus.idle || _status == StageStatus.running || _status == StageStatus.paused);
+
+    final canEdit = (_status == StageStatus.idle ||
+        _status == StageStatus.running ||
+        _status == StageStatus.paused);
 
     final result = await showVariaveisDialog(
       context,
@@ -366,30 +377,36 @@ class _StageFormState extends State<StageForm> {
         }
         _startTimer();
         _isViewingClosed = false;
-        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause, _lastResumeTime);
+        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start,
+            _elapsedBeforePause, _lastResumeTime);
       } else if (newStatus == StageStatus.paused) {
         _stopTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.parado, _start, _elapsed, null);
+        widget.onStatusChanged
+            ?.call(StageProgressStatus.parado, _start, _elapsed, null);
         _saveFormData();
       } else if (newStatus == StageStatus.closed) {
         _end = DateTime.now();
         _stopTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.finalizado, _start, _elapsed, null);
+        widget.onStatusChanged
+            ?.call(StageProgressStatus.finalizado, _start, _elapsed, null);
       } else if (newStatus == StageStatus.idle && _isViewingClosed) {
         _end = null;
         _isViewingClosed = false;
         _lastResumeTime = DateTime.now();
         newStatus = StageStatus.running;
         _startTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start, _elapsedBeforePause, _lastResumeTime);
+        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start,
+            _elapsedBeforePause, _lastResumeTime);
       }
-      
+
       _status = newStatus;
     });
 
     if (newStatus == StageStatus.closed && !widget.isEditing) {
       _save();
-    } else if (newStatus == StageStatus.closed && widget.isEditing && !_isViewingClosed) {
+    } else if (newStatus == StageStatus.closed &&
+        widget.isEditing &&
+        !_isViewingClosed) {
       _save();
     }
   }
@@ -432,11 +449,12 @@ class _StageFormState extends State<StageForm> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.lock, color: Colors.orange.shade700, size: 20),
+                            Icon(Icons.lock,
+                                color: Colors.orange.shade700, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Apontamento encerrado. Clique em REABRIR para editar.',
+                                'Apontamento Aguardando. Clique em REABRIR para editar.',
                                 style: TextStyle(
                                   color: Colors.orange.shade800,
                                   fontWeight: FontWeight.w500,
@@ -449,8 +467,8 @@ class _StageFormState extends State<StageForm> {
 
                     if (_start != null)
                       Card(
-                        color: _status == StageStatus.running 
-                            ? Colors.green.shade50 
+                        color: _status == StageStatus.running
+                            ? Colors.green.shade50
                             : _status == StageStatus.paused
                                 ? Colors.orange.shade50
                                 : Colors.grey.shade50,
@@ -458,8 +476,8 @@ class _StageFormState extends State<StageForm> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                           side: BorderSide(
-                            color: _status == StageStatus.running 
-                                ? Colors.green.shade300 
+                            color: _status == StageStatus.running
+                                ? Colors.green.shade300
                                 : _status == StageStatus.paused
                                     ? Colors.orange.shade300
                                     : Colors.grey.shade300,
@@ -475,7 +493,8 @@ class _StageFormState extends State<StageForm> {
                                   children: [
                                     const Text(
                                       'Início:',
-                                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
                                     ),
                                     Text(
                                       '${dfDate.format(_start!)} ${dfTime.format(_start!)}',
@@ -488,7 +507,8 @@ class _StageFormState extends State<StageForm> {
                                       const SizedBox(height: 4),
                                       const Text(
                                         'Término:',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey),
                                       ),
                                       Text(
                                         '${dfDate.format(_end!)} ${dfTime.format(_end!)}',
@@ -502,17 +522,18 @@ class _StageFormState extends State<StageForm> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
                                 decoration: BoxDecoration(
-                                  color: _status == StageStatus.running 
-                                      ? Colors.green.shade100 
+                                  color: _status == StageStatus.running
+                                      ? Colors.green.shade100
                                       : _status == StageStatus.paused
                                           ? Colors.orange.shade100
                                           : Colors.grey.shade100,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: _status == StageStatus.running 
-                                        ? Colors.green.shade400 
+                                    color: _status == StageStatus.running
+                                        ? Colors.green.shade400
                                         : _status == StageStatus.paused
                                             ? Colors.orange.shade400
                                             : Colors.grey.shade400,
@@ -523,14 +544,14 @@ class _StageFormState extends State<StageForm> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      _status == StageStatus.running 
-                                          ? Icons.timer 
+                                      _status == StageStatus.running
+                                          ? Icons.timer
                                           : _status == StageStatus.paused
                                               ? Icons.pause
                                               : Icons.check_circle,
                                       size: 24,
-                                      color: _status == StageStatus.running 
-                                          ? Colors.green.shade700 
+                                      color: _status == StageStatus.running
+                                          ? Colors.green.shade700
                                           : _status == StageStatus.paused
                                               ? Colors.orange.shade700
                                               : Colors.grey.shade700,
@@ -542,8 +563,8 @@ class _StageFormState extends State<StageForm> {
                                         fontWeight: FontWeight.bold,
                                         fontSize: 22,
                                         fontFamily: 'monospace',
-                                        color: _status == StageStatus.running 
-                                            ? Colors.green.shade700 
+                                        color: _status == StageStatus.running
+                                            ? Colors.green.shade700
                                             : _status == StageStatus.paused
                                                 ? Colors.orange.shade700
                                                 : Colors.grey.shade700,
@@ -557,8 +578,7 @@ class _StageFormState extends State<StageForm> {
                         ),
                       ),
 
-                    if (_start != null)
-                      const SizedBox(height: 16),
+                    if (_start != null) const SizedBox(height: 16),
 
                     // BOTÕES: Químicos e Variáveis (REMOLHO)
                     if (_isRemolho && _hasVariables) ...[
@@ -568,14 +588,19 @@ class _StageFormState extends State<StageForm> {
                             child: OutlinedButton.icon(
                               onPressed: _openQuimicosDialog,
                               icon: const Icon(Icons.science, size: 18),
-                              label: Text('Químicos (${_getQuimicosApontamentos()})'),
+                              label: Text(
+                                  'Químicos (${_getQuimicosApontamentos()})'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(48),
                                 side: BorderSide(
-                                  color: _isFieldsLocked ? Colors.grey : Colors.blue.shade700, 
+                                  color: _isFieldsLocked
+                                      ? Colors.grey
+                                      : Colors.blue.shade700,
                                   width: 2,
                                 ),
-                                foregroundColor: _isFieldsLocked ? Colors.grey : Colors.blue.shade700,
+                                foregroundColor: _isFieldsLocked
+                                    ? Colors.grey
+                                    : Colors.blue.shade700,
                               ),
                             ),
                           ),
@@ -584,14 +609,19 @@ class _StageFormState extends State<StageForm> {
                             child: OutlinedButton.icon(
                               onPressed: _openVariaveisDialog,
                               icon: const Icon(Icons.tune, size: 18),
-                              label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
+                              label: Text(
+                                  'Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(48),
                                 side: BorderSide(
-                                  color: _isFieldsLocked ? Colors.grey : Colors.green.shade700, 
+                                  color: _isFieldsLocked
+                                      ? Colors.grey
+                                      : Colors.green.shade700,
                                   width: 2,
                                 ),
-                                foregroundColor: _isFieldsLocked ? Colors.grey : Colors.green.shade700,
+                                foregroundColor: _isFieldsLocked
+                                    ? Colors.grey
+                                    : Colors.green.shade700,
                               ),
                             ),
                           ),
@@ -605,14 +635,19 @@ class _StageFormState extends State<StageForm> {
                       OutlinedButton.icon(
                         onPressed: _openVariaveisDialog,
                         icon: const Icon(Icons.tune, size: 18),
-                        label: Text('Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
+                        label: Text(
+                            'Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(48),
                           side: BorderSide(
-                            color: _isFieldsLocked ? Colors.grey : Colors.green.shade700, 
+                            color: _isFieldsLocked
+                                ? Colors.grey
+                                : Colors.green.shade700,
                             width: 2,
                           ),
-                          foregroundColor: _isFieldsLocked ? Colors.grey : Colors.green.shade700,
+                          foregroundColor: _isFieldsLocked
+                              ? Colors.grey
+                              : Colors.green.shade700,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -627,9 +662,11 @@ class _StageFormState extends State<StageForm> {
                         enabled: !_isFieldsLocked,
                       ),
                       items: _responsaveisSup
-                          .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                          .map(
+                              (r) => DropdownMenuItem(value: r, child: Text(r)))
                           .toList(),
-                      onChanged: _isFieldsLocked ? null : _onResponsavelSupChanged,
+                      onChanged:
+                          _isFieldsLocked ? null : _onResponsavelSupChanged,
                     ),
 
                     const SizedBox(height: 20),
@@ -643,14 +680,18 @@ class _StageFormState extends State<StageForm> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: _isFieldsLocked ? Colors.grey.shade100 : Colors.orange.shade50,
+                        color: _isFieldsLocked
+                            ? Colors.grey.shade100
+                            : Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _isFieldsLocked ? Colors.grey.shade300 : Colors.orange.shade200,
+                          color: _isFieldsLocked
+                              ? Colors.grey.shade300
+                              : Colors.orange.shade200,
                         ),
                       ),
                       child: Column(
@@ -659,7 +700,9 @@ class _StageFormState extends State<StageForm> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Material(
-                                color: _isFieldsLocked ? Colors.grey : Colors.red.shade400,
+                                color: _isFieldsLocked
+                                    ? Colors.grey
+                                    : Colors.red.shade400,
                                 borderRadius: BorderRadius.circular(25),
                                 child: InkWell(
                                   onTap: _isFieldsLocked ? null : _decrement,
@@ -669,23 +712,26 @@ class _StageFormState extends State<StageForm> {
                                     height: 50,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
                                     ),
-                                    child: const Icon(Icons.remove, color: Colors.white, size: 20),
+                                    child: const Icon(Icons.remove,
+                                        color: Colors.white, size: 20),
                                   ),
                                 ),
                               ),
-                              
                               const SizedBox(width: 16),
-                              
                               Container(
                                 constraints: const BoxConstraints(minWidth: 80),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: _isFieldsLocked ? Colors.grey : Colors.orange.shade400, 
+                                    color: _isFieldsLocked
+                                        ? Colors.grey
+                                        : Colors.orange.shade400,
                                     width: 2,
                                   ),
                                 ),
@@ -695,54 +741,71 @@ class _StageFormState extends State<StageForm> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: _isFieldsLocked ? Colors.grey : Colors.orange.shade900,
+                                    color: _isFieldsLocked
+                                        ? Colors.grey
+                                        : Colors.orange.shade900,
                                   ),
                                 ),
                               ),
-                              
                               const SizedBox(width: 16),
-                              
                               Material(
-                                color: _isFieldsLocked ? Colors.grey : Colors.green.shade400,
+                                color: _isFieldsLocked
+                                    ? Colors.grey
+                                    : Colors.green.shade400,
                                 borderRadius: BorderRadius.circular(25),
                                 child: InkWell(
-                                  onTap: _isFieldsLocked ? null : () => _increment(1),
+                                  onTap: _isFieldsLocked
+                                      ? null
+                                      : () => _increment(1),
                                   borderRadius: BorderRadius.circular(25),
                                   child: Container(
                                     width: 50,
                                     height: 50,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
                                     ),
-                                    child: const Icon(Icons.add, color: Colors.white, size: 20),
+                                    child: const Icon(Icons.add,
+                                        color: Colors.white, size: 20),
                                   ),
                                 ),
                               ),
-                              
                               const SizedBox(width: 12),
-                              const Text('peles', style: TextStyle(fontSize: 16)),
+                              const Text('peles',
+                                  style: TextStyle(fontSize: 16)),
                             ],
                           ),
-                          
                           const SizedBox(height: 16),
-                          
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildQuickButton('+10', _isFieldsLocked ? null : () => _increment(10)),
+                              _buildQuickButton(
+                                  '+10',
+                                  _isFieldsLocked
+                                      ? null
+                                      : () => _increment(10)),
                               const SizedBox(width: 12),
-                              _buildQuickButton('+20', _isFieldsLocked ? null : () => _increment(20)),
+                              _buildQuickButton(
+                                  '+20',
+                                  _isFieldsLocked
+                                      ? null
+                                      : () => _increment(20)),
                               const SizedBox(width: 12),
-                              _buildQuickButton('+50', _isFieldsLocked ? null : () => _increment(50)),
+                              _buildQuickButton(
+                                  '+50',
+                                  _isFieldsLocked
+                                      ? null
+                                      : () => _increment(50)),
                             ],
                           ),
-                          
                           const SizedBox(height: 8),
                           Text(
                             'Máximo: ${widget.quantidadeRestante} peles',
                             style: TextStyle(
-                              color: _isFieldsLocked ? Colors.grey : Colors.orange.shade700,
+                              color: _isFieldsLocked
+                                  ? Colors.grey
+                                  : Colors.orange.shade700,
                               fontSize: 12,
                             ),
                           ),
@@ -762,7 +825,8 @@ class _StageFormState extends State<StageForm> {
                         alignLabelWithHint: true,
                       ),
                       maxLines: 3,
-                      onChanged: _isFieldsLocked ? null : (_) => _saveFormData(),
+                      onChanged:
+                          _isFieldsLocked ? null : (_) => _saveFormData(),
                     ),
 
                     const SizedBox(height: 24),
@@ -781,11 +845,15 @@ class _StageFormState extends State<StageForm> {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: (_status == StageStatus.idle || _status == StageStatus.paused) && !_isViewingClosed
+            onPressed: (_status == StageStatus.idle ||
+                        _status == StageStatus.paused) &&
+                    !_isViewingClosed
                 ? () => _onStatusChange(StageStatus.running)
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: (_status == StageStatus.idle || _status == StageStatus.paused) && !_isViewingClosed
+              backgroundColor: (_status == StageStatus.idle ||
+                          _status == StageStatus.paused) &&
+                      !_isViewingClosed
                   ? Colors.green
                   : Colors.grey.shade300,
               foregroundColor: Colors.white,
@@ -813,11 +881,13 @@ class _StageFormState extends State<StageForm> {
         const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton(
-            onPressed: (_status == StageStatus.running || _status == StageStatus.paused)
+            onPressed: (_status == StageStatus.running ||
+                    _status == StageStatus.paused)
                 ? () => _onStatusChange(StageStatus.closed)
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: (_status == StageStatus.running || _status == StageStatus.paused)
+              backgroundColor: (_status == StageStatus.running ||
+                      _status == StageStatus.paused)
                   ? Colors.red
                   : Colors.grey.shade300,
               foregroundColor: Colors.white,
@@ -851,7 +921,8 @@ class _StageFormState extends State<StageForm> {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: onPressed != null ? Colors.blue.shade500 : Colors.grey,
+          backgroundColor:
+              onPressed != null ? Colors.blue.shade500 : Colors.grey,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),

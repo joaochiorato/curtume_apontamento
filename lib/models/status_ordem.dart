@@ -2,7 +2,7 @@
 // Estados possíveis conforme regra de negócio
 
 enum StatusOrdem {
-  aguardando('Aguardando', 'Ordem criada, aguardando início'),
+  Aguardando('Aguardando', 'Ordem criada, Aguardando início'),
   emProducao('Em Produção', 'Apontamento iniciado'),
   finalizado('Finalizado', 'Todos os apontamentos concluídos'),
   cancelado('Cancelado', 'Ordem cancelada');
@@ -14,24 +14,24 @@ enum StatusOrdem {
 
   // 🎨 Cor associada ao status (para uso visual discreto)
   String get textoStatus => label;
-  
+
   // ✅ Valida se pode transitar para outro status
   bool podeTransitarPara(StatusOrdem novoStatus) {
     switch (this) {
-      case StatusOrdem.aguardando:
+      case StatusOrdem.Aguardando:
         // De Aguardando -> pode ir para Em Produção ou Cancelado
-        return novoStatus == StatusOrdem.emProducao || 
-               novoStatus == StatusOrdem.cancelado;
-      
+        return novoStatus == StatusOrdem.emProducao ||
+            novoStatus == StatusOrdem.cancelado;
+
       case StatusOrdem.emProducao:
         // De Em Produção -> pode ir para Finalizado ou Cancelado
-        return novoStatus == StatusOrdem.finalizado || 
-               novoStatus == StatusOrdem.cancelado;
-      
+        return novoStatus == StatusOrdem.finalizado ||
+            novoStatus == StatusOrdem.cancelado;
+
       case StatusOrdem.finalizado:
         // De Finalizado -> não pode mais mudar
         return false;
-      
+
       case StatusOrdem.cancelado:
         // De Cancelado -> não pode mais mudar
         return false;
@@ -41,7 +41,7 @@ enum StatusOrdem {
   // 📊 Retorna o próximo status na sequência normal
   StatusOrdem? get proximoStatus {
     switch (this) {
-      case StatusOrdem.aguardando:
+      case StatusOrdem.Aguardando:
         return StatusOrdem.emProducao;
       case StatusOrdem.emProducao:
         return StatusOrdem.finalizado;
@@ -54,8 +54,8 @@ enum StatusOrdem {
   // 🔄 Converte string para enum
   static StatusOrdem fromString(String status) {
     switch (status.toLowerCase()) {
-      case 'aguardando':
-        return StatusOrdem.aguardando;
+      case 'Aguardando':
+        return StatusOrdem.Aguardando;
       case 'em produção':
       case 'em producao':
         return StatusOrdem.emProducao;
@@ -64,7 +64,7 @@ enum StatusOrdem {
       case 'cancelado':
         return StatusOrdem.cancelado;
       default:
-        return StatusOrdem.aguardando;
+        return StatusOrdem.Aguardando;
     }
   }
 }
@@ -76,7 +76,7 @@ enum StatusOrdem {
 │                    FLUXO DE STATUS DA ORDEM                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                       │
-│  1. AGUARDANDO                                                       │
+│  1. Aguardando                                                       │
 │     ├─ Estado inicial ao criar a ordem                              │
 │     ├─ Nenhum apontamento foi iniciado                              │
 │     └─> Transita para "Em Produção" ao iniciar primeiro apontamento │

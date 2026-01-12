@@ -8,7 +8,7 @@ Sistema completo de gerenciamento de status das Ordens de Produção (OF) seguin
 
 ## 🔄 ESTADOS POSSÍVEIS
 
-### 1. **AGUARDANDO** (Estado Inicial)
+### 1. **Aguardando** (Estado Inicial)
 - ✅ Ordem criada, nenhum apontamento iniciado
 - ✅ Cor: Cinza (`Colors.grey.shade600`)
 - ✅ Pode transitar para: **Em Produção** ou **Cancelado**
@@ -36,7 +36,7 @@ Sistema completo de gerenciamento de status das Ordens de Produção (OF) seguin
 
 ```
 ┌──────────────┐
-│  AGUARDANDO  │ ← Estado inicial
+│  Aguardando  │ ← Estado inicial
 └──────┬───────┘
        │
        │ ┌─────────────────────────────────┐
@@ -69,7 +69,7 @@ Sistema completo de gerenciamento de status das Ordens de Produção (OF) seguin
 
 ### Regra 1: Início do Apontamento
 ```
-SE ordem.status == AGUARDANDO
+SE ordem.status == Aguardando
 E usuário INICIAR primeiro apontamento
 ENTÃO ordem.status = EM PRODUÇÃO
 ```
@@ -83,9 +83,9 @@ ENTÃO ordem.status = FINALIZADO
 
 ### Regra 3: Sem Início
 ```
-SE ordem.status == AGUARDANDO
+SE ordem.status == Aguardando
 E NENHUM apontamento for iniciado
-ENTÃO ordem.status permanece AGUARDANDO
+ENTÃO ordem.status permanece Aguardando
 ```
 
 ### Regra 4: Estados Finais
@@ -104,7 +104,7 @@ Enum com os 4 estados possíveis e lógica de validação de transições:
 
 ```dart
 enum StatusOrdem {
-  aguardando,
+  Aguardando,
   emProducao,
   finalizado,
   cancelado,
@@ -283,7 +283,7 @@ flutter run
 OrdemModel ordem = OrdemModel(
   of: '18283',
   cliente: 'Cliente A',
-  status: StatusOrdem.aguardando,  // Estado inicial
+  status: StatusOrdem.Aguardando,  // Estado inicial
   artigos: [artigo1, artigo2],
 );
 

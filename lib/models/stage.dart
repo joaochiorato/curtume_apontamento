@@ -33,6 +33,7 @@ class VariableModel {
   final double? min;
   final double? max;
   final String? hint;
+  final String? previstoTolerancia; // Valor da coluna "Previsto/Tolerância" do Quartzo
 
   VariableModel({
     required this.name,
@@ -40,12 +41,14 @@ class VariableModel {
     this.min,
     this.max,
     this.hint,
+    this.previstoTolerancia,
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 3 ESTÁGIOS - Conforme Teste de Mesa Apontamento Curtume
-// Cod_operacao: 1000 (REMOLHO), 1001 (ENXUGADEIRA), 1002 (DIVISORA)
+// 5 ESTÁGIOS - Conforme Roteiro Produtivo Quartzo
+// Cod_operacao: 1000 (REMOLHO), 1001 (ENXUGADEIRA), 1002 (DIVISORA),
+//               1003 (REBAIXADEIRA), 1004 (REFILA)
 // ═══════════════════════════════════════════════════════════════
 
 final List<StageModel> availableStages = [
@@ -63,21 +66,26 @@ final List<StageModel> availableStages = [
       VariableModel(
         name: 'Volume de Água',
         unit: 'L',
+        min: 0,
+        max: 100,
         hint: '100% do Peso do Couro',
+        previstoTolerancia: '100',
       ),
       VariableModel(
         name: 'Temperatura da Água',
         unit: 'ºC',
-        min: 50,
-        max: 70,
-        hint: 'Faixa 50 a 70',
+        min: 10,
+        max: 60,
+        hint: '60 +/- 10',
+        previstoTolerancia: '60',
       ),
       VariableModel(
         name: 'Tensoativo',
         unit: 'L',
-        min: 4.8,
-        max: 5.2,
+        min: 0.200,
+        max: 5.3,
         hint: 'Faixa 4.8 - 5.2',
+        previstoTolerancia: '5',
       ),
     ],
   ),
@@ -99,6 +107,7 @@ final List<StageModel> availableStages = [
         min: 40,
         max: 110,
         hint: '40 a 110',
+        previstoTolerancia: '75',
       ),
       VariableModel(
         name: 'Pressão do Rolo (2º manômetro)',
@@ -106,20 +115,23 @@ final List<StageModel> availableStages = [
         min: 60,
         max: 110,
         hint: '60 a 110',
+        previstoTolerancia: '85',
       ),
       VariableModel(
         name: 'Velocidade do Feltro',
         unit: 'mt/min',
-        min: 12,
-        max: 18,
+        min: 3,
+        max: 15,
         hint: '15 +/- 3',
+        previstoTolerancia: '15',
       ),
       VariableModel(
         name: 'Velocidade do Tapete',
         unit: 'mt/min',
-        min: 10,
-        max: 16,
+        min: 3,
+        max: 13,
         hint: '13 +/- 3',
+        previstoTolerancia: '13',
       ),
     ],
   ),
@@ -138,9 +150,10 @@ final List<StageModel> availableStages = [
       VariableModel(
         name: 'Velocidade da Máquina',
         unit: 'mt/min',
-        min: 21,
-        max: 25,
+        min: 2,
+        max: 23,
         hint: '23 +/- 2',
+        previstoTolerancia: '23',
       ),
       VariableModel(
         name: 'Distância da Navalha',
@@ -148,20 +161,82 @@ final List<StageModel> availableStages = [
         min: 8.0,
         max: 8.5,
         hint: '8,0 a 8,5',
+        previstoTolerancia: '8.25',
       ),
       VariableModel(
         name: 'Fio da Navalha Inferior',
         unit: 'mm',
-        min: 4.5,
-        max: 5.5,
+        min: 0.5,
+        max: 5.0,
         hint: '5,0 +/- 0,5',
+        previstoTolerancia: '5.0',
       ),
       VariableModel(
         name: 'Fio da Navalha Superior',
         unit: 'mm',
-        min: 5.5,
-        max: 6.5,
+        min: 0.5,
+        max: 6.0,
         hint: '6,0 +/- 0,5',
+        previstoTolerancia: '6.0',
+      ),
+    ],
+  ),
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 4. REBAIXADEIRA (Cod_operacao: 1003)
+  // 2 variáveis conforme cadastro Quartzo
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  StageModel(
+    code: 'REBAIXADEIRA',
+    title: 'REBAIXADEIRA',
+    machines: ['1', '2'],
+    hasFulao: false,
+    needsResponsibleSuperior: true,
+    variables: [
+      VariableModel(
+        name: 'Velocidade do Rolo de Transporte',
+        unit: '',
+        min: 10,
+        max: 12,
+        hint: '10/12',
+        previstoTolerancia: '11',
+      ),
+      VariableModel(
+        name: 'Espessura e rebaixe',
+        unit: '',
+        min: 1.2,
+        max: 1.3,
+        hint: '1.2/1.3',
+        previstoTolerancia: '1.3',
+      ),
+    ],
+  ),
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 5. REFILA (Cod_operacao: 1004)
+  // 3 variáveis conforme cadastro Quartzo
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  StageModel(
+    code: 'REFILA',
+    title: 'REFILA',
+    machines: ['1'],
+    hasFulao: false,
+    needsResponsibleSuperior: true,
+    variables: [
+      VariableModel(
+        name: 'PESO LÍQUIDO',
+        unit: 'KGS',
+        hint: '',
+      ),
+      VariableModel(
+        name: 'PESO DO REFILE',
+        unit: 'KGS',
+        hint: '',
+      ),
+      VariableModel(
+        name: 'PESO DO CUPIM',
+        unit: 'KGS',
+        hint: '',
       ),
     ],
   ),

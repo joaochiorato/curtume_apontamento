@@ -62,10 +62,10 @@ class OrdemProducaoRepository {
       numeroOf: '120-ORP-3',
       artigo: 'QUARTZO',
       pve: '',
-      cor: '',
-      crustItem: '',
-      espFinal: '',
-      classe: '',
+      cor: 'BLACK',
+      crustItem: '1163',
+      espFinal: '1.0/1.4',
+      classe: 'G119',
       po: '',
       loteWetBlue: '',
       numeroPecasNF: 100000,
@@ -75,7 +75,7 @@ class OrdemProducaoRepository {
       metragemEnx: 0,
       pesoLiquido: 100000,
       dataCriacao: DateTime.now(),
-      status: StatusOrdem.aguardando,
+      status: StatusOrdem.Aguardando,
       estagios: _criarEstagiosTesteMesa(),
     );
   }
@@ -102,9 +102,9 @@ class OrdemProducaoRepository {
           VariavelControle(
             nome: 'Temperatura da Água',
             unidade: 'ºC',
-            valorMinimo: 50,
-            valorMaximo: 70,
-            padrao: 'Faixa 50 a 70',
+            valorMinimo: 0,
+            valorMaximo: 60,
+            padrao: '60 +/- 10',
           ),
           VariavelControle(
             nome: 'Tensoativo',
@@ -148,8 +148,8 @@ class OrdemProducaoRepository {
           VariavelControle(
             nome: 'Velocidade do Feltro',
             unidade: 'mt/min',
-            valorMinimo: 12,
-            valorMaximo: 18,
+            valorMinimo: 3,
+            valorMaximo: 15,
             padrao: '15 +/- 3',
           ),
           VariavelControle(

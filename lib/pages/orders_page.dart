@@ -54,16 +54,21 @@ class _OrdersPageState extends State<OrdersPage> {
 
     _ordens = [
       OrdemModel(
-        of: '120-ORP-3',
-        cliente: 'Cliente 6357',
+        Doc: '120-ORP-3',
+        cliente: '6357',
         data: DateTime.now(),
-        status: StatusOrdem.aguardando,
+        status: StatusOrdem.Aguardando,
         artigos: [
           // Apenas QUARTZO BLACK conforme teste de mesa
           ArtigoModel(
             codigo: 'CSA001',
-            descricao: 'PRP001- QUARTZO BLACK',
+            descricao: '10- QUARTZO',
             quantidade: 350,
+            cor: 'BLACK',
+            crustItem: '1163',
+            espFinal: '1063 1.0/1.4',
+            classe: 'G119',
+            descricaoCompleta: 'COURO MERCADO EXTERNO',
           ),
         ],
       ),
@@ -77,7 +82,7 @@ class _OrdersPageState extends State<OrdersPage> {
     setState(() {
       _ordensFiltradas = _ordens.where((ordem) {
         final matchOF = _filtroOF.text.isEmpty ||
-            ordem.of.toLowerCase().contains(_filtroOF.text.toLowerCase());
+            ordem.Doc.toLowerCase().contains(_filtroOF.text.toLowerCase());
 
         final matchData = _dataFiltro == null ||
             (ordem.data.year == _dataFiltro!.year &&
@@ -160,7 +165,7 @@ class _OrdersPageState extends State<OrdersPage> {
                   child: TextField(
                     controller: _filtroOF,
                     decoration: InputDecoration(
-                      hintText: 'Filtrar por OF',
+                      hintText: 'Filtro por Ordem',
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
@@ -259,7 +264,7 @@ class _OrdersPageState extends State<OrdersPage> {
         statusColor = const Color(0xFF4CAF50);
         statusText = 'Em Produção';
         break;
-      case StatusOrdem.aguardando:
+      case StatusOrdem.Aguardando:
         statusColor = const Color(0xFFFF9800);
         statusText = 'Não Iniciado';
         break;
@@ -295,7 +300,7 @@ class _OrdersPageState extends State<OrdersPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'OF: ${ordem.of}',
+                    'Ordem: ${ordem.Doc}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

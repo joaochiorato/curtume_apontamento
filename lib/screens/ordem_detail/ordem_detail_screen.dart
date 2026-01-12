@@ -37,7 +37,7 @@ class OrdemDetailScreen extends StatelessWidget {
               children: [
                 // Cabeçalho da OF
                 _buildHeader(context, ordem),
-                
+
                 const Divider(height: 1),
 
                 // Informações detalhadas
@@ -122,7 +122,7 @@ class OrdemDetailScreen extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          
+
           // Grade de informações
           _buildInfoGrid(context, [
             {'label': 'PVE', 'value': ordem.pve},
@@ -149,9 +149,15 @@ class OrdemDetailScreen extends StatelessWidget {
 
           _buildInfoGrid(context, [
             {'label': 'Nº Peças NF', 'value': ordem.numeroPecasNF.toString()},
-            {'label': 'Metragem NF', 'value': ordem.metragemNF.toStringAsFixed(2)},
+            {
+              'label': 'Metragem NF',
+              'value': ordem.metragemNF.toStringAsFixed(2)
+            },
             {'label': 'AVG', 'value': ordem.avg.toStringAsFixed(2)},
-            {'label': 'Peso Líquido', 'value': '${ordem.pesoLiquido.toStringAsFixed(2)} kg'},
+            {
+              'label': 'Peso Líquido',
+              'value': '${ordem.pesoLiquido.toStringAsFixed(2)} kg'
+            },
           ]),
         ],
       ),
@@ -212,7 +218,6 @@ class OrdemDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -252,7 +257,8 @@ class EstagioCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
-        onTap: ordem.status == StatusOrdem.cancelado || ordem.status == StatusOrdem.finalizado
+        onTap: ordem.status == StatusOrdem.cancelado ||
+                ordem.status == StatusOrdem.finalizado
             ? null
             : () {
                 Navigator.push(
@@ -287,7 +293,8 @@ class EstagioCard extends StatelessWidget {
                     ),
                     child: Center(
                       child: estagio.isConcluido
-                          ? const Icon(Icons.check, color: Colors.white, size: 18)
+                          ? const Icon(Icons.check,
+                              color: Colors.white, size: 18)
                           : Text(
                               '${estagio.ordem}',
                               style: const TextStyle(
@@ -307,9 +314,10 @@ class EstagioCard extends StatelessWidget {
                       children: [
                         Text(
                           estagio.nome,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         if (estagio.isIniciado)
                           Text(
@@ -322,7 +330,8 @@ class EstagioCard extends StatelessWidget {
 
                   // Status
                   if (estagio.isConcluido)
-                    const Icon(Icons.check_circle, color: AppTheme.statusFinalizado)
+                    const Icon(Icons.check_circle,
+                        color: AppTheme.statusFinalizado)
                   else if (estagio.isIniciado)
                     Text(
                       '$percentual%',
@@ -332,7 +341,8 @@ class EstagioCard extends StatelessWidget {
                       ),
                     )
                   else
-                    const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textHint),
+                    const Icon(Icons.arrow_forward_ios,
+                        size: 16, color: AppTheme.textHint),
                 ],
               ),
 
