@@ -53,6 +53,9 @@ class _OrdersPageState extends State<OrdersPage> {
     // ═══════════════════════════════════════════════════════════════
 
     _ordens = [
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // ORP 120-ORP-001-3 - QUARTZO (Original - não modificada)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       OrdemModel(
         Doc: '120-ORP-001-3',
         cliente: '6357 - VANCOUROS INDUSTRIA E COMERCIO DE COUROS LTDA ',
@@ -69,6 +72,80 @@ class _OrdersPageState extends State<OrdersPage> {
             espFinal: '1063 1.0/1.4',
             classe: 'G119',
             descricaoCompleta: 'COURO MERCADO EXTERNO',
+          ),
+        ],
+      ),
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // ORP 120-ORP-001-4 - AMETISTA e TOPÁZIO (2 artigos)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      OrdemModel(
+        Doc: '120-ORP-001-4',
+        cliente: '6357 - VANCOUROS INDUSTRIA E COMERCIO DE COUROS LTDA ',
+        data: DateTime.now(),
+        status: StatusOrdem.Aguardando,
+        artigos: [
+          ArtigoModel(
+            codigo: 'CSA002',
+            descricao: '20- AMETISTA',
+            quantidade: 280,
+            cor: 'PURPLE',
+            crustItem: '1164',
+            espFinal: '1064 1.1/1.5',
+            classe: 'G120',
+            descricaoCompleta: 'COURO EXPORTACAO PREMIUM',
+          ),
+          ArtigoModel(
+            codigo: 'CSA006',
+            descricao: '25- TOPÁZIO',
+            quantidade: 330,
+            cor: 'BROWN',
+            crustItem: '1168',
+            espFinal: '1068 1.0/1.5',
+            classe: 'G124',
+            descricaoCompleta: 'COURO SELETO PRIMEIRA LINHA',
+          ),
+        ],
+      ),
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // ORP 120-ORP-001-5 - SAFIRA, ESMERALDA, RUBI (3 artigos)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      OrdemModel(
+        Doc: '120-ORP-001-5',
+        cliente: '6357 - VANCOUROS INDUSTRIA E COMERCIO DE COUROS LTDA ',
+        data: DateTime.now(),
+        status: StatusOrdem.Aguardando,
+        artigos: [
+          ArtigoModel(
+            codigo: 'CSA003',
+            descricao: '30- SAFIRA',
+            quantidade: 420,
+            cor: 'NAVY',
+            crustItem: '1165',
+            espFinal: '1065 1.2/1.6',
+            classe: 'G121',
+            descricaoCompleta: 'COURO NOBRE ESPECIAL',
+          ),
+          ArtigoModel(
+            codigo: 'CSA004',
+            descricao: '40- ESMERALDA',
+            quantidade: 310,
+            cor: 'GREEN',
+            crustItem: '1166',
+            espFinal: '1066 1.0/1.3',
+            classe: 'G122',
+            descricaoCompleta: 'COURO PREMIUM INTERNACIONAL',
+          ),
+          ArtigoModel(
+            codigo: 'CSA005',
+            descricao: '50- RUBI',
+            quantidade: 390,
+            cor: 'RED',
+            crustItem: '1167',
+            espFinal: '1067 1.1/1.4',
+            classe: 'G123',
+            descricaoCompleta: 'COURO ALTO PADRAO LUXO',
           ),
         ],
       ),
