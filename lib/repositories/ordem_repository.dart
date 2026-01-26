@@ -59,7 +59,7 @@ class OrdemProducaoRepository {
   OrdemProducao _criarOrdemTesteMesa() {
     return OrdemProducao(
       id: 'XYD459939',
-      numeroOf: '120-ORP-3',
+      numeroOf: '120-ORP-001-3',
       artigo: 'QUARTZO',
       pve: '',
       cor: 'BLACK',

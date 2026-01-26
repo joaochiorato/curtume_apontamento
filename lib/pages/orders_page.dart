@@ -54,8 +54,8 @@ class _OrdersPageState extends State<OrdersPage> {
 
     _ordens = [
       OrdemModel(
-        Doc: '120-ORP-3',
-        cliente: '6357',
+        Doc: '120-ORP-001-3',
+        cliente: '6357 - VANCOUROS INDUSTRIA E COMERCIO DE COUROS LTDA ',
         data: DateTime.now(),
         status: StatusOrdem.Aguardando,
         artigos: [
