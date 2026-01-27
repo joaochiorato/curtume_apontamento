@@ -1,6 +1,6 @@
 {
-    "name": "curtume_apontamento_remolho",
-    "short_name": "curtume_apontamento_remolho",
+    "name": "curtume_apontamento",
+    "short_name": "curtume_apontamento",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
