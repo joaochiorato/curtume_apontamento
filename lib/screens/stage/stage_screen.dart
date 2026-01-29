@@ -325,7 +325,7 @@ class _StageScreenState extends State<StageScreen> {
           if (variavel.valorMinimo != null || variavel.valorMaximo != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Faixa: ${variavel.valorMinimo ?? '-'} a ${variavel.valorMaximo ?? '-'} ${variavel.unidade}',
+              'Fa: ${variavel.valorMinimo ?? '-'} a ${variavel.valorMaximo ?? '-'} ${variavel.unidade}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.textHint,
                   ),

@@ -47,6 +47,10 @@ class ArtigoModel {
   final String espFinal;
   final String classe;
   final String descricaoCompleta;
+  final String loteWetBlue;
+  final int numeroPecasNF;
+  final double metragemNF;
+  final String avg;
 
   ArtigoModel({
     required this.codigo,
@@ -57,5 +61,9 @@ class ArtigoModel {
     this.espFinal = '',
     this.classe = '',
     this.descricaoCompleta = '',
+    this.loteWetBlue = '',
+    this.numeroPecasNF = 0,
+    this.metragemNF = 0.0,
+    this.avg = '',
   });
 }

@@ -157,8 +157,8 @@ Future<Map<String, String>?> showVariaveisDialog(
                                             ],
                                             decoration: InputDecoration(
                                               hintText: variable.hint != null && variable.hint!.isNotEmpty
-                                                  ? 'Faixa: ${variable.hint}'
-                                                  : (hasFaixa ? 'Faixa: ${variable.min} - ${variable.max}' : 'Informe o valor'),
+                                                  ? ' ${variable.hint}'
+                                                  : (hasFaixa ? ': ${variable.min} - ${variable.max}' : 'Informe o valor'),
                                               hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                               border: OutlineInputBorder(
@@ -187,7 +187,7 @@ Future<Map<String, String>?> showVariaveisDialog(
                                         if (variable.previstoTolerancia != null && variable.previstoTolerancia!.isNotEmpty) ...[
                                           const SizedBox(height: 4),
                                           Text(
-                                            'Previsto / Tolerância: ${variable.previstoTolerancia}',
+                                            'Tolerância: ${variable.previstoTolerancia}',
                                             style: TextStyle(
                                               fontSize: 11,
                                               color: Colors.grey.shade600,

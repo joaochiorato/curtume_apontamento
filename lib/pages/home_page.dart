@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'orders_page.dart';
+import 'selection_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -7,7 +7,7 @@ class HomePage extends StatelessWidget {
   void _acessarOrdens(BuildContext context) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => const OrdersPage(),
+        builder: (_) => const SelectionPage(),
       ),
     );
   }

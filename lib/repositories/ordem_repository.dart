@@ -111,7 +111,7 @@ class OrdemProducaoRepository {
             unidade: 'L',
             valorMinimo: 4.8,
             valorMaximo: 5.2,
-            padrao: 'Faixa 4.8 - 5.2',
+            padrao: 'Fa 4.8 - 5.2',
           ),
         ],
         dadosAdicionais: {

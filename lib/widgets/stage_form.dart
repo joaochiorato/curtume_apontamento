@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/stage.dart';
-import '../models/formulacoes_model.dart';
-import '../widgets/formulacoes_dialog.dart';
 import '../widgets/variaveis_dialog.dart';
 import '../pages/stage_memory_storage.dart';
 
@@ -14,7 +12,9 @@ class StageForm extends StatefulWidget {
   final void Function(StageProgressStatus status, DateTime? startTime,
       Duration? elapsed, DateTime? lastResumeTime)? onStatusChanged;
   final void Function(StageFormData data)? onFormDataChanged;
+  final void Function(String justificativa)? onPauseJustification;
   final Map<String, dynamic>? initialData;
+  final Map<String, String>? articleHeader;
   final int quantidadeTotal;
   final int quantidadeProcessada;
   final int quantidadeRestante;
@@ -24,6 +24,7 @@ class StageForm extends StatefulWidget {
   final Duration? elapsedTime;
   final DateTime? lastResumeTime; // ✅ Adicionado
   final StageFormData? savedFormData;
+  final bool autoStart; // ✅ Novo: indica se deve auto-iniciar
 
   const StageForm({
     super.key,
@@ -31,7 +32,9 @@ class StageForm extends StatefulWidget {
     required this.onSaved,
     this.onStatusChanged,
     this.onFormDataChanged,
+    this.onPauseJustification,
     this.initialData,
+    this.articleHeader,
     required this.quantidadeTotal,
     required this.quantidadeProcessada,
     required this.quantidadeRestante,
@@ -41,6 +44,7 @@ class StageForm extends StatefulWidget {
     this.elapsedTime,
     this.lastResumeTime, // ✅ Adicionado
     this.savedFormData,
+    this.autoStart = false, // ✅ Novo: padrão false para não quebrar código existente
   });
 
   @override
@@ -49,7 +53,6 @@ class StageForm extends StatefulWidget {
 
 class _StageFormState extends State<StageForm> {
   final _formKey = GlobalKey<FormState>();
-  QuimicosFormulacaoData? _quimicosData;
   Map<String, String> _variaveisData = {};
   final _obs = TextEditingController();
   final _qtdProcessadaCtrl = TextEditingController();
@@ -74,6 +77,9 @@ class _StageFormState extends State<StageForm> {
   DateTime? _lastResumeTime;
 
   bool _isViewingClosed = false;
+
+  // Histórico de pausas
+  final List<Map<String, dynamic>> _pauseHistory = [];
 
   final dfDate = DateFormat('dd/MM/yyyy');
   final dfTime = DateFormat('HH:mm');
@@ -121,6 +127,13 @@ class _StageFormState extends State<StageForm> {
     } else if (widget.savedFormData != null) {
       _loadSavedFormData();
     }
+
+    // ✅ Auto-iniciar: abrir diálogo de variáveis e iniciar apontamento
+    if (widget.autoStart && _status == StageStatus.idle) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _autoStartWorkflow();
+      });
+    }
   }
 
   void _loadSavedFormData() {
@@ -131,7 +144,6 @@ class _StageFormState extends State<StageForm> {
       _qtdProcessadaCtrl.text = data.quantidade.toString();
     if (data.observacao != null) _obs.text = data.observacao!;
     if (data.variaveis != null) _variaveisData = Map.from(data.variaveis!);
-    if (data.quimicos != null) _quimicosData = data.quimicos;
   }
 
   void _saveFormData() {
@@ -140,7 +152,6 @@ class _StageFormState extends State<StageForm> {
       quantidade: int.tryParse(_qtdProcessadaCtrl.text),
       observacao: _obs.text,
       variaveis: _variaveisData.isNotEmpty ? Map.from(_variaveisData) : null,
-      quimicos: _quimicosData,
     ));
   }
 
@@ -167,10 +178,6 @@ class _StageFormState extends State<StageForm> {
       _variaveisData =
           variables.map((k, v) => MapEntry(k, v?.toString() ?? ''));
     }
-
-    if (data['quimicos'] != null) {
-      _quimicosData = QuimicosFormulacaoData.fromJson(data['quimicos']);
-    }
   }
 
   @override
@@ -191,13 +198,8 @@ class _StageFormState extends State<StageForm> {
     super.dispose();
   }
 
-  bool get _isRemolho => widget.stage.code.toUpperCase() == 'REMOLHO';
   bool get _hasVariables => widget.stage.variables.isNotEmpty;
   bool get _isFieldsLocked => _isViewingClosed;
-
-  int _getQuimicosApontamentos() {
-    return _quimicosData?.getQuantidadeApontamentos() ?? 0;
-  }
 
   int _getVariaveisPreenchidas() {
     return _variaveisData.values.where((v) => v.isNotEmpty).length;
@@ -234,30 +236,6 @@ class _StageFormState extends State<StageForm> {
     }
   }
 
-  Future<void> _openQuimicosDialog() async {
-    if (_isFieldsLocked) {
-      _showLockedMessage();
-      return;
-    }
-
-    final canEdit = (_status == StageStatus.idle ||
-        _status == StageStatus.running ||
-        _status == StageStatus.paused);
-
-    final result = await showQuimicosDialog(
-      context,
-      dadosAtuais: _quimicosData,
-      canEdit: canEdit,
-    );
-
-    if (result != null) {
-      setState(() {
-        _quimicosData = result;
-      });
-      _saveFormData();
-    }
-  }
-
   Future<void> _openVariaveisDialog() async {
     if (_isFieldsLocked) {
       _showLockedMessage();
@@ -280,6 +258,33 @@ class _StageFormState extends State<StageForm> {
         _variaveisData = result;
       });
       _saveFormData();
+    }
+  }
+
+  /// ✅ Novo: workflow de auto-inicialização
+  Future<void> _autoStartWorkflow() async {
+    // Se o estágio tem variáveis, abrir o diálogo primeiro
+    if (_hasVariables) {
+      final result = await showVariaveisDialog(
+        context,
+        variables: widget.stage.variables,
+        valoresAtuais: _variaveisData,
+        canEdit: true,
+      );
+
+      // Se o usuário preencheu as variáveis, salvar e iniciar
+      if (result != null) {
+        setState(() {
+          _variaveisData = result;
+        });
+        _saveFormData();
+
+        // Iniciar o apontamento automaticamente
+        _onStatusChange(StageStatus.running);
+      }
+    } else {
+      // Se não tem variáveis, apenas iniciar direto
+      _onStatusChange(StageStatus.running);
     }
   }
 
@@ -318,10 +323,6 @@ class _StageFormState extends State<StageForm> {
     if (!_formKey.currentState!.validate()) return;
 
     final qtdApontamento = int.tryParse(_qtdProcessadaCtrl.text) ?? 0;
-    if (qtdApontamento <= 0) {
-      _show('Informe uma quantidade válida!', isError: true);
-      return;
-    }
 
     if (qtdApontamento > widget.quantidadeRestante) {
       _show(
@@ -347,7 +348,8 @@ class _StageFormState extends State<StageForm> {
       'end': _end?.toIso8601String(),
       'status': _status.name,
       'variables': _variaveisData,
-      if (_quimicosData != null) 'quimicos': _quimicosData!.toJson(),
+      'pauseHistory': _pauseHistory,
+      'totalElapsedSeconds': _elapsed.inSeconds,
     };
 
     widget.onSaved(data);
@@ -363,7 +365,143 @@ class _StageFormState extends State<StageForm> {
     );
   }
 
-  void _onStatusChange(StageStatus newStatus) {
+  void _mostrarDialogoPausarComJustificativa() {
+    String? justificativaSelecionada;
+    final outrosController = TextEditingController();
+    final observacaoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text('Motivo da Pausa'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Selecione o motivo da pausa:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 16),
+                  RadioListTile<String>(
+                    title: const Text('Parada técnica'),
+                    value: 'Parada técnica',
+                    groupValue: justificativaSelecionada,
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        justificativaSelecionada = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Almoço'),
+                    value: 'Almoço',
+                    groupValue: justificativaSelecionada,
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        justificativaSelecionada = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Outros'),
+                    value: 'Outros',
+                    groupValue: justificativaSelecionada,
+                    onChanged: (value) {
+                      setStateDialog(() {
+                        justificativaSelecionada = value;
+                      });
+                    },
+                  ),
+                  if (justificativaSelecionada == 'Outros')
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 16),
+                      child: TextField(
+                        controller: outrosController,
+                        decoration: const InputDecoration(
+                          labelText: 'Especifique o motivo',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        maxLines: 2,
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: observacaoController,
+                    decoration: const InputDecoration(
+                      labelText: 'Observação (opcional)',
+                      hintText: 'Adicione informações adicionais sobre a pausa',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (justificativaSelecionada == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Selecione um motivo para pausar'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (justificativaSelecionada == 'Outros' &&
+                      outrosController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Especifique o motivo da pausa'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                    return;
+                  }
+
+                  String justificativaFinal = justificativaSelecionada == 'Outros'
+                      ? 'Outros: ${outrosController.text.trim()}'
+                      : justificativaSelecionada!;
+
+                  // Adicionar observação se foi preenchida
+                  if (observacaoController.text.trim().isNotEmpty) {
+                    justificativaFinal += ' | Obs: ${observacaoController.text.trim()}';
+                  }
+
+                  Navigator.pop(context);
+
+                  // Aqui pausamos com a justificativa
+                  _onStatusChange(StageStatus.paused, justificativa: justificativaFinal);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Pausar'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _onStatusChange(StageStatus newStatus, {String? justificativa}) {
     setState(() {
       if (newStatus == StageStatus.running) {
         if (_start == null) {
@@ -372,8 +510,16 @@ class _StageFormState extends State<StageForm> {
           _elapsed = Duration.zero;
           _lastResumeTime = DateTime.now();
         } else if (_status == StageStatus.paused) {
-          // Retomando de pausa - atualizar lastResumeTime
+          // Retomando de pausa - atualizar lastResumeTime e registrar retomada
           _lastResumeTime = DateTime.now();
+
+          // Atualizar o último registro de pausa com o horário de retomada
+          if (_pauseHistory.isNotEmpty) {
+            _pauseHistory.last['resumeTime'] = DateTime.now().toIso8601String();
+            final pauseTime = DateTime.parse(_pauseHistory.last['pauseTime'] as String);
+            final resumeTime = DateTime.now();
+            _pauseHistory.last['pauseDuration'] = resumeTime.difference(pauseTime).inSeconds;
+          }
         }
         _startTimer();
         _isViewingClosed = false;
@@ -381,8 +527,19 @@ class _StageFormState extends State<StageForm> {
             _elapsedBeforePause, _lastResumeTime);
       } else if (newStatus == StageStatus.paused) {
         _stopTimer();
+
+        // Registrar pausa no histórico
+        _pauseHistory.add({
+          'pauseTime': DateTime.now().toIso8601String(),
+          'justificativa': justificativa ?? 'Não informada',
+          'elapsedAtPause': _elapsed.inSeconds,
+        });
+
         widget.onStatusChanged
             ?.call(StageProgressStatus.parado, _start, _elapsed, null);
+        if (justificativa != null) {
+          widget.onPauseJustification?.call(justificativa);
+        }
         _saveFormData();
       } else if (newStatus == StageStatus.closed) {
         _end = DateTime.now();
@@ -390,17 +547,21 @@ class _StageFormState extends State<StageForm> {
         widget.onStatusChanged
             ?.call(StageProgressStatus.finalizado, _start, _elapsed, null);
       } else if (newStatus == StageStatus.idle && _isViewingClosed) {
+        // ✅ REABRIR: Não mudar o status aqui, apenas resetar flags
         _end = null;
         _isViewingClosed = false;
-        _lastResumeTime = DateTime.now();
-        newStatus = StageStatus.running;
-        _startTimer();
-        widget.onStatusChanged?.call(StageProgressStatus.emProducao, _start,
-            _elapsedBeforePause, _lastResumeTime);
+        // Não mudar para running aqui - será feito pelo _autoStartWorkflow
       }
 
       _status = newStatus;
     });
+
+    // ✅ Se está reabrindo um estágio encerrado, executar workflow de auto-start
+    if (newStatus == StageStatus.idle && !_isViewingClosed && _start != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _autoStartWorkflow();
+      });
+    }
 
     if (newStatus == StageStatus.closed && !widget.isEditing) {
       _save();
@@ -436,6 +597,11 @@ class _StageFormState extends State<StageForm> {
                     _buildActionBar(),
 
                     const SizedBox(height: 16),
+
+                    if (widget.articleHeader != null) ...[
+                      _buildArticleInfoCard(),
+                      const SizedBox(height: 16),
+                    ],
 
                     if (_isViewingClosed)
                       Container(
@@ -580,58 +746,8 @@ class _StageFormState extends State<StageForm> {
 
                     if (_start != null) const SizedBox(height: 16),
 
-                    // BOTÕES: Químicos e Variáveis (REMOLHO)
-                    if (_isRemolho && _hasVariables) ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _openQuimicosDialog,
-                              icon: const Icon(Icons.science, size: 18),
-                              label: Text(
-                                  'Químicos (${_getQuimicosApontamentos()})'),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(48),
-                                side: BorderSide(
-                                  color: _isFieldsLocked
-                                      ? Colors.grey
-                                      : Colors.blue.shade700,
-                                  width: 2,
-                                ),
-                                foregroundColor: _isFieldsLocked
-                                    ? Colors.grey
-                                    : Colors.blue.shade700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _openVariaveisDialog,
-                              icon: const Icon(Icons.tune, size: 18),
-                              label: Text(
-                                  'Variáveis (${_getVariaveisPreenchidas()}/${widget.stage.variables.length})'),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(48),
-                                side: BorderSide(
-                                  color: _isFieldsLocked
-                                      ? Colors.grey
-                                      : Colors.green.shade700,
-                                  width: 2,
-                                ),
-                                foregroundColor: _isFieldsLocked
-                                    ? Colors.grey
-                                    : Colors.green.shade700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // BOTÃO VARIÁVEIS - Para outros estágios
-                    if (!_isRemolho && _hasVariables) ...[
+                    // BOTÃO VARIÁVEIS - Todos os estágios
+                    if (_hasVariables) ...[
                       OutlinedButton.icon(
                         onPressed: _openVariaveisDialog,
                         icon: const Icon(Icons.tune, size: 18),
@@ -840,6 +956,88 @@ class _StageFormState extends State<StageForm> {
     );
   }
 
+  Widget _buildArticleInfoCard() {
+    final header = widget.articleHeader!;
+    final cor = header['cor'] ?? '';
+    final classe = header['classe'] ?? '';
+    final crustItem = header['crustItem'] ?? '';
+    final espFinal = header['espFinal'] ?? '';
+    final loteWetBlue = header['loteWetBlue'] ?? '';
+    final numeroPecasNF = header['numeroPecasNF'] ?? '';
+    final metragemNF = header['metragemNF'] ?? '';
+    final avg = header['avg'] ?? '';
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'INFORMAÇÕES DO ARTIGO',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF546E7A),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            _buildInfoRow('Cor', cor),
+            const SizedBox(height: 8),
+            _buildInfoRow('Classe', classe),
+            const SizedBox(height: 8),
+            _buildInfoRow('Crust Item', crustItem),
+            const SizedBox(height: 8),
+            _buildInfoRow('Esp Final', espFinal),
+            const SizedBox(height: 8),
+            _buildInfoRow('Lote WET BLUE', loteWetBlue),
+            const SizedBox(height: 8),
+            _buildInfoRow('Nº Pçs NF', numeroPecasNF),
+            const SizedBox(height: 8),
+            _buildInfoRow('Metragem NF', metragemNF),
+            const SizedBox(height: 8),
+            _buildInfoRow('AVG', avg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            '$label:',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF616161),
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF212121),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionBar() {
     return Row(
       children: [
@@ -866,7 +1064,7 @@ class _StageFormState extends State<StageForm> {
         Expanded(
           child: ElevatedButton(
             onPressed: _status == StageStatus.running
-                ? () => _onStatusChange(StageStatus.paused)
+                ? _mostrarDialogoPausarComJustificativa
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _status == StageStatus.running

@@ -1,5 +1,4 @@
 import '../models/stage.dart';
-import '../models/formulacoes_model.dart';
 
 /// Status possíveis de um estágio na tela de listagem
 enum StageProgressStatus {
@@ -16,14 +15,12 @@ class StageFormData {
   int? quantidade;
   String? observacao;
   Map<String, String>? variaveis;
-  QuimicosFormulacaoData? quimicos;
 
   StageFormData({
     this.responsavelSuperior,
     this.quantidade,
     this.observacao,
     this.variaveis,
-    this.quimicos,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,7 +29,6 @@ class StageFormData {
       'quantidade': quantidade,
       'observacao': observacao,
       'variaveis': variaveis,
-      'quimicos': quimicos?.toJson(),
     };
   }
 
@@ -44,15 +40,21 @@ class StageFormData {
       variaveis: map['variaveis'] != null
           ? Map<String, String>.from(map['variaveis'])
           : null,
-      quimicos: map['quimicos'] != null
-          ? QuimicosFormulacaoData.fromJson(map['quimicos'])
-          : null,
     );
   }
 }
 
 /// Armazenamento em memória para apontamentos dos estágios
 class StageMemoryStorage {
+  // Singleton instance
+  static final StageMemoryStorage _instance = StageMemoryStorage._internal();
+
+  factory StageMemoryStorage() {
+    return _instance;
+  }
+
+  StageMemoryStorage._internal();
+
   final Map<String, List<Map<String, dynamic>>> _apontamentos = {};
   final Map<String, bool> _finalized = {};
   final Map<String, StageProgressStatus> _stageStatus = {};
@@ -61,6 +63,7 @@ class StageMemoryStorage {
   final Map<String, DateTime?> _stageLastResumeTime =
       {}; // ✅ Momento que retomou
   final Map<String, StageFormData> _stageFormData = {};
+  final Map<String, String> _stagePauseJustification = {}; // ✅ Justificativa de pausa
   int _quantidadeTotal = 0;
 
   void setQuantidadeTotal(int qtd) {
@@ -102,6 +105,15 @@ class StageMemoryStorage {
     _stageLastResumeTime[stageCode] = time;
   }
 
+  // ✅ Justificativa de pausa
+  String? getStagePauseJustification(String stageCode) {
+    return _stagePauseJustification[stageCode];
+  }
+
+  void setStagePauseJustification(String stageCode, String justificativa) {
+    _stagePauseJustification[stageCode] = justificativa;
+  }
+
   StageFormData? getStageFormData(String stageCode) {
     return _stageFormData[stageCode];
   }
@@ -116,7 +128,6 @@ class StageMemoryStorage {
     int? quantidade,
     String? observacao,
     Map<String, String>? variaveis,
-    QuimicosFormulacaoData? quimicos,
   }) {
     final current = _stageFormData[stageCode] ?? StageFormData();
     _stageFormData[stageCode] = StageFormData(
@@ -124,7 +135,6 @@ class StageMemoryStorage {
       quantidade: quantidade ?? current.quantidade,
       observacao: observacao ?? current.observacao,
       variaveis: variaveis ?? current.variaveis,
-      quimicos: quimicos ?? current.quimicos,
     );
   }
 
