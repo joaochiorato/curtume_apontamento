@@ -11,13 +11,14 @@ class ArticlesPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text('OF ${of.of}'),
+        title: Text('Doc. ${of.Doc}'),
         actions: [
           Center(
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -51,7 +52,7 @@ class ArticlesPage extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Lista de artigos
           Expanded(
             child: ListView.builder(
@@ -68,7 +69,8 @@ class ArticlesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildArticleCard(BuildContext context, ArtigoModel artigo, int index) {
+  Widget _buildArticleCard(
+      BuildContext context, ArtigoModel artigo, int index) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -81,10 +83,15 @@ class ArticlesPage extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => StagePage(
                 articleHeader: {
-                  'of': of.of,
+                  'of': of.Doc,
                   'artigo': artigo.descricao,
                   'codigo': artigo.codigo,
-                  'quantidade': artigo.quantidade.toString(), // ✅ ADICIONADO
+                  'quantidade': artigo.quantidade.toString(),
+                  'cor': artigo.cor,
+                  'crustItem': artigo.crustItem,
+                  'espFinal': artigo.espFinal,
+                  'classe': artigo.classe,
+                  'descricaoCompleta': artigo.descricaoCompleta,
                 },
               ),
             ),
@@ -132,7 +139,7 @@ class ArticlesPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Código: ${artigo.codigo}',
+                          'Código: ${artigo.codigo}${artigo.descricaoCompleta.isNotEmpty ? ' - ${artigo.descricaoCompleta}' : ''}',
                           style: const TextStyle(
                             fontSize: 13,
                             color: Color(0xFF757575),
@@ -148,11 +155,11 @@ class ArticlesPage extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
               const Divider(height: 1),
               const SizedBox(height: 12),
-              
+
               // Quantidade
               Row(
                 children: [

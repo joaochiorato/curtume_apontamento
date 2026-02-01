@@ -227,7 +227,7 @@ class _StageFormState extends State<StageForm> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Total da OF:',
+                                  'Total da Ordem:',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.grey.shade700,

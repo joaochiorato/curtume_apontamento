@@ -166,14 +166,14 @@ class HistoricoApontamentosScreen extends StatelessWidget {
         children: [
           const Divider(),
           const SizedBox(height: 8),
-          
+
           // Timeline de eventos
           _buildTimelineEventos(apontamento.eventos, dfTime),
-          
+
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          
+
           // Dados do apontamento
           _buildDadosApontamento(apontamento),
         ],
@@ -181,7 +181,8 @@ class HistoricoApontamentosScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineEventos(List<ApontamentoEvento> eventos, DateFormat dfTime) {
+  Widget _buildTimelineEventos(
+      List<ApontamentoEvento> eventos, DateFormat dfTime) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,7 +198,7 @@ class HistoricoApontamentosScreen extends StatelessWidget {
           final index = entry.key;
           final evento = entry.value;
           final isLast = index == eventos.length - 1;
-          
+
           return _buildTimelineItem(
             evento: evento,
             dfTime: dfTime,
@@ -221,7 +222,7 @@ class HistoricoApontamentosScreen extends StatelessWidget {
       case TipoEvento.pausado:
         cor = Colors.orange;
         break;
-      case TipoEvento.encerrado:
+      case TipoEvento.Aguardando:
         cor = Colors.blue;
         break;
       case TipoEvento.reaberto:
@@ -262,7 +263,7 @@ class HistoricoApontamentosScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 12),
-        
+
         // Informações do evento
         Expanded(
           child: Padding(
@@ -331,17 +332,20 @@ class HistoricoApontamentosScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        
-        _buildInfoRow('Quantidade:', '${apontamento.quantidadeProcessada} peles'),
-        _buildInfoRow('Responsável:', apontamento.responsavel ?? 'Não informado'),
-        
+
+        _buildInfoRow(
+            'Quantidade:', '${apontamento.quantidadeProcessada} peles'),
+        _buildInfoRow(
+            'Responsável:', apontamento.responsavel ?? 'Não informado'),
+
         if (apontamento.responsavelSuperior != null)
           _buildInfoRow('Supervisor:', apontamento.responsavelSuperior!),
-        
+
         if (apontamento.fulao != null)
           _buildInfoRow('Fulão:', apontamento.fulao!),
-        
-        if (apontamento.observacao != null && apontamento.observacao!.isNotEmpty) ...[
+
+        if (apontamento.observacao != null &&
+            apontamento.observacao!.isNotEmpty) ...[
           const SizedBox(height: 8),
           const Text(
             'Observação:',
@@ -359,7 +363,7 @@ class HistoricoApontamentosScreen extends StatelessWidget {
             ),
           ),
         ],
-        
+
         // Variáveis do processo
         if (apontamento.dadosFinais['variables'] != null) ...[
           const SizedBox(height: 12),
@@ -434,7 +438,7 @@ class HistoricoApontamentosScreen extends StatelessWidget {
   String _formatDuracao(Duration duracao) {
     final horas = duracao.inHours;
     final minutos = duracao.inMinutes.remainder(60);
-    
+
     if (horas > 0) {
       return '${horas}h ${minutos}min';
     } else {

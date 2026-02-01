@@ -125,7 +125,7 @@ class ArtigoModel {
 O sistema de gerenciamento de status permanece ativo:
 
 ```
-AGUARDANDO → EM PRODUÇÃO → FINALIZADO
+Aguardando → EM PRODUÇÃO → FINALIZADO
            ↘ CANCELADO ↙
 ```
 

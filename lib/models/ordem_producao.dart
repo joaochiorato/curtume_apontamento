@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 /// 🎯 Status da Ordem de Produção
 enum StatusOrdem {
-  aguardando('Aguardando', 'grey'),
+  Aguardando('Aguardando', 'grey'),
   emProducao('Em Produção', 'blue'),
   finalizado('Finalizado', 'green'),
   cancelado('Cancelado', 'red');
@@ -33,10 +33,10 @@ class OrdemProducao {
   final double? diferencaPercentual;
   final DateTime dataCriacao;
   StatusOrdem status;
-  
+
   /// Lista de estágios do processo
   final List<Estagio> estagios;
-  
+
   OrdemProducao({
     required this.id,
     required this.numeroOf,
@@ -56,7 +56,7 @@ class OrdemProducao {
     required this.pesoLiquido,
     this.diferencaPercentual,
     required this.dataCriacao,
-    this.status = StatusOrdem.aguardando,
+    this.status = StatusOrdem.Aguardando,
     required this.estagios,
   });
 
@@ -69,9 +69,7 @@ class OrdemProducao {
 
   /// Retorna o total de peças processadas
   int get totalProcessado {
-    return estagios
-        .map((e) => e.quantidadeProcessada)
-        .fold(0, (a, b) => a + b);
+    return estagios.map((e) => e.quantidadeProcessada).fold(0, (a, b) => a + b);
   }
 
   /// Verifica se a ordem está completa

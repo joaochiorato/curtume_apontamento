@@ -22,7 +22,8 @@ class _StagePageState extends State<StagePage> {
     storage.setQuantidadeTotal(qtdTotal);
   }
 
-  void _openStageForm(StageModel stage, {Map<String, dynamic>? dadosParaEditar, int? indexApontamento}) {
+  void _openStageForm(StageModel stage,
+      {Map<String, dynamic>? dadosParaEditar, int? indexApontamento}) {
     final info = storage.getStageInfo(stage.code);
     final processada = info['processada'] as int;
     final total = info['total'] as int;
@@ -36,12 +37,14 @@ class _StagePageState extends State<StagePage> {
     int restanteAjustado = restante;
     int processadaAjustada = processada;
     if (dadosParaEditar != null && indexApontamento != null) {
-      final qtdApontamentoOriginal = dadosParaEditar['qtdProcessada'] as int? ?? 0;
+      final qtdApontamentoOriginal =
+          dadosParaEditar['qtdProcessada'] as int? ?? 0;
       restanteAjustado = restante + qtdApontamentoOriginal;
       processadaAjustada = processada - qtdApontamentoOriginal;
     }
 
-    Navigator.of(context).push(MaterialPageRoute(
+    Navigator.of(context)
+        .push(MaterialPageRoute(
       builder: (_) => Scaffold(
         appBar: AppBar(
           title: Text(stage.title),
@@ -55,7 +58,8 @@ class _StagePageState extends State<StagePage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: restanteAjustado == 0 ? Colors.green : Colors.white,
+                      color:
+                          restanteAjustado == 0 ? Colors.green : Colors.white,
                     ),
                   ),
                 ),
@@ -66,13 +70,17 @@ class _StagePageState extends State<StagePage> {
           stage: stage,
           initialData: dadosParaEditar ?? storage.getLastData(stage.code),
           quantidadeTotal: total,
-          quantidadeProcessada: dadosParaEditar != null ? processadaAjustada : processada,
+          quantidadeProcessada:
+              dadosParaEditar != null ? processadaAjustada : processada,
           quantidadeRestante: restanteAjustado,
           isEditing: dadosParaEditar != null,
-          currentStatus: dadosParaEditar != null ? StageProgressStatus.finalizado : currentStatus,
+          currentStatus: dadosParaEditar != null
+              ? StageProgressStatus.finalizado
+              : currentStatus,
           startTime: dadosParaEditar != null ? null : startTime,
           elapsedTime: dadosParaEditar != null ? null : elapsedTime,
-          lastResumeTime: dadosParaEditar != null ? null : lastResumeTime, // ✅ Adicionado
+          lastResumeTime:
+              dadosParaEditar != null ? null : lastResumeTime, // ✅ Adicionado
           savedFormData: dadosParaEditar != null ? null : savedFormData,
           onStatusChanged: (status, start, elapsed, lastResume) {
             // ✅ Salvar status, startTime, elapsedTime e lastResumeTime
@@ -95,7 +103,9 @@ class _StagePageState extends State<StagePage> {
             final qtdApontamento =
                 int.tryParse(data['qtdProcessada']?.toString() ?? '0') ?? 0;
 
-            if ((dadosParaEditar != null ? processadaAjustada : processada) + qtdApontamento > total) {
+            if ((dadosParaEditar != null ? processadaAjustada : processada) +
+                    qtdApontamento >
+                total) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -118,11 +128,11 @@ class _StagePageState extends State<StagePage> {
             setState(() {});
             Navigator.pop(context);
 
-            final novoProcessado = dadosParaEditar != null 
+            final novoProcessado = dadosParaEditar != null
                 ? processadaAjustada + qtdApontamento
                 : processada + qtdApontamento;
             final finalizou = novoProcessado >= total;
-            
+
             final msg = dadosParaEditar != null
                 ? '✓ Apontamento atualizado! ($novoProcessado / $total)'
                 : finalizou
@@ -139,7 +149,8 @@ class _StagePageState extends State<StagePage> {
           },
         ),
       ),
-    )).then((_) {
+    ))
+        .then((_) {
       setState(() {});
     });
   }
@@ -171,7 +182,7 @@ class _StagePageState extends State<StagePage> {
   void _showAllStagesHistory() {
     int totalApontamentos = 0;
     int totalPelesProcessadas = 0;
-    
+
     for (final stage in availableStages) {
       totalApontamentos += storage.getApontamentos(stage.code).length;
       totalPelesProcessadas += storage.getQuantidadeProcessada(stage.code);
@@ -215,15 +226,13 @@ class _StagePageState extends State<StagePage> {
                       const SizedBox(height: 4),
                       // ✅ CORRIGIDO: Mostra quantidade da OF, não soma
                       _buildSummaryRow(
-                        'Quantidade da OF:',
+                        'Quantidade da Ordem:',
                         '$qtdTotalOF peles',
                       ),
                     ],
                   ),
                 ),
-                
                 const SizedBox(height: 16),
-
                 if (totalApontamentos == 0)
                   const Center(
                     child: Padding(
@@ -239,13 +248,14 @@ class _StagePageState extends State<StagePage> {
                   )
                 else
                   ...availableStages.map((stage) {
-                    final stageApontamentos = storage.getApontamentos(stage.code);
+                    final stageApontamentos =
+                        storage.getApontamentos(stage.code);
                     if (stageApontamentos.isEmpty) {
                       return const SizedBox.shrink();
                     }
 
                     final info = storage.getStageInfo(stage.code);
-                    
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -295,14 +305,13 @@ class _StagePageState extends State<StagePage> {
                             ],
                           ),
                         ),
-                        
                         const SizedBox(height: 8),
-
                         ...stageApontamentos.asMap().entries.map((entry) {
                           final idx = entry.key;
                           final apt = entry.value;
                           final qtd = apt['qtdProcessada'] ?? 0;
-                          final resp = apt['responsavelSuperior'] ?? 'Não informado';
+                          final resp =
+                              apt['responsavelSuperior'] ?? 'Não informado';
                           final start = apt['start'] != null
                               ? DateTime.parse(apt['start'])
                                   .toString()
@@ -396,7 +405,8 @@ class _StagePageState extends State<StagePage> {
                                       },
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.orange.shade700,
-                                        side: BorderSide(color: Colors.orange.shade300),
+                                        side: BorderSide(
+                                            color: Colors.orange.shade300),
                                       ),
                                       child: const Text('REABRIR'),
                                     ),
@@ -406,7 +416,6 @@ class _StagePageState extends State<StagePage> {
                             ),
                           );
                         }),
-                        
                         const SizedBox(height: 12),
                       ],
                     );
@@ -445,14 +454,14 @@ class _StagePageState extends State<StagePage> {
     String text;
     Color bgColor;
     Color textColor;
-    
+
     if (isComplete) {
       text = 'Finalizado';
       bgColor = Colors.blue.shade100;
       textColor = Colors.blue.shade700;
     } else {
       switch (status) {
-        case StageProgressStatus.aguardando:
+        case StageProgressStatus.Aguardando:
           text = 'Aguardando';
           bgColor = Colors.grey.shade100;
           textColor = Colors.grey.shade700;
@@ -467,8 +476,13 @@ class _StagePageState extends State<StagePage> {
           bgColor = Colors.orange.shade100;
           textColor = Colors.orange.shade700;
           break;
+        case StageProgressStatus.encerrado:
+          text = 'Encerrado';
+          bgColor = Colors.orange.shade100;
+          textColor = Colors.orange.shade700;
+          break;
         case StageProgressStatus.finalizado:
-          text = 'Aguardando';
+          text = 'Finalizado';
           bgColor = Colors.grey.shade100;
           textColor = Colors.grey.shade700;
           break;
@@ -492,6 +506,31 @@ class _StagePageState extends State<StagePage> {
           fontSize: 12,
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF37474F),
+          ),
+        ),
+      ],
     );
   }
 
@@ -529,8 +568,11 @@ class _StagePageState extends State<StagePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'OF: ${widget.articleHeader['of'] ?? '-'}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        'Ordem: ${widget.articleHeader['of'] ?? '-'}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -552,13 +594,74 @@ class _StagePageState extends State<StagePage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Artigo: ${widget.articleHeader['artigo'] ?? '-'}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text('Artigo: ${widget.articleHeader['artigo'] ?? '-'}'),
+                  Text(
+                    'Código: ${widget.articleHeader['codigo'] ?? '-'}${widget.articleHeader['descricaoCompleta'] != null && widget.articleHeader['descricaoCompleta']!.isNotEmpty ? ' - ${widget.articleHeader['descricaoCompleta']}' : ''}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF757575),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildInfoField(
+                                'Cor',
+                                widget.articleHeader['cor'] ?? '-',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildInfoField(
+                                'Crust Item',
+                                widget.articleHeader['crustItem'] ?? '-',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildInfoField(
+                                'Espessura Final',
+                                widget.articleHeader['espFinal'] ?? '-',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildInfoField(
+                                'Classe',
+                                widget.articleHeader['classe'] ?? '-',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 12),
             child: Padding(
@@ -582,16 +685,15 @@ class _StagePageState extends State<StagePage> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.blue.shade700,
                       side: BorderSide(color: Colors.blue.shade300),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
           const SizedBox(height: 12),
-
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -619,18 +721,23 @@ class _StagePageState extends State<StagePage> {
                                     ? Icons.play_circle
                                     : status == StageProgressStatus.parado
                                         ? Icons.pause_circle
-                                        : Icons.circle_outlined,
+                                        : status ==
+                                                StageProgressStatus.encerrado
+                                            ? Icons.stop_circle
+                                            : Icons.circle_outlined,
                             color: isComplete
                                 ? Colors.green
                                 : status == StageProgressStatus.emProducao
                                     ? Colors.green
                                     : status == StageProgressStatus.parado
                                         ? Colors.orange
-                                        : Colors.grey,
+                                        : status ==
+                                                StageProgressStatus.encerrado
+                                            ? Colors.orange
+                                            : Colors.grey,
                             size: 32,
                           ),
                           const SizedBox(width: 12),
-
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,7 +769,6 @@ class _StagePageState extends State<StagePage> {
                               ],
                             ),
                           ),
-
                           _buildStatusBadge(status, isComplete),
                         ],
                       ),

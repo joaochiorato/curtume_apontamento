@@ -162,7 +162,7 @@ class _StageScreenState extends State<StageScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildInfoChip('Total da OF:', '${estagio.quantidadeTotal} peles'),
+              _buildInfoChip('Total da Ordem:', '${estagio.quantidadeTotal} peles'),
               _buildInfoChip('Já processado:', '${estagio.quantidadeProcessada} peles', 
                   color: AppTheme.statusFinalizado),
             ],
@@ -325,7 +325,7 @@ class _StageScreenState extends State<StageScreen> {
           if (variavel.valorMinimo != null || variavel.valorMaximo != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Faixa: ${variavel.valorMinimo ?? '-'} a ${variavel.valorMaximo ?? '-'} ${variavel.unidade}',
+              'Fa: ${variavel.valorMinimo ?? '-'} a ${variavel.valorMaximo ?? '-'} ${variavel.unidade}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.textHint,
                   ),

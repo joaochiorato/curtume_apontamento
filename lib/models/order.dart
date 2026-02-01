@@ -1,7 +1,7 @@
 // Enum para status da ordem
 enum StatusOrdem {
   emProducao,
-  aguardando,
+  Aguardando,
   finalizada,
   cancelada,
 }
@@ -12,7 +12,7 @@ extension StatusOrdemExtension on StatusOrdem {
     switch (this) {
       case StatusOrdem.emProducao:
         return 'Em Produção';
-      case StatusOrdem.aguardando:
+      case StatusOrdem.Aguardando:
         return 'Não Iniciado';
       case StatusOrdem.finalizada:
         return 'Finalizada';
@@ -23,14 +23,14 @@ extension StatusOrdemExtension on StatusOrdem {
 }
 
 class OrdemModel {
-  final String of;
+  final String Doc;
   final String cliente;
   final DateTime data;
   final StatusOrdem? status;
   final List<ArtigoModel> artigos;
 
   OrdemModel({
-    required this.of,
+    required this.Doc,
     required this.cliente,
     required this.data,
     this.status,
@@ -42,10 +42,28 @@ class ArtigoModel {
   final String codigo;
   final String descricao;
   final int quantidade;
+  final String cor;
+  final String crustItem;
+  final String espFinal;
+  final String classe;
+  final String descricaoCompleta;
+  final String loteWetBlue;
+  final int numeroPecasNF;
+  final double metragemNF;
+  final String avg;
 
   ArtigoModel({
     required this.codigo,
     required this.descricao,
     required this.quantidade,
+    this.cor = '',
+    this.crustItem = '',
+    this.espFinal = '',
+    this.classe = '',
+    this.descricaoCompleta = '',
+    this.loteWetBlue = '',
+    this.numeroPecasNF = 0,
+    this.metragemNF = 0.0,
+    this.avg = '',
   });
 }

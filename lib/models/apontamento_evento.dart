@@ -2,7 +2,7 @@
 enum TipoEvento {
   iniciado,
   pausado,
-  encerrado,
+  Aguardando,
   reaberto,
   alterado,
 }
@@ -32,7 +32,7 @@ class ApontamentoEvento {
         return 'Iniciado';
       case TipoEvento.pausado:
         return 'Pausado';
-      case TipoEvento.encerrado:
+      case TipoEvento.Aguardando:
         return 'Encerrado';
       case TipoEvento.reaberto:
         return 'Reaberto';
@@ -48,7 +48,7 @@ class ApontamentoEvento {
         return '▶️';
       case TipoEvento.pausado:
         return '⏸️';
-      case TipoEvento.encerrado:
+      case TipoEvento.Aguardando:
         return '✅';
       case TipoEvento.reaberto:
         return '🔄';
@@ -118,17 +118,17 @@ class ApontamentoCompleto {
   /// Retorna a duração total do apontamento
   Duration? get duracaoTotal {
     if (eventos.isEmpty) return null;
-    
+
     final inicio = eventos.firstWhere(
       (e) => e.tipo == TipoEvento.iniciado,
       orElse: () => eventos.first,
     );
-    
+
     final fim = eventos.lastWhere(
-      (e) => e.tipo == TipoEvento.encerrado,
+      (e) => e.tipo == TipoEvento.Aguardando,
       orElse: () => eventos.last,
     );
-    
+
     return fim.dataHora.difference(inicio.dataHora);
   }
 
